@@ -8,7 +8,7 @@ find_package(OpenGL REQUIRED)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_subdirectory(Source)
+add_subdirectory(src)
 
 add_library(${PROJECT_NAME} STATIC ${ENGINE_SRC})
 
