@@ -1,6 +1,6 @@
 #include <CGEngine.h>
 
-int main(int argc, char* argv[])
+int main(const int argc, char* argv[])
 {
 	CGEngine::ApplicationCreateInfo createInfo;
 	createInfo.cmdArgs = { argc, argv };

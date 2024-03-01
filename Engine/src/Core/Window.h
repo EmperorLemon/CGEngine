@@ -24,4 +24,6 @@ namespace CGEngine
 	};
 
 	void CreateWindow(const WindowCreateInfo& info, Window& window);
+	void DestroyWindow(const Window& window);
+	bool PollEvents(const Window& window);
 }
