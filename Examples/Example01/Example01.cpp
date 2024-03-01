@@ -3,7 +3,9 @@
 int main(const int argc, char* argv[])
 {
 	CGEngine::ApplicationCreateInfo createInfo;
-	createInfo.cmdArgs = { argc, argv };
+	{
+		createInfo.cmdArgs = { argc, argv };
+	}
 
 	auto app = CGEngine::Application(createInfo);
 	app.Run();

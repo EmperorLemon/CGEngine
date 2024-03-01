@@ -4,11 +4,14 @@ namespace CGEngine
 {
 	Application::Application(const ApplicationCreateInfo& appInfo)
 	{
-		WindowCreateInfo createInfo;
+		m_logger = Logger("APP");
 
-		createInfo.width = 800;
-		createInfo.height = 600;
-		createInfo.title = "Default Window";
+		WindowCreateInfo createInfo;
+		{
+			createInfo.width = 800;
+			createInfo.height = 600;
+			createInfo.title = "Default Window";
+		}
 
 		CreateWindow(createInfo, m_window);
 	}

@@ -24,6 +24,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/sr
 
 target_link_libraries(${PROJECT_NAME} PUBLIC 
 	glfw
+    spdlog
 )
 
 add_custom_command(TARGET CGCore POST_BUILD

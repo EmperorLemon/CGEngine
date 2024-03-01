@@ -34,5 +34,6 @@ namespace CGEngine
 		void Quit();
 	private:
 		Window m_window;
+		Logger m_logger;
 	};
 }
