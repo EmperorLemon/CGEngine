@@ -4,9 +4,9 @@
 
 namespace CGEngine
 {
-	void CreateWindow(const WindowCreateInfo& info, Window& window) 
+	void CreateWindow(const WindowCreateInfo& windowInfo, Window& window) 
 	{
-		CreateGLFWWindow(info, window);
+		CreateGLFWWindow(windowInfo, window);
 	}
 
 	void DestroyWindow(const Window& window)

@@ -28,11 +28,11 @@ namespace CGEngine
 	class Application
 	{
 	public:
-		Application(const ApplicationCreateInfo& info);
+		explicit Application(const ApplicationCreateInfo& appInfo);
 
 		void Run();
 		void Quit();
 	private:
-		bool m_valid = false;
+		Window m_window;
 	};
 }

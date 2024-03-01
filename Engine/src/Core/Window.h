@@ -23,7 +23,7 @@ namespace CGEngine
 		uint32_t height = 0;
 	};
 
-	void CreateWindow(const WindowCreateInfo& info, Window& window);
+	void CreateWindow(const WindowCreateInfo& windowInfo, Window& window);
 	void DestroyWindow(const Window& window);
 	bool PollEvents(const Window& window);
 }

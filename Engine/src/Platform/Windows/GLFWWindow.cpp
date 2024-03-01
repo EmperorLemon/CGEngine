@@ -7,7 +7,7 @@
 
 static uint32_t s_WindowCount = 0;
 
-void CreateGLFWWindow(const CGEngine::WindowCreateInfo& info, CGEngine::Window& window)
+void CreateGLFWWindow(const CGEngine::WindowCreateInfo& windowInfo, CGEngine::Window& window)
 {
 	if (s_WindowCount == 0)
 	{
@@ -17,7 +17,7 @@ void CreateGLFWWindow(const CGEngine::WindowCreateInfo& info, CGEngine::Window& 
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-	window.window = glfwCreateWindow(static_cast<int>(info.width), static_cast<int>(info.height), info.title.c_str(), nullptr, nullptr);
+	window.window = glfwCreateWindow(static_cast<int>(windowInfo.width), static_cast<int>(windowInfo.height), windowInfo.title.c_str(), nullptr, nullptr);
 	window.handle = nullptr;
 
 	s_WindowCount++;
