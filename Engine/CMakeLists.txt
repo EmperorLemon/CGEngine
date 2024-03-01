@@ -9,8 +9,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(src)
+add_subdirectory(Platform)
 
-add_library(${PROJECT_NAME} STATIC ${ENGINE_SRC})
+add_library(${PROJECT_NAME} STATIC ${ENGINE_SRC} ${PLATFORM})
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(CG_DEBUG)
@@ -21,6 +22,10 @@ endif()
 add_subdirectory(ThirdParty)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC 
+	glfw
+)
 
 add_custom_command(TARGET CGCore POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E create_symlink
