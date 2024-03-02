@@ -4,7 +4,9 @@
 
 namespace CGEngine
 {
-	enum class RendererAPI
+	struct RenderAPI;
+
+	enum class GraphicsAPI
 	{
 		CG_NO_API,
 		CG_OPENGL_API,
@@ -15,7 +17,7 @@ namespace CGEngine
 
 	struct RendererCreateInfo
 	{
-		RendererAPI API = RendererAPI::CG_NO_API;
+		GraphicsAPI API = GraphicsAPI::CG_NO_API;
 		Window window;
 	};
 
@@ -29,10 +31,11 @@ namespace CGEngine
 		void Render();
 		void PostRender();
 
-		static RendererAPI GetAPI();
+		static GraphicsAPI GetAPI();
 	private:
-		static RendererAPI m_API;
+		static GraphicsAPI m_API;
 
 		std::shared_ptr<Window> m_window = nullptr;
+		std::shared_ptr<RenderAPI> m_backend = nullptr;
 	};
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <string>
+#include <string_view>
 
 namespace CGEngine
 {
@@ -24,4 +24,5 @@ namespace CGEngine
 	};
 
 	void CreateContext(const ContextCreateInfo& contextInfo);
+	void SwapBuffers(const std::shared_ptr<Window>& window);
 }

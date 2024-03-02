@@ -9,4 +9,9 @@ namespace CGEngine
 		OpenGL::CreateContext(contextInfo.window);
 		OpenGL::QueryDeviceProperties(contextInfo.properties);
 	}
+
+	void SwapBuffers(const std::shared_ptr<Window>& window)
+	{
+		OpenGL::SwapBuffers(window);
+	}
 }
