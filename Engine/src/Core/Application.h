@@ -3,6 +3,8 @@
 #include "Base.h"
 #include "Window.h"
 
+#include "Renderer/Renderer.h"
+
 namespace CGEngine
 {
 	struct ApplicationCommandLineArgs
@@ -33,6 +35,8 @@ namespace CGEngine
 		void Run();
 		void Quit();
 	private:
+		Renderer m_renderer;
+
 		Window m_window;
 		Logger m_logger;
 	};

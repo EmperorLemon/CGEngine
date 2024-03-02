@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 static uint32_t s_WindowCount = 0;
 
@@ -15,9 +15,12 @@ void CreateGLFWWindow(const CGEngine::WindowCreateInfo& windowInfo, CGEngine::Wi
 			throw std::runtime_error("Unable to initialize glfw!");
 	}
 
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	window.title = windowInfo.title;
 
-	window.window = glfwCreateWindow(static_cast<int>(windowInfo.width), static_cast<int>(windowInfo.height), windowInfo.title.c_str(), nullptr, nullptr);
+	window.width = windowInfo.width;
+	window.height = windowInfo.height;
+
+	window.window = glfwCreateWindow(static_cast<int>(windowInfo.width), static_cast<int>(windowInfo.height), windowInfo.title.data(), nullptr, nullptr);
 	window.handle = nullptr;
 
 	s_WindowCount++;

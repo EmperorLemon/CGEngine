@@ -6,22 +6,20 @@ namespace CGEngine
 	{
 		m_logger = Logger("APP");
 
-		WindowCreateInfo createInfo;
-		{
-			createInfo.width = 800;
-			createInfo.height = 600;
-			createInfo.title = "Default Window";
-		}
-
-		CreateWindow(createInfo, m_window);
+		CreateWindow({800, 600,"Default Window"}, m_window);
+		m_renderer = Renderer({ RendererAPI::CG_OPENGL_API, m_window});
 	}
 
 	void Application::Run()
 	{
+		m_renderer.PreRender();
+
 		while (PollEvents(m_window))
 		{
-			
+			m_renderer.Render();
 		}
+
+		m_renderer.PostRender();
 	}
 
 	void Application::Quit()
