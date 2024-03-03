@@ -20,7 +20,7 @@ namespace CGEngine::OpenGL
 		return GL_FLOAT;
 	}
 
-	GLBuffer::GLBuffer(const void* data, const size_t size, const std::string_view& name) : Buffer(size, 0)
+	GLBuffer::GLBuffer(const void* data, const size_t size, const std::string_view name) : Buffer(size, 0)
 	{
 		glCreateBuffers(1, &p_id);
 		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(size), data, GL_DYNAMIC_STORAGE_BIT);

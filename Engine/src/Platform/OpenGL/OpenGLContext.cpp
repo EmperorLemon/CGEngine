@@ -10,7 +10,7 @@
 
 namespace CGEngine::OpenGL
 {
-	void DebugMessageCallback(const GLenum source, const GLenum type, const GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userData)
+	static void DebugMessageCallback(const GLenum source, const GLenum type, const GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userData)
 	{
 		const auto src_str = [source]
 		{

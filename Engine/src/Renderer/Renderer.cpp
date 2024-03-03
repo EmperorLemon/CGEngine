@@ -41,8 +41,6 @@ namespace CGEngine
 
 		const auto vertex_buffer = std::make_shared<OpenGL::GLBuffer>(vertices.data(), vertices.size() * sizeof(float), "Default Buffer");
 		const auto vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer.get(), nullptr, vertices.size(), layout);
-
-		vertex_array->Bind();
 	}
 
 	void Renderer::PreRender()
