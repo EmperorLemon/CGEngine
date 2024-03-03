@@ -4,8 +4,9 @@
 
 namespace CGEngine::OpenGL
 {
-	struct OpenGLAPI : RenderAPI
+	class OpenGLAPI final : public RenderAPI
 	{
+	public:
 		void Clear(uint32_t mask) override;
 		void ClearColor(float* rgba) override;
 	};

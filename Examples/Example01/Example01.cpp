@@ -2,6 +2,8 @@
 
 int main(const int argc, char* argv[])
 {
+	CGEngine::Logger::Init();
+
 	CGEngine::ApplicationCreateInfo createInfo;
 	{
 		createInfo.cmdArgs = { argc, argv };

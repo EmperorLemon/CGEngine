@@ -24,8 +24,16 @@ namespace CGEngine
 		CG_CLEAR_COLOR,
 	};
 
-	struct RenderAPI
+	class RenderAPI
 	{
+	public:
+		RenderAPI() = default;
+
+		RenderAPI(RenderAPI&& old) noexcept = default;
+		RenderAPI& operator=(RenderAPI&& old) noexcept = default;
+		RenderAPI(const RenderAPI&) = delete;
+		RenderAPI& operator=(const RenderAPI&) = delete;
+
 		virtual ~RenderAPI() = default;
 
 		virtual void Clear(uint32_t mask) = 0;
