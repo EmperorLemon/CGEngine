@@ -50,8 +50,8 @@ namespace CGEngine
 	public:
 		Buffer(const size_t size, const uint32_t id) : p_size(size), p_id(id) {}
 
-		Buffer(Buffer&& old) noexcept = default;
-		Buffer& operator=(Buffer&& old) noexcept = default;
+		Buffer(Buffer&&) noexcept = default;
+		Buffer& operator=(Buffer&&) noexcept = default;
 		Buffer(const Buffer&) = delete;
 		Buffer& operator=(const Buffer&) = delete;
 

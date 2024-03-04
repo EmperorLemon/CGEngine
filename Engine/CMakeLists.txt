@@ -30,4 +30,4 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 
 add_custom_command(TARGET CGCore POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E create_symlink
-                   ${CMAKE_CURRENT_SOURCE_DIR}/Assets $<TARGET_FILE_DIR:CGCore>/Assets)
+                   ${CMAKE_CURRENT_SOURCE_DIR}/Assets $<TARGET_FILE_DIR:CGEngine>/Assets)

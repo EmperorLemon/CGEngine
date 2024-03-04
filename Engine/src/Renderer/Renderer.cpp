@@ -2,12 +2,13 @@
 #include "Context.h"
 
 #include <span>
-#include <iostream>
 
-#include "Platform/OpenGL/OpenGLBuffer.h"
+#include "Platform/OpenGL/OpenGL.h"
 
 #include "RenderAPI.h"
-#include "Platform/OpenGL/OpenGLAPI.h"
+#include "Shader.h"
+
+#include "IO/FileSystem.h"
 
 namespace CGEngine
 {
@@ -41,6 +42,13 @@ namespace CGEngine
 
 		const auto vertex_buffer = std::make_shared<OpenGL::GLBuffer>(vertices.data(), vertices.size() * sizeof(float), "Default Buffer");
 		const auto vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer.get(), nullptr, vertices.size(), layout);
+
+		std::vector<char> vert_src, frag_src;
+		IO::ReadFile("Assets/Shaders/unlit.vert", vert_src);
+		IO::ReadFile("Assets/Shaders/unlit.frag", frag_src);
+
+		ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
+		const auto shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 	}
 
 	void Renderer::PreRender()
