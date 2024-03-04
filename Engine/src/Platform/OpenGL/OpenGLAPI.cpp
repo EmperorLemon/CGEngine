@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 
+#include "OpenGLBuffer.h"
+
 namespace CGEngine::OpenGL
 {
 	uint32_t Convert(const ClearMask mask)
@@ -22,6 +24,16 @@ namespace CGEngine::OpenGL
 		}
 
 		return 0;
+	}
+
+	void OpenGLAPI::Draw(void* array_ptr) const
+	{
+		if (array_ptr != nullptr)
+		{
+			const auto& vertex_array = static_cast<GLVertexArray*>(array_ptr);
+
+			glDrawArrays(GL_TRIANGLES, 0, vertex_array->GetVertexCount());
+		}
 	}
 
 	void OpenGLAPI::Clear(const uint32_t mask)

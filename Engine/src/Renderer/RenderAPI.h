@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "Buffer.h"
+
 namespace CGEngine
 {
 	constexpr uint32_t CreateRGBA(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a = 255)
@@ -36,6 +38,7 @@ namespace CGEngine
 
 		virtual ~RenderAPI() = default;
 
+		virtual void Draw(void* array_ptr) const = 0;
 		virtual void Clear(uint32_t mask) = 0;
 		virtual void ClearColor(float* rgba) = 0;
 	};

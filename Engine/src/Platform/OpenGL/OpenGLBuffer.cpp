@@ -2,65 +2,76 @@
 
 #include <glad/glad.h>
 
+#include "Core/Logger.hpp"
+
 namespace CGEngine::OpenGL
 {
-	GLenum Convert(const DataType type)
+	constexpr GLenum Convert(const DataType type)
 	{
-		if (type == DataType::INT8) return GL_BYTE;
-		if (type == DataType::UINT8) return GL_UNSIGNED_BYTE;
-
-		if (type == DataType::INT16) return GL_SHORT;
-		if (type == DataType::UINT16) return GL_UNSIGNED_SHORT;
-
-		if (type == DataType::INT32) return GL_INT;
-		if (type == DataType::UINT32) return GL_UNSIGNED_INT;
-
-		if (type == DataType::FLOAT) return GL_FLOAT;
+		switch (type)
+		{
+		case DataType::UNSIGNED_BYTE:  return GL_UNSIGNED_BYTE;
+		case DataType::BYTE:		   return GL_BYTE;
+		case DataType::UNSIGNED_SHORT: return GL_UNSIGNED_SHORT;
+		case DataType::SHORT:		   return GL_SHORT;
+		case DataType::UNSIGNED_INT:   return GL_UNSIGNED_INT;
+		case DataType::INT:            return GL_INT;
+		case DataType::FLOAT:	       return GL_FLOAT;
+		}
 
 		return GL_FLOAT;
 	}
 
-	GLBuffer::GLBuffer(const void* data, const size_t size, const std::string_view name) : Buffer(size, 0)
+	GLBuffer::GLBuffer(const void* data, const size_t size, const int32_t count, const std::string_view name) : Buffer(size, count, 0)
 	{
 		glCreateBuffers(1, &p_id);
-		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(size), data, GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(size) * count, data, GL_DYNAMIC_STORAGE_BIT);
 
 		if (!name.empty())
 			glObjectLabel(GL_BUFFER, p_id, static_cast<GLsizei>(name.length()), name.data());
 	}
 
-	GLVertexArray::GLVertexArray(const GLBuffer* vertexBuffer, const GLBuffer* indexBuffer, const size_t count, const VertexLayout& layout)
+	GLVertexArray::GLVertexArray(const GLBuffer* vertexBuffer, const GLBuffer* indexBuffer, const VertexLayout& layout) : VertexArray(0, 0, 0)
 	{
-		glCreateVertexArrays(1, &m_id);
+		if (vertexBuffer == nullptr) CG_ERROR("Vertex buffer is nullptr!");
 
-		glVertexArrayVertexBuffer(m_id, 0, vertexBuffer->GetID(), 0, static_cast<GLsizei>(vertexBuffer->GetSize() / count));
-		if (indexBuffer != nullptr)  glVertexArrayElementBuffer(m_id, indexBuffer->GetID());
+		glCreateVertexArrays(1, &p_id);
 
 		const std::vector<VertexAttribute>& attributes = layout.GetAttributes();
 
-		for (const auto& attribute : attributes)
-			glEnableVertexArrayAttrib(m_id, attribute.index);
+		int32_t stride = 0;
 
 		for (const auto& attribute : attributes)
-			glVertexArrayAttribFormat(m_id, attribute.index, attribute.count, Convert(attribute.type), attribute.normalized, attribute.offset);
+			stride += attribute.count * GetSize(attribute.type);
+
+		glVertexArrayVertexBuffer(p_id, 0, vertexBuffer->GetID(), 0, stride);
+		if (indexBuffer != nullptr)  glVertexArrayElementBuffer(p_id, indexBuffer->GetID());
 
 		for (const auto& attribute : attributes)
-			glVertexArrayAttribBinding(m_id, attribute.index, 0);
+			glEnableVertexArrayAttrib(p_id, attribute.index);
+
+		for (const auto& attribute : attributes)
+			glVertexArrayAttribFormat(p_id, attribute.index, attribute.count, Convert(attribute.type), attribute.normalized, attribute.offset);
+
+		for (const auto& attribute : attributes)
+			glVertexArrayAttribBinding(p_id, attribute.index, 0);
+
+		p_vertexCount = vertexBuffer->GetCount();
+		if (indexBuffer != nullptr) p_indexCount = indexBuffer->GetCount();
 	}
 
 	GLVertexArray::~GLVertexArray()
 	{
-		glDeleteVertexArrays(1, &m_id);
+		glDeleteVertexArrays(1, &p_id);
 	}
 
 	void GLVertexArray::Bind() const
 	{
-		glBindVertexArray(m_id);
+		glBindVertexArray(p_id);
 	}
 
 	void GLVertexArray::Unbind() const
 	{
 		glBindVertexArray(0);
 	}
-
 }

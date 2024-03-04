@@ -35,7 +35,7 @@ namespace CGEngine::OpenGL
 			if (!success)
 			{
 				glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
-				CG_ERROR("ERROR::SHADER_COMPILATION_ERROR of type: {0} \n {1} \n", shader_type, infoLog);
+				CG_ERROR("ERROR::SHADER_COMPILATION_ERROR of type: {0}\n{1}", shader_type, infoLog);
 			}
 		}
 		else
@@ -45,7 +45,7 @@ namespace CGEngine::OpenGL
 			if (!success)
 			{
 				glGetProgramInfoLog(shader, 1024, nullptr, infoLog);
-				CG_ERROR("ERROR::PROGRAM_LINKING_ERROR of type: {0} \n {1} \n", shader_type, infoLog);
+				CG_ERROR("ERROR::PROGRAM_LINKING_ERROR of type: {0}\n{1}", shader_type, infoLog);
 			}
 		}
 	}
