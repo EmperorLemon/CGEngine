@@ -24,6 +24,7 @@ namespace CGEngine
 		DataType type;
 		bool normalized;
 		uint32_t offset;
+		int32_t stride;
 	};
 
 	constexpr int32_t GetDataSize(const DataType type)
@@ -51,12 +52,15 @@ namespace CGEngine
 	{
 	public:
 		VertexLayout& add(uint32_t index, int32_t count, DataType type, bool normalized = false);
+		VertexLayout& add(uint32_t index, int32_t count, uint32_t offset, int32_t stride, bool normalized = false);
 		VertexLayout& end();
 
 		[[nodiscard]] const std::vector<VertexAttribute>& GetAttributes() const { return m_layout; }
 	private:
 		uint32_t m_offset = 0;
 		std::vector<VertexAttribute> m_layout;
+
+		bool m_ignore = false;
 	};
 
 	struct SubBuffer

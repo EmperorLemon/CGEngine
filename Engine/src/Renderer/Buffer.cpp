@@ -4,21 +4,34 @@ namespace CGEngine
 {
 	VertexLayout& VertexLayout::add(const uint32_t index, const int32_t count, const DataType type, const bool normalized)
 	{
-		m_layout.emplace_back(index, count, type, normalized, 0);
+		m_ignore = false;
+		m_layout.emplace_back(index, count, type, normalized, 0, count * GetDataSize(type));
+
+		return *this;
+	}
+
+	VertexLayout& VertexLayout::add(const uint32_t index, const int32_t count, const uint32_t offset, const int32_t stride, bool normalized)
+	{
+		m_ignore = true;
+		m_layout.emplace_back(index, count, DataType::VOID, normalized, offset, stride);
 
 		return *this;
 	}
 
 	VertexLayout& VertexLayout::end()
 	{
-		m_offset = 0;
-
-		for (auto& attribute : m_layout)
+		if (!m_ignore)
 		{
-			const int32_t size = attribute.count * GetDataSize(attribute.type);
-			attribute.offset = m_offset;
-			m_offset += size;
+			m_offset = 0;
+
+			for (auto& attribute : m_layout)
+			{
+				const int32_t size = attribute.stride;
+				attribute.offset = m_offset;
+				m_offset += size;
+			}
 		}
+
 
 		return *this;
 	}

@@ -1,16 +1,24 @@
 #include "FileSystem.h"
 
-#include "Core/Logger.hpp"
-
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 
+#include "Core/Logger.hpp"
+
+#include "IO/glTF/glTFLoader.h"
+
 namespace CGEngine::IO
 {
-	void ReadFile(const char* filepath, std::vector<std::byte>& data)
+	void LoadModelFile(const std::string_view filepath, const ModelFileType type)
 	{
-		if (std::ifstream file(filepath, std::ios::binary | std::ios::ate); file)
+		if (type == ModelFileType::glTF)
+			LoadglTFModel(filepath);
+	}
+
+	void ReadFile(const std::string_view filepath, std::vector<std::byte>& data)
+	{
+		if (std::ifstream file(filepath.data(), std::ios::binary | std::ios::ate); file)
 		{
 			file.seekg(0, std::ios::end);
 
@@ -27,9 +35,9 @@ namespace CGEngine::IO
 			CG_ERROR("Could not open file: {0}", filepath);
 	}
 
-	void ReadFile(const char* filepath, std::string& data)
+	void ReadFile(const std::string_view filepath, std::string& data)
 	{
-		if (std::ifstream file(filepath, std::ios::binary | std::ios::ate); file)
+		if (std::ifstream file(filepath.data(), std::ios::binary | std::ios::ate); file)
 		{
 			file.seekg(0, std::ios::end);
 
@@ -46,7 +54,7 @@ namespace CGEngine::IO
 			CG_ERROR("Could not open file: {0}", filepath);
 	}
 
-	bool FileExists(const char* filepath)
+	bool FileExists(const std::string_view filepath)
 	{
 		const auto s = std::filesystem::file_status{};
 		return status_known(s) ? exists(s) : std::filesystem::exists(filepath);

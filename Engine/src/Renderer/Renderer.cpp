@@ -50,6 +50,8 @@ namespace CGEngine
 			      .end();
 		}
 
+		LoadModelFile("Assets/Models/cube.gltf", IO::ModelFileType::glTF);
+
 		const auto vertex_buffer = std::make_shared<OpenGL::GLBuffer>(DataType::FLOAT,   vertices.size(), vertices.data());
 		const auto index_buffer = std::make_shared<OpenGL::GLBuffer>(DataType::UNSIGNED_SHORT, indices.size(), indices.data());
 

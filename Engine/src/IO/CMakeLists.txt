@@ -1,5 +1,8 @@
 set(IO
 
+${CMAKE_CURRENT_SOURCE_DIR}/glTF/glTFLoader.h
+${CMAKE_CURRENT_SOURCE_DIR}/glTF/glTFLoader.cpp
+
 ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem.h
 ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem.cpp
 

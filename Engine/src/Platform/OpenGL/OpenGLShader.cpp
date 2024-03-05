@@ -125,6 +125,11 @@ namespace CGEngine::OpenGL
 		FetchUniformNames(p_id, m_uniforms);
 	}
 
+	GLShader::~GLShader()
+	{
+		glDeleteProgram(p_id);
+	}
+
 	void GLShader::Bind() const
 	{
 		glUseProgram(p_id);

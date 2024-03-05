@@ -26,6 +26,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	glfw
     spdlog
     glad
+    tinygltf
 )
 
 add_custom_command(TARGET CGCore POST_BUILD

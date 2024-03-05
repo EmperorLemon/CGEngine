@@ -8,6 +8,10 @@ namespace CGEngine::OpenGL
 	{
 	public:
 		GLBuffer(DataType type, size_t length, const void* data);
+		GLBuffer(size_t size, const void* data);
+
+		void SetData(size_t size, const void* data) const;
+		void SetSubData(int32_t offset, size_t size, const void* data) const;
 
 		[[nodiscard]] int32_t  GetSize()  const override { return p_size; }
 		[[nodiscard]] int32_t  GetLength() const override { return p_length; }

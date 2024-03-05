@@ -1,12 +1,27 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 #include <vector>
 
 namespace CGEngine::IO
 {
-	void ReadFile(const char* filepath, std::vector<std::byte>& data);
-	void ReadFile(const char* filepath, std::string& data);
+	enum class FileType : uint8_t
+	{
+		TEXT_FILE,
+		BINARY_FILE
+	};
 
-	bool FileExists(const char* filepath);
+	enum class ModelFileType : uint8_t
+	{
+		glTF,
+		glb,
+		OBJ,
+	};
+
+	void LoadModelFile(std::string_view filepath, ModelFileType type);
+
+	void ReadFile(std::string_view filepath, std::vector<std::byte>& data);
+	void ReadFile(std::string_view filepath, std::string& data);
+
+	bool FileExists(std::string_view filepath);
 }

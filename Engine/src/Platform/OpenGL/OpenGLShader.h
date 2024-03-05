@@ -18,6 +18,13 @@ namespace CGEngine::OpenGL
 	public:
 		explicit GLShader(ShaderModule modules[], size_t count);
 
+		GLShader(GLShader&&) noexcept = default;
+		GLShader& operator=(GLShader&&) noexcept = default;
+		GLShader(const GLShader&) = delete;
+		GLShader& operator=(const GLShader&) = delete;
+
+		~GLShader() override;
+
 		void Bind() const override;
 		void Unbind() const override;
 
