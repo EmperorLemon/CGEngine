@@ -66,7 +66,7 @@ namespace CGEngine::OpenGL
 			glEnableVertexArrayAttrib(p_id, attribute.index);
 
 		for (const auto& attribute : attributes)
-			glVertexArrayAttribFormat(p_id, attribute.index, attribute.count, Convert(attribute.type), attribute.normalized, attribute.offset);
+			glVertexArrayAttribFormat(p_id, attribute.index, attribute.count, GL_FLOAT, attribute.normalized, attribute.offset);
 
 		for (const auto& attribute : attributes)
 			glVertexArrayAttribBinding(p_id, attribute.index, 0);
