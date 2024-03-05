@@ -15,14 +15,20 @@ namespace CGEngine
 	std::shared_ptr<OpenGL::GLVertexArray> vertex_array = nullptr;
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
 
-	float data[] =
+	float data_v[] =
 	{
 		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
 		 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
 	};
 
-	std::span vertices(data, std::size(data));
+	uint16_t data_i[] =
+	{
+		0, 1, 2
+	};
+
+	std::span vertices(data_v, std::size(data_v));
+	std::span  indices(data_i, std::size(data_i));
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
@@ -44,8 +50,10 @@ namespace CGEngine
 			      .end();
 		}
 
-		const auto vertex_buffer = std::make_shared<OpenGL::GLBuffer>(vertices.data(), sizeof(float), vertices.size(), "Default Buffer");
-		vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer.get(), nullptr, layout);
+		const auto vertex_buffer = std::make_shared<OpenGL::GLBuffer>(DataType::FLOAT,   vertices.size(), vertices.data());
+		const auto index_buffer = std::make_shared<OpenGL::GLBuffer>(DataType::UNSIGNED_SHORT, indices.size(), indices.data());
+
+		vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer.get(), index_buffer.get(), layout);
 
 		std::string vert_src, frag_src;
 		IO::ReadFile("Assets/Shaders/unlit.vert", vert_src);

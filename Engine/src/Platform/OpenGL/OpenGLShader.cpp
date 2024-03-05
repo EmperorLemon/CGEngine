@@ -53,7 +53,37 @@ namespace CGEngine::OpenGL
 	constexpr bool is_vertex(const ShaderModule& module) { return module.type == ShaderType::VERTEX; }
 	constexpr bool is_fragment(const ShaderModule& module) { return module.type == ShaderType::FRAGMENT; }
 
-	GLShader::GLShader(ShaderModule modules[], const int8_t count) : Shader(0)
+	static void FetchUniformNames(const uint32_t program, std::unordered_map<std::string_view, GLUniform>& uniforms)
+	{
+		GLint uniform_count = 0;
+		glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &uniform_count);
+
+		if (uniform_count != 0)
+		{
+			GLint	max_name_len = 0;
+			GLsizei length = 0;
+			GLsizei count  = 0;
+			GLenum  type   = GL_NONE;
+			glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_name_len);
+
+			const auto& uniform_name = std::make_unique<char[]>(max_name_len);
+
+			for (GLint i = 0; i < uniform_count; ++i)
+			{
+				glGetActiveUniform(program, i, max_name_len, &length, &count, &type, uniform_name.get());
+
+				GLUniform uniform = {};
+				{
+					uniform.location = glGetUniformLocation(program, uniform_name.get());
+					uniform.count    = count;
+				}
+
+				uniforms.emplace(std::make_pair(std::string_view(uniform_name.get(), length), uniform));
+			}
+		}
+	}
+
+	GLShader::GLShader(ShaderModule modules[], const size_t count) : Shader(0)
 	{
 		if (count < 2) return;
 
@@ -91,6 +121,8 @@ namespace CGEngine::OpenGL
 
 		glDeleteShader(vertex_module->id);
 		glDeleteShader(fragment_module->id);
+
+		FetchUniformNames(p_id, m_uniforms);
 	}
 
 	void GLShader::Bind() const
@@ -101,5 +133,13 @@ namespace CGEngine::OpenGL
 	void GLShader::Unbind() const
 	{
 		glUseProgram(0);
+	}
+
+	const GLUniform& GLShader::GetUniform(const std::string_view name) const
+	{
+		if (m_uniforms.contains(name))
+			return m_uniforms.at(name);
+
+		throw std::runtime_error("Unable to fetch uniform!");
 	}
 }

@@ -10,7 +10,9 @@ namespace CGEngine::OpenGL
 	{
 		switch (type)
 		{
-		case DataType::UNSIGNED_BYTE:  return GL_UNSIGNED_BYTE;
+		case DataType::VOID:		  
+		case DataType::UNSIGNED_BYTE:
+			return GL_UNSIGNED_BYTE;
 		case DataType::BYTE:		   return GL_BYTE;
 		case DataType::UNSIGNED_SHORT: return GL_UNSIGNED_SHORT;
 		case DataType::SHORT:		   return GL_SHORT;
@@ -22,13 +24,10 @@ namespace CGEngine::OpenGL
 		return GL_FLOAT;
 	}
 
-	GLBuffer::GLBuffer(const void* data, const size_t size, const int32_t count, const std::string_view name) : Buffer(size, count, 0)
+	GLBuffer::GLBuffer(const DataType type, const size_t length, const void* data) : Buffer(type, GetDataSize(type), static_cast<int32_t>(length), 0)
 	{
 		glCreateBuffers(1, &p_id);
-		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(size) * count, data, GL_DYNAMIC_STORAGE_BIT);
-
-		if (!name.empty())
-			glObjectLabel(GL_BUFFER, p_id, static_cast<GLsizei>(name.length()), name.data());
+		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(p_size * length), data, GL_DYNAMIC_STORAGE_BIT);
 	}
 
 	GLVertexArray::GLVertexArray(const GLBuffer* vertexBuffer, const GLBuffer* indexBuffer, const VertexLayout& layout) : VertexArray(0, 0, 0)
@@ -42,7 +41,7 @@ namespace CGEngine::OpenGL
 		int32_t stride = 0;
 
 		for (const auto& attribute : attributes)
-			stride += attribute.count * GetSize(attribute.type);
+			stride += attribute.count * GetDataSize(attribute.type);
 
 		glVertexArrayVertexBuffer(p_id, 0, vertexBuffer->GetID(), 0, stride);
 		if (indexBuffer != nullptr)  glVertexArrayElementBuffer(p_id, indexBuffer->GetID());
@@ -56,8 +55,8 @@ namespace CGEngine::OpenGL
 		for (const auto& attribute : attributes)
 			glVertexArrayAttribBinding(p_id, attribute.index, 0);
 
-		p_vertexCount = vertexBuffer->GetCount();
-		if (indexBuffer != nullptr) p_indexCount = indexBuffer->GetCount();
+		p_vertexCount = vertexBuffer->GetLength();
+		if (indexBuffer != nullptr) p_indexCount = indexBuffer->GetLength();
 	}
 
 	GLVertexArray::~GLVertexArray()

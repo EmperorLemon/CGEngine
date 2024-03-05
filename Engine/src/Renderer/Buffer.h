@@ -5,19 +5,9 @@
 
 namespace CGEngine
 {
-	enum class DataSize : size_t
-	{
-		UINT8 = 1 << 0,
-		INT8 = 1 << 0,
-		INT16 = 1 << 1,
-		UINT16 = 1 << 1,
-		UINT32 = 1 << 2,
-		INT32 = 1 << 2,
-		FLOAT = 1 << 2
-	};
-
 	enum class DataType : uint8_t
 	{
+		VOID,
 		UNSIGNED_BYTE,
 		BYTE,
 		UNSIGNED_SHORT,
@@ -36,10 +26,12 @@ namespace CGEngine
 		uint32_t offset;
 	};
 
-	constexpr int32_t GetSize(const DataType type)
+	constexpr int32_t GetDataSize(const DataType type)
 	{
 		switch (type)
 		{
+		case DataType::VOID:
+			return 0 << 0;
 		case DataType::UNSIGNED_BYTE:
 		case DataType::BYTE:
 			return 1 << 0;
@@ -67,10 +59,20 @@ namespace CGEngine
 		std::vector<VertexAttribute> m_layout;
 	};
 
+	struct SubBuffer
+	{
+		SubBuffer(const DataType type, const size_t length, const int32_t offset = 0) : type(type), size(GetDataSize(type)), length(static_cast<int32_t>(length)), offset(offset) {}
+
+		DataType type = DataType::VOID;
+		int32_t  size = 0;
+		int32_t  length = 0;
+		int32_t  offset = 0;
+	};
+
 	class Buffer
 	{
 	public:
-		Buffer(const size_t size, const int32_t count, const uint32_t id) : p_size(size), p_count(count), p_id(id) {}
+		Buffer(const DataType type, const int32_t size, const int32_t length, const uint32_t id) : p_type(type), p_size(size), p_length(length), p_id(id) {}
 
 		Buffer(Buffer&&) noexcept = default;
 		Buffer& operator=(Buffer&&) noexcept = default;
@@ -79,12 +81,13 @@ namespace CGEngine
 
 		virtual ~Buffer() = default;
 
-		[[nodiscard]] virtual size_t   GetSize()  const = 0;
-		[[nodiscard]] virtual int32_t  GetCount() const = 0;
-		[[nodiscard]] virtual uint32_t GetID()    const = 0;
+		[[nodiscard]] virtual int32_t  GetSize()    const = 0;
+		[[nodiscard]] virtual int32_t  GetLength()  const = 0;
+		[[nodiscard]] virtual uint32_t GetID()      const = 0;
 	protected:
-		size_t	 p_size  = 0;
-		int32_t  p_count = 0;
+		DataType p_type  = DataType::VOID;
+		int32_t	 p_size  = 0;
+		int32_t  p_length = 0;
 		uint32_t p_id    = 0;
 	};
 

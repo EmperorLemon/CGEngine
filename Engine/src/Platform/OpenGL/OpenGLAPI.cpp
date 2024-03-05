@@ -32,7 +32,8 @@ namespace CGEngine::OpenGL
 		{
 			const auto& vertex_array = static_cast<GLVertexArray*>(array_ptr);
 
-			glDrawArrays(GL_TRIANGLES, 0, vertex_array->GetVertexCount());
+			//glDrawArrays(GL_TRIANGLES, 0, vertex_array->GetVertexCount());
+			glDrawElements(GL_TRIANGLES, vertex_array->GetIndexCount(), GL_UNSIGNED_SHORT, nullptr);
 		}
 	}
 

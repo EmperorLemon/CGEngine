@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string_view>
-
 #include "Renderer/Buffer.h"
 
 namespace CGEngine::OpenGL
@@ -9,10 +7,10 @@ namespace CGEngine::OpenGL
 	class GLBuffer final : public Buffer
 	{
 	public:
-		GLBuffer(const void* data, size_t size, int32_t count, std::string_view name);
+		GLBuffer(DataType type, size_t length, const void* data);
 
-		[[nodiscard]] size_t   GetSize()  const override { return p_size; }
-		[[nodiscard]] int32_t  GetCount() const override { return p_count; }
+		[[nodiscard]] int32_t  GetSize()  const override { return p_size; }
+		[[nodiscard]] int32_t  GetLength() const override { return p_length; }
 		[[nodiscard]] uint32_t GetID()    const override { return p_id; }
 	};
 

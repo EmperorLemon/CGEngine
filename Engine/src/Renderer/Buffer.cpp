@@ -15,7 +15,7 @@ namespace CGEngine
 
 		for (auto& attribute : m_layout)
 		{
-			const uint32_t size = attribute.count * GetSize(attribute.type);
+			const int32_t size = attribute.count * GetDataSize(attribute.type);
 			attribute.offset = m_offset;
 			m_offset += size;
 		}
