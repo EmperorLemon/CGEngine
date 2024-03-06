@@ -84,6 +84,18 @@ namespace CGEngine
 
 		m_camera->projection = Math::Perspective(m_camera->fov, m_camera->aspect, m_camera->near, m_camera->far);
 		m_camera->view = Math::View(m_camera->position, m_camera->direction, m_camera->up);
+
+		shader->Use();
+
+		auto model = Math::Mat4(1.0f);
+
+		model = Math::Rotate(model, 45.0f, Math::Y_AXIS);
+
+		shader->BindUniform("uProjection", OpenGL::UniformType::MAT4, Math::value_ptr(m_camera->projection));
+		shader->BindUniform("uView", OpenGL::UniformType::MAT4, Math::value_ptr(m_camera->view));
+		shader->BindUniform("uModel", OpenGL::UniformType::MAT4, Math::value_ptr(model));
+
+		shader->Disable();
 	}
 
 	void Renderer::Render()
@@ -95,15 +107,9 @@ namespace CGEngine
 
 		shader->Use();
 
-		const auto& model = Math::Mat4(1.0f);
-
-		shader->BindUniform("uProjection", OpenGL::UniformType::MAT4, Math::value_ptr(m_camera->projection));
-		shader->BindUniform("uView", OpenGL::UniformType::MAT4, Math::value_ptr(m_camera->view));
-		shader->BindUniform("uModel", OpenGL::UniformType::MAT4, Math::value_ptr(model));
-
 		{
 			vertex_array->Bind();
-			m_backend->Draw(vertex_array.get());
+			   m_backend->Draw(vertex_array.get());
 			vertex_array->Unbind();
 		}
 
