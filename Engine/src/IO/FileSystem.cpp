@@ -5,15 +5,16 @@
 #include <filesystem>
 
 #include "Core/Logger.hpp"
+#include "Component/Mesh.h"
 
 #include "IO/glTF/glTFLoader.h"
 
 namespace CGEngine::IO
 {
-	void LoadModelFile(const std::string_view filepath, const ModelFileType type)
+	void LoadModelFile(const std::string_view filepath, const ModelFileType type, Object::Mesh& mesh)
 	{
 		if (type == ModelFileType::glTF)
-			LoadglTFModel(filepath);
+			LoadglTFModel(filepath, mesh);
 	}
 
 	void ReadFile(const std::string_view filepath, std::vector<std::byte>& data)

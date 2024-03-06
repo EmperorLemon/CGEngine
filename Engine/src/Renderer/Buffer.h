@@ -22,7 +22,6 @@ namespace CGEngine
 	{
 		uint32_t index;
 		int32_t count;
-		DataType type;
 		bool normalized;
 		uint32_t offset;
 		int32_t stride;
@@ -52,8 +51,7 @@ namespace CGEngine
 	class VertexLayout
 	{
 	public:
-		VertexLayout& add(uint32_t index, int32_t count, DataType type, bool normalized = false);
-		VertexLayout& add(uint32_t index, int32_t count, int32_t stride, bool normalized = false);
+		VertexLayout& add(uint32_t index, int32_t count, uint32_t offset, int32_t stride, bool normalized = false);
 		VertexLayout& end();
 
 		[[nodiscard]] const std::vector<VertexAttribute>& GetAttributes() const { return m_layout; }
@@ -75,7 +73,7 @@ namespace CGEngine
 	class Buffer
 	{
 	public:
-		Buffer(const DataType type, const int32_t size, const int32_t length, const uint32_t id) : p_type(type), p_size(size), p_length(length), p_id(id) {}
+		explicit Buffer(const size_t size) : p_size(size) {}
 
 		Buffer(Buffer&&) noexcept = default;
 		Buffer& operator=(Buffer&&) noexcept = default;
@@ -85,16 +83,13 @@ namespace CGEngine
 		virtual ~Buffer() = default;
 
 		virtual void SetData(size_t size, const void* data) const = 0;
-		virtual void SetSubData(int32_t offset, size_t size, const void* data) const = 0;
+		virtual void SetSubData(size_t offset, size_t size, const void* data) const = 0;
 
-		[[nodiscard]] virtual int32_t  GetSize()    const = 0;
-		[[nodiscard]] virtual int32_t  GetLength()  const = 0;
-		[[nodiscard]] virtual uint32_t GetID()      const = 0;
+		[[nodiscard]] virtual size_t GetSize() const = 0;
+		[[nodiscard]] virtual uint32_t GetID() const = 0;
 	protected:
-		DataType p_type  = DataType::VOID;
-		int32_t	 p_size  = 0;
-		int32_t  p_length = 0;
-		uint32_t p_id    = 0;
+		size_t	 p_size = 0;
+		uint32_t p_id   = 0;
 	};
 
 	class VertexArray

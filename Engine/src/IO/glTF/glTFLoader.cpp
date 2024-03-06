@@ -1,7 +1,5 @@
 #include "glTFLoader.h"
 
-#include "Platform/OpenGL/OpenGLBuffer.h"
-
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -10,43 +8,12 @@
 #include <stack>
 
 #include "Core/Logger.hpp"
+#include "Component/Mesh.h"
 
 namespace CGEngine::IO
 {
-	constexpr auto PADDING = 2; // 2 bytes of padding needed to align memory
-
-	std::shared_ptr<Buffer> vertex_buffer = nullptr;
-	std::shared_ptr<VertexArray> vertex_array = nullptr;
-
-	constexpr DataType GetDataType(const int32_t type)
-	{
-		switch (type)
-		{
-		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
-			return DataType::UNSIGNED_BYTE;
-		case TINYGLTF_COMPONENT_TYPE_BYTE:
-			return DataType::BYTE;
-		case TINYGLTF_COMPONENT_TYPE_SHORT:
-			return DataType::SHORT;
-		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-			return DataType::UNSIGNED_SHORT;
-		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-			return DataType::UNSIGNED_INT;
-		case TINYGLTF_COMPONENT_TYPE_INT:
-			return DataType::INT;
-		case TINYGLTF_COMPONENT_TYPE_FLOAT:
-			return DataType::FLOAT;
-		default:
-			break;
-		}
-
-		return DataType::FLOAT;
-	}
-
 	static void ProcessMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh)
 	{
-		std::vector<SubBuffer> buffers;
-
 		for (const auto& bufferView : model.bufferViews)
 		{
 			if (bufferView.target == 0)
@@ -54,22 +21,7 @@ namespace CGEngine::IO
 				CG_WARN("glTF Warning: bufferView target is 0");
 				continue;
 			}
-
-			const auto& buffer = model.buffers[bufferView.buffer];
-			buffers.emplace_back(bufferView.byteLength, bufferView.byteStride, bufferView.byteOffset, buffer.data.data() + bufferView.byteOffset);
 		}
-
-		size_t length = 0;
-
-		for (const auto& buffer : buffers)
-			length += buffer.length;
-
-		vertex_buffer = std::make_shared<OpenGL::GLBuffer>(length + PADDING, nullptr);
-
-		for (const auto& buffer : buffers)
-			vertex_buffer->SetSubData(buffer.offset, buffer.length, buffer.data);
-
-		VertexLayout layout;
 
 		for (const auto& primitive : mesh.primitives)
 		{
@@ -78,16 +30,8 @@ namespace CGEngine::IO
 			for (const auto& attribute : primitive.attributes)
 			{
 				const tinygltf::Accessor accessor = model.accessors[attribute.second];
-
-				layout.add(attribute.second, static_cast<int32_t>(accessor.count), GetDataType(accessor.componentType));
 			}
 		}
-
-		layout.end();
-
-		vertex_array = std::make_shared<OpenGL::GLVertexArray>(dynamic_cast<OpenGL::GLBuffer*>(vertex_buffer.get()), layout);
-
-		//CG_TRACE("{0}", vertex_array->GetID());
 	}
 
 	static void ExtractMeshes(const tinygltf::Model& model, const tinygltf::Node& parentNode)
@@ -118,7 +62,37 @@ namespace CGEngine::IO
 		}
 	}
 
-	bool LoadglTFModel(const std::string_view filepath)
+	static void CheckModel(const tinygltf::Model& model, Object::Mesh& mesh)
+	{
+		const auto& gltfMesh = model.meshes[0];
+		const auto& primitive = gltfMesh.primitives[0];
+
+		const auto& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
+		const auto& posView = model.bufferViews[posAccessor.bufferView];
+		const auto& posBuffer = model.buffers[posView.buffer];
+		const auto  posData = reinterpret_cast<const float*>(posBuffer.data.data() + posView.byteOffset + posAccessor.byteOffset);
+
+		const auto& indexAccessor = model.accessors[primitive.indices];
+		const auto& indexView     = model.bufferViews[indexAccessor.bufferView];
+		const auto& indexBuffer   = model.buffers[indexView.buffer];
+		const auto  indexData = reinterpret_cast<const uint16_t*>(indexBuffer.data.data() + indexView.byteOffset + indexAccessor.byteOffset);
+
+		const int32_t nComponents = posAccessor.componentType == TINYGLTF_TYPE_SCALAR ? 1 : posAccessor.componentType == TINYGLTF_TYPE_VEC2 ? 2 : 3;
+
+		mesh.vertices.reserve(posAccessor.count * nComponents);
+		mesh.indices.reserve(indexAccessor.count);
+
+		const size_t v_size = posAccessor.count * nComponents;
+		const size_t i_size = indexAccessor.count;
+
+		for (size_t i = 0; i < v_size; ++i)
+			mesh.vertices.push_back(posData[i]);
+
+		for (size_t i = 0; i < i_size; ++i)
+			mesh.indices.push_back(indexData[i]);
+	}
+
+	bool LoadglTFModel(const std::string_view filepath, Object::Mesh& mesh)
 	{
 		tinygltf::TinyGLTF loader;
 		tinygltf::Model model;
@@ -138,7 +112,8 @@ namespace CGEngine::IO
 		else
 			CG_INFO("Loaded glTF: {0}", filepath.data());
 
-		SubmitModel(model);
+		//SubmitModel(model);
+		CheckModel(model, mesh);
 
 		return success;
 	}

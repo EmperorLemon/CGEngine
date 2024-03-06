@@ -3,6 +3,11 @@
 #include <string_view>
 #include <vector>
 
+namespace CGEngine::Object
+{
+	struct Mesh;
+}
+
 namespace CGEngine::IO
 {
 	enum class FileType : uint8_t
@@ -18,7 +23,7 @@ namespace CGEngine::IO
 		OBJ,
 	};
 
-	void LoadModelFile(std::string_view filepath, ModelFileType type);
+	void LoadModelFile(std::string_view filepath, ModelFileType type, Object::Mesh& mesh);
 
 	void ReadFile(std::string_view filepath, std::vector<std::byte>& data);
 	void ReadFile(std::string_view filepath, std::string& data);

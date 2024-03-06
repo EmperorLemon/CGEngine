@@ -8,6 +8,8 @@
 #include "RenderAPI.h"
 #include "Shader.h"
 
+#include "Component/Mesh.h"
+
 #include "IO/FileSystem.h"
 
 namespace CGEngine
@@ -45,17 +47,23 @@ namespace CGEngine
 
 		VertexLayout layout;
 		{
-			layout.add(0, 3, DataType::FLOAT)
-			      .add(1, 3, DataType::FLOAT)
+			layout.add(0, 3, 0, 3 * sizeof(float))
 			      .end();
 		}
 
-		LoadModelFile("Assets/Models/triangle.gltf", IO::ModelFileType::glTF);
+		Object::Mesh mesh = {};
 
-		//const auto vertex_buffer = std::make_shared<OpenGL::GLBuffer>(DataType::FLOAT,   vertices.size(), vertices.data());
-		//const auto index_buffer = std::make_shared<OpenGL::GLBuffer>(DataType::UNSIGNED_SHORT, indices.size(), indices.data());
+		LoadModelFile("Assets/Models/triangle.gltf", IO::ModelFileType::glTF, mesh);
 
-		//vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer.get(), index_buffer.get(), layout);
+		const size_t vertexDataSize = sizeof(float) * mesh.vertices.size();
+		const size_t indexDataSize  = sizeof(uint16_t) * mesh.indices.size();
+		const size_t bufferSize = vertexDataSize + indexDataSize;
+
+		const auto& vertex_buffer = std::make_shared<OpenGL::GLBuffer>(bufferSize, nullptr);
+		vertex_buffer->SetSubData(0, vertexDataSize, mesh.vertices.data());
+		vertex_buffer->SetSubData(vertexDataSize, indexDataSize, mesh.indices.data());
+
+		vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer.get(), layout);
 
 		std::string vert_src, frag_src;
 		IO::ReadFile("Assets/Shaders/unlit.vert", vert_src);
@@ -77,10 +85,9 @@ namespace CGEngine
 		m_backend->ClearColor(RGBA);
 
 		shader->Bind();
-		m_backend->Draw(nullptr);
-		//vertex_array->Bind();
-		//m_backend->Draw(vertex_array.get());
-		//vertex_array->Unbind();
+		vertex_array->Bind();
+		m_backend->Draw(vertex_array.get());
+		vertex_array->Unbind();
 
 		SwapBuffers(m_window);
 	}

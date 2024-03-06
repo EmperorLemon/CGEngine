@@ -7,21 +7,25 @@ namespace CGEngine::OpenGL
 	class GLBuffer final : public Buffer
 	{
 	public:
-		GLBuffer(DataType type, size_t length, const void* data);
-		GLBuffer(size_t length, const void* data);
+		GLBuffer(size_t size, const void* data);
+
+		GLBuffer(GLBuffer&&) noexcept = default;
+		GLBuffer& operator=(GLBuffer&&) noexcept = default;
+		GLBuffer(const GLBuffer&) = delete;
+		GLBuffer& operator=(const GLBuffer&) = delete;
+
+		~GLBuffer() override;
 
 		void SetData(size_t size, const void* data) const override;
-		void SetSubData(int32_t offset, size_t size, const void* data) const override;
+		void SetSubData(size_t offset, size_t size, const void* data) const override;
 
-		[[nodiscard]] int32_t  GetSize()  const override { return p_size; }
-		[[nodiscard]] int32_t  GetLength() const override { return p_length; }
-		[[nodiscard]] uint32_t GetID()    const override { return p_id; }
+		[[nodiscard]] size_t GetSize() const override { return p_size; }
+		[[nodiscard]] uint32_t GetID() const override { return p_id; }
 	};
 
 	class GLVertexArray final : public VertexArray
 	{
 	public:
-		GLVertexArray(const GLBuffer* vertexBuffer, const GLBuffer* indexBuffer, const VertexLayout& layout);
 		GLVertexArray(const GLBuffer* vertexBuffer, const VertexLayout& layout);
 
 		GLVertexArray(GLVertexArray&&) noexcept = default;
