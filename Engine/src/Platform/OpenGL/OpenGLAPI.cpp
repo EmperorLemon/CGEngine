@@ -7,7 +7,7 @@
 
 namespace CGEngine::OpenGL
 {
-	uint32_t Convert(const ClearMask mask)
+	constexpr uint32_t Convert(const ClearMask mask)
 	{
 		switch (mask)
 		{
@@ -32,8 +32,10 @@ namespace CGEngine::OpenGL
 		{
 			const auto& vertex_array = static_cast<GLVertexArray*>(array_ptr);
 
-			//glDrawArrays(GL_TRIANGLES, 0, vertex_array->GetVertexCount());
-			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(36));
+			//glDrawArrays(GL_TRIANGLES, vertex_array->GetVertexOffset(), vertex_array->GetVertexCount());
+
+			const auto& indices = vertex_array->GetIndices();
+			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
 		}
 	}
 

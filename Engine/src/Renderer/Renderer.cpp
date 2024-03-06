@@ -14,23 +14,9 @@
 
 namespace CGEngine
 {
+	std::shared_ptr<OpenGL::GLBuffer> vertex_buffer = nullptr;
 	std::shared_ptr<OpenGL::GLVertexArray> vertex_array = nullptr;
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
-
-	float data_v[] =
-	{
-		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
-	};
-
-	uint16_t data_i[] =
-	{
-		0, 1, 2
-	};
-
-	std::span vertices(data_v, std::size(data_v));
-	std::span  indices(data_i, std::size(data_i));
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
@@ -44,7 +30,10 @@ namespace CGEngine
 
 		CreateContext(context);
 		m_backend = std::make_shared<OpenGL::OpenGLAPI>();
+	}
 
+	void Renderer::PreRender()
+	{
 		VertexLayout layout;
 		{
 			layout.add(0, 3, 0, 3 * sizeof(float))
@@ -52,18 +41,20 @@ namespace CGEngine
 		}
 
 		Object::Mesh mesh = {};
-
 		LoadModelFile("Assets/Models/triangle.gltf", IO::ModelFileType::glTF, mesh);
 
-		const size_t vertexDataSize = sizeof(float) * mesh.vertices.size();
-		const size_t indexDataSize  = sizeof(uint16_t) * mesh.indices.size();
-		const size_t bufferSize = vertexDataSize + indexDataSize;
+		const size_t vBufferSize = sizeof(float) * mesh.vertices.size();
+		const size_t iBufferSize = sizeof(uint16_t) * mesh.indices.size();
+		const size_t bufferSize = vBufferSize + iBufferSize;
 
-		const auto& vertex_buffer = std::make_shared<OpenGL::GLBuffer>(bufferSize, nullptr);
-		vertex_buffer->SetSubData(0, vertexDataSize, mesh.vertices.data());
-		vertex_buffer->SetSubData(vertexDataSize, indexDataSize, mesh.indices.data());
+		const BufferInfo vBufferInfo = { vBufferSize, mesh.vertices.size(), 0 };
+		const BufferInfo iBufferInfo = { iBufferSize, mesh.indices.size(), vBufferInfo.size };
 
-		vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer.get(), layout);
+		vertex_buffer = std::make_shared<OpenGL::GLBuffer>(bufferSize, nullptr);
+		vertex_buffer->SetSubData(vBufferInfo.offset, vBufferInfo.size, mesh.vertices.data());
+		vertex_buffer->SetSubData(iBufferInfo.offset, iBufferInfo.size, mesh.indices.data());
+
+		vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer->GetID(), vBufferInfo, &iBufferInfo, layout);
 
 		std::string vert_src, frag_src;
 		IO::ReadFile("Assets/Shaders/unlit.vert", vert_src);
@@ -71,10 +62,6 @@ namespace CGEngine
 
 		ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
 		shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
-	}
-
-	void Renderer::PreRender()
-	{
 	}
 
 	void Renderer::Render()

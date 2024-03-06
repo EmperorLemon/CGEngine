@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <cstdint>
-#include <span>
+#include <optional>
 
 namespace CGEngine
 {
@@ -60,23 +60,20 @@ namespace CGEngine
 		std::vector<VertexAttribute> m_layout;
 	};
 
-	struct SubBuffer
+	struct BufferInfo
 	{
-		explicit SubBuffer(const size_t length, const size_t stride, const size_t offset = 0, const void* data = nullptr) : length(length), stride(stride), offset(static_cast<int32_t>(offset)), data(data) {}
-
-		size_t  length = 0;
-		size_t  stride = 0;
-		int32_t offset = 0;
-		const void* data = nullptr;
+		size_t  size   = 0; // byte size of buffer
+		size_t  count  = 0; // number of elements in buffer
+		size_t  offset = 0; // byte offset of buffer (used for combining multiple buffers)
 	};
 
 	class Buffer
 	{
 	public:
-		explicit Buffer(const size_t size) : p_size(size) {}
+		Buffer() = default;
 
 		Buffer(Buffer&&) noexcept = default;
-		Buffer& operator=(Buffer&&) noexcept = default;
+		Buffer& operator=(Buffer&&) noexcept = delete;
 		Buffer(const Buffer&) = delete;
 		Buffer& operator=(const Buffer&) = delete;
 
@@ -85,20 +82,18 @@ namespace CGEngine
 		virtual void SetData(size_t size, const void* data) const = 0;
 		virtual void SetSubData(size_t offset, size_t size, const void* data) const = 0;
 
-		[[nodiscard]] virtual size_t GetSize() const = 0;
 		[[nodiscard]] virtual uint32_t GetID() const = 0;
 	protected:
-		size_t	 p_size = 0;
-		uint32_t p_id   = 0;
+		uint32_t p_id = 0;
 	};
 
 	class VertexArray
 	{
 	public:
-		explicit VertexArray(const uint32_t id, const int32_t vertexCount, const int32_t indexCount) : p_id(id), p_vertexCount(vertexCount), p_indexCount(indexCount) {}
+		explicit VertexArray(const BufferInfo& vertexBuffer) : p_vertexBuffer(vertexBuffer) {}
 
 		VertexArray(VertexArray&&) noexcept = default;
-		VertexArray& operator=(VertexArray&&) noexcept = default;
+		VertexArray& operator=(VertexArray&&) noexcept = delete;
 		VertexArray(const VertexArray&) = delete;
 		VertexArray& operator=(const VertexArray&) = delete;
 
@@ -107,14 +102,14 @@ namespace CGEngine
 		virtual void Bind()   const = 0;
 		virtual void Unbind() const = 0;
 
-		[[nodiscard]] virtual uint32_t GetID()   const = 0;
+		[[nodiscard]] virtual uint32_t GetID() const = 0;
 
-		[[nodiscard]] virtual int32_t  GetVertexCount() const = 0;
-		[[nodiscard]] virtual int32_t  GetIndexCount()  const = 0;
+		[[nodiscard]] virtual const BufferInfo& GetVertices() const = 0;
+		[[nodiscard]] virtual const BufferInfo& GetIndices()  const = 0;
 	protected:
 		uint32_t p_id = 0;
 
-		int32_t  p_vertexCount = 0;
-		int32_t  p_indexCount = 0;
+		const BufferInfo&		  p_vertexBuffer;
+		std::optional<BufferInfo> p_indexBuffer;
 	};
 }

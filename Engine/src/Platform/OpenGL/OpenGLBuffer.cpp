@@ -24,7 +24,7 @@ namespace CGEngine::OpenGL
 		return GL_FLOAT;
 	}
 
-	GLBuffer::GLBuffer(const size_t size, const void* data) : Buffer(size)
+	GLBuffer::GLBuffer(const size_t size, const void* data) : Buffer()
 	{
 		glCreateBuffers(1, &p_id);
 		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(size), data, GL_DYNAMIC_STORAGE_BIT);
@@ -46,10 +46,8 @@ namespace CGEngine::OpenGL
 		glNamedBufferSubData(p_id, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);
 	}
 
-	GLVertexArray::GLVertexArray(const GLBuffer* vertexBuffer, const VertexLayout& layout) : VertexArray(0, 0, 0)
+	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const VertexLayout& layout) : VertexArray(vertexBuffer)
 	{
-		if (vertexBuffer == nullptr) CG_ERROR("Vertex buffer is nullptr!");
-
 		glCreateVertexArrays(1, &p_id);
 
 		const std::vector<VertexAttribute>& attributes = layout.GetAttributes();
@@ -59,8 +57,8 @@ namespace CGEngine::OpenGL
 		for (const auto& attribute : attributes)
 			stride += attribute.stride;
 
-		glVertexArrayVertexBuffer(p_id, 0, vertexBuffer->GetID(), 0, stride);
-		glVertexArrayElementBuffer(p_id, vertexBuffer->GetID());
+		glVertexArrayVertexBuffer(p_id, 0, bufferID, static_cast<GLintptr>(vertexBuffer.offset), stride);
+		glVertexArrayElementBuffer(p_id, bufferID);
 
 		for (const auto& attribute : attributes)
 			glEnableVertexArrayAttrib(p_id, attribute.index);
@@ -70,6 +68,9 @@ namespace CGEngine::OpenGL
 
 		for (const auto& attribute : attributes)
 			glVertexArrayAttribBinding(p_id, attribute.index, 0);
+
+		if (indexBuffer != nullptr)
+			p_indexBuffer = std::make_optional<BufferInfo>(*indexBuffer);
 	}
 
 	GLVertexArray::~GLVertexArray()
