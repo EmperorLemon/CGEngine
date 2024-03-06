@@ -8,6 +8,8 @@
 #include "RenderAPI.h"
 #include "Shader.h"
 
+#include "Math/Vector3.h"
+
 #include "Component/Mesh.h"
 
 #include "IO/FileSystem.h"
