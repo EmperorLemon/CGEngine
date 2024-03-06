@@ -13,6 +13,19 @@ namespace CGEngine::OpenGL
 		int32_t count;
 	};
 
+	enum class UniformType : uint8_t
+	{
+		BOOL,
+		UNSIGNED_INT,
+		INT,
+		FLOAT,
+		VEC2,
+		VEC3,
+		VEC4,
+		MAT3,
+		MAT4
+	};
+
 	class GLShader final : public Shader
 	{
 	public:
@@ -25,11 +38,13 @@ namespace CGEngine::OpenGL
 
 		~GLShader() override;
 
-		void Bind() const override;
-		void Unbind() const override;
+		void Use() const override;
+		void Disable() const override;
 
-		[[nodiscard]] const GLUniform& GetUniform(std::string_view name) const;
+		void BindUniform(std::string_view name, UniformType type, const void* value, bool transpose = false) const;
 	private:
-		std::unordered_map<std::string_view, GLUniform> m_uniforms;
+		[[nodiscard]] const GLUniform& GetUniform(const std::string& name) const;
+
+		std::unordered_map<std::string, GLUniform> m_uniforms;
 	};
 }

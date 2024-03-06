@@ -31,7 +31,7 @@ namespace CGEngine::OpenGL
 
 	GLBuffer::~GLBuffer()
 	{
-		CG_INFO("Deleted GLBuffer {0}", p_id);
+		CG_TRACE("Deleted GLBuffer {0}", p_id);
 		glDeleteBuffers(1, &p_id);
 	}
 
@@ -74,7 +74,7 @@ namespace CGEngine::OpenGL
 
 	GLVertexArray::~GLVertexArray()
 	{
-		CG_INFO("Deleted GLVertexArray {0}", p_id);
+		CG_TRACE("Deleted GLVertexArray {0}", p_id);
 		glDeleteVertexArrays(1, &p_id);
 	}
 

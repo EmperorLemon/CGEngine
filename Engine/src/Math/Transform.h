@@ -7,7 +7,7 @@
 
 namespace CGEngine::Math
 {
-	Mat4 Perspective(float fov, float aspect, float near = 1.0f, float far = 1000.0f);
+	Mat4 Perspective(float fov, float aspect, float near = 0.1f, float far = 1000.0f);
 	Mat4	    View(const Vector3& position, const Vector3& direction, const Vector3& up);
 
 	Mat4 Translate(const Mat4& transform, const Vector3& translation);

@@ -53,7 +53,7 @@ namespace CGEngine::OpenGL
 	constexpr bool is_vertex(const ShaderModule& module) { return module.type == ShaderType::VERTEX; }
 	constexpr bool is_fragment(const ShaderModule& module) { return module.type == ShaderType::FRAGMENT; }
 
-	static void FetchUniformNames(const uint32_t program, std::unordered_map<std::string_view, GLUniform>& uniforms)
+	static void FetchUniformNames(const uint32_t program, std::unordered_map<std::string, GLUniform>& uniforms)
 	{
 		GLint uniform_count = 0;
 		glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &uniform_count);
@@ -78,7 +78,7 @@ namespace CGEngine::OpenGL
 					uniform.count    = count;
 				}
 
-				uniforms.emplace(std::make_pair(std::string_view(uniform_name.get(), length), uniform));
+				uniforms.emplace(std::make_pair(std::string(uniform_name.get(), length), uniform));
 			}
 		}
 	}
@@ -127,20 +127,45 @@ namespace CGEngine::OpenGL
 
 	GLShader::~GLShader()
 	{
+		CG_TRACE("Deleted GLShader {0}", p_id);
 		glDeleteProgram(p_id);
 	}
 
-	void GLShader::Bind() const
+	void GLShader::Use() const
 	{
 		glUseProgram(p_id);
 	}
 
-	void GLShader::Unbind() const
+	void GLShader::Disable() const
 	{
 		glUseProgram(0);
 	}
 
-	const GLUniform& GLShader::GetUniform(const std::string_view name) const
+	void GLShader::BindUniform(const std::string_view name, const UniformType type, const void* value, const bool transpose) const
+	{
+		const auto& uniform = GetUniform(name.data());
+
+		if (value == nullptr)
+		{
+			CG_WARN("value is nullptr!");
+			return;
+		}
+
+		switch (type)
+		{
+		case UniformType::BOOL:
+		case UniformType::INT:		    glProgramUniform1i(p_id, uniform.location, *static_cast<const GLint*>(value));								 break;
+		case UniformType::UNSIGNED_INT: glProgramUniform1ui(p_id, uniform.location, *static_cast<const GLuint*>(value));						 break;
+		case UniformType::FLOAT:		glProgramUniform1f(p_id, uniform.location, *static_cast<const GLfloat*>(value));								 break;
+		case UniformType::VEC2:			glProgramUniform2fv(p_id, uniform.location, uniform.count, static_cast<const GLfloat*>(value));					 break;
+		case UniformType::VEC3:			glProgramUniform3fv(p_id, uniform.location, uniform.count, static_cast<const GLfloat*>(value));					 break;
+		case UniformType::VEC4:			glProgramUniform4fv(p_id, uniform.location, uniform.count, static_cast<const GLfloat*>(value));					 break;
+		case UniformType::MAT3:			glProgramUniformMatrix3fv(p_id, uniform.location, uniform.count, transpose, static_cast<const GLfloat*>(value)); break;
+		case UniformType::MAT4:			glProgramUniformMatrix4fv(p_id, uniform.location, uniform.count, transpose, static_cast<const GLfloat*>(value)); break;
+		}
+	}
+
+	const GLUniform& GLShader::GetUniform(const std::string& name) const
 	{
 		if (m_uniforms.contains(name))
 			return m_uniforms.at(name);

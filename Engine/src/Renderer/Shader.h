@@ -33,8 +33,8 @@ public:
 
 	virtual ~Shader() = default;
 
-	virtual void Bind()   const = 0;
-	virtual void Unbind() const = 0;
+	virtual void Use()   const = 0;
+	virtual void Disable() const = 0;
 
 protected:
 	uint32_t p_id = 0;

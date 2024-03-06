@@ -48,8 +48,25 @@ namespace CGEngine
 	class VertexLayout
 	{
 	public:
-		VertexLayout& add(uint32_t index, int32_t count, DataType type, uint32_t offset, int32_t stride, bool normalized = false);
-		VertexLayout& end();
+		VertexLayout& add(uint32_t index, int32_t count, DataType type, uint32_t offset, int32_t stride, bool normalized = false)
+		{
+			m_layout.emplace_back(index, count, type, normalized, offset, stride);
+
+			return *this;
+		}
+		VertexLayout& end()
+		{
+			m_offset = 0;
+
+			for (auto& attribute : m_layout)
+			{
+				const int32_t stride = attribute.stride;
+				attribute.offset = m_offset;
+				m_offset += stride;
+			}
+
+			return *this;
+		}
 
 		[[nodiscard]] const std::vector<VertexAttribute>& GetAttributes() const { return m_layout; }
 	private:

@@ -4,7 +4,7 @@
 
 namespace CGEngine::Math
 {
-	Mat4 Perpsective(const float fov, const float aspect, const float near, const float far)
+	Mat4 Perspective(const float fov, const float aspect, const float near, const float far)
 	{
 		return glm::perspective(fov, aspect, near, far);
 	}

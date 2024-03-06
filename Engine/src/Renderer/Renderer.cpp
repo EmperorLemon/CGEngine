@@ -1,14 +1,14 @@
 #include "Renderer.h"
 #include "Context.h"
 
-#include <span>
-
 #include "Platform/OpenGL/OpenGL.h"
 
+#include "Camera.h"
 #include "RenderAPI.h"
 #include "Shader.h"
 
-#include "Math/Vector3.h"
+#include "Math/Math.h"
+#include "Math/Transform.h"
 
 #include "Component/Mesh.h"
 
@@ -16,6 +16,8 @@
 
 namespace CGEngine
 {
+	void SetupRenderScene();
+
 	std::shared_ptr<OpenGL::GLBuffer> vertex_buffer = nullptr;
 	std::shared_ptr<OpenGL::GLVertexArray> vertex_array = nullptr;
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
@@ -32,18 +34,20 @@ namespace CGEngine
 
 		CreateContext(context);
 		m_backend = std::make_shared<OpenGL::OpenGLAPI>();
+
+		SetupRenderScene();
 	}
 
-	void Renderer::PreRender()
+	void SetupRenderScene()
 	{
 		VertexLayout layout;
 		{
 			layout.add(0, 3, DataType::FLOAT, 0, 3 * sizeof(float))
-			      .end();
+				  .end();
 		}
 
 		Object::Mesh mesh = {};
-		LoadModelFile("Assets/Models/triangle.gltf", IO::ModelFileType::glTF, mesh);
+		LoadModelFile("Assets/Models/cube.gltf", IO::ModelFileType::glTF, mesh);
 
 		const size_t vBufferSize = sizeof(float) * mesh.vertices.size();
 		const size_t iBufferSize = sizeof(uint16_t) * mesh.indices.size();
@@ -66,6 +70,22 @@ namespace CGEngine
 		shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 	}
 
+	void Renderer::PreRender()
+	{
+		m_backend->Enable(static_cast<uint32_t>(APICapability::CG_DEPTH_TEST));
+
+		constexpr auto camera_position = Math::Vector3(0.0f, 0.0f, 5.0f);
+		m_camera = std::make_shared<Camera>(camera_position);
+
+		m_camera->fov = Math::DegToRad(45.0f);
+
+		const uint32_t height = m_window->height != 0 ? m_window->height : 1;
+		m_camera->aspect = static_cast<float>(m_window->width) / static_cast<float>(height);
+
+		m_camera->projection = Math::Perspective(m_camera->fov, m_camera->aspect, m_camera->near, m_camera->far);
+		m_camera->view = Math::View(m_camera->position, m_camera->direction, m_camera->up);
+	}
+
 	void Renderer::Render()
 	{
 		float RGBA[4] = { 0.2f, 0.45f, 0.6f, 1.0f };
@@ -73,17 +93,26 @@ namespace CGEngine
 		m_backend->Clear(static_cast<uint32_t>(ClearMask::CG_COLOR_BUFFER_BIT));
 		m_backend->ClearColor(RGBA);
 
-		shader->Bind();
-		vertex_array->Bind();
-		m_backend->Draw(vertex_array.get());
-		vertex_array->Unbind();
+		shader->Use();
+
+		const auto& model = Math::Mat4(1.0f);
+
+		shader->BindUniform("uProjection", OpenGL::UniformType::MAT4, Math::value_ptr(m_camera->projection));
+		shader->BindUniform("uView", OpenGL::UniformType::MAT4, Math::value_ptr(m_camera->view));
+		shader->BindUniform("uModel", OpenGL::UniformType::MAT4, Math::value_ptr(model));
+
+		{
+			vertex_array->Bind();
+			m_backend->Draw(vertex_array.get());
+			vertex_array->Unbind();
+		}
 
 		SwapBuffers(m_window);
 	}
 
 	void Renderer::PostRender()
 	{
-		shader->Unbind();
+		shader->Disable();
 	}
 
 	GraphicsAPI Renderer::GetAPI()

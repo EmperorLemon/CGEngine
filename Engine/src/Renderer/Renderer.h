@@ -4,6 +4,7 @@
 
 namespace CGEngine
 {
+	struct Camera;
 	struct RenderAPI;
 
 	enum class GraphicsAPI
@@ -36,6 +37,7 @@ namespace CGEngine
 		static GraphicsAPI m_API;
 
 		std::shared_ptr<Window> m_window = nullptr;
+		std::shared_ptr<Camera> m_camera = nullptr;
 		std::shared_ptr<RenderAPI> m_backend = nullptr;
 	};
 }
