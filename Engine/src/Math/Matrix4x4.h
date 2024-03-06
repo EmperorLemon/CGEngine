@@ -4,5 +4,5 @@
 
 namespace CGEngine::Math
 {
-	using Mat4 = glm::mat4
+	using Mat4 = glm::mat4;
 }
