@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <span>
 
 namespace CGEngine
 {
@@ -63,12 +64,12 @@ namespace CGEngine
 
 	struct SubBuffer
 	{
-		SubBuffer(const DataType type, const size_t length, const int32_t offset = 0) : type(type), size(GetDataSize(type)), length(static_cast<int32_t>(length)), offset(offset) {}
+		explicit SubBuffer(const size_t length, const size_t stride, const size_t offset = 0, const void* data = nullptr) : length(length), stride(stride), offset(static_cast<int32_t>(offset)), data(data) {}
 
-		DataType type = DataType::VOID;
-		int32_t  size = 0;
-		int32_t  length = 0;
-		int32_t  offset = 0;
+		size_t  length = 0;
+		size_t  stride = 0;
+		int32_t offset = 0;
+		const void* data = nullptr;
 	};
 
 	class Buffer
@@ -82,6 +83,9 @@ namespace CGEngine
 		Buffer& operator=(const Buffer&) = delete;
 
 		virtual ~Buffer() = default;
+
+		virtual void SetData(size_t size, const void* data) const = 0;
+		virtual void SetSubData(int32_t offset, size_t size, const void* data) const = 0;
 
 		[[nodiscard]] virtual int32_t  GetSize()    const = 0;
 		[[nodiscard]] virtual int32_t  GetLength()  const = 0;

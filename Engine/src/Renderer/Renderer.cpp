@@ -50,12 +50,12 @@ namespace CGEngine
 			      .end();
 		}
 
-		LoadModelFile("Assets/Models/cube.gltf", IO::ModelFileType::glTF);
+		LoadModelFile("Assets/Models/triangle.gltf", IO::ModelFileType::glTF);
 
-		const auto vertex_buffer = std::make_shared<OpenGL::GLBuffer>(DataType::FLOAT,   vertices.size(), vertices.data());
-		const auto index_buffer = std::make_shared<OpenGL::GLBuffer>(DataType::UNSIGNED_SHORT, indices.size(), indices.data());
+		//const auto vertex_buffer = std::make_shared<OpenGL::GLBuffer>(DataType::FLOAT,   vertices.size(), vertices.data());
+		//const auto index_buffer = std::make_shared<OpenGL::GLBuffer>(DataType::UNSIGNED_SHORT, indices.size(), indices.data());
 
-		vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer.get(), index_buffer.get(), layout);
+		//vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer.get(), index_buffer.get(), layout);
 
 		std::string vert_src, frag_src;
 		IO::ReadFile("Assets/Shaders/unlit.vert", vert_src);
@@ -77,9 +77,10 @@ namespace CGEngine
 		m_backend->ClearColor(RGBA);
 
 		shader->Bind();
-		vertex_array->Bind();
-		m_backend->Draw(vertex_array.get());
-		vertex_array->Unbind();
+		m_backend->Draw(nullptr);
+		//vertex_array->Bind();
+		//m_backend->Draw(vertex_array.get());
+		//vertex_array->Unbind();
 
 		SwapBuffers(m_window);
 	}

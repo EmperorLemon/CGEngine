@@ -28,12 +28,17 @@ namespace CGEngine::OpenGL
 
 	void OpenGLAPI::Draw(void* array_ptr) const
 	{
+
+		glBindVertexArray(1);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+		glBindVertexArray(0);
+
 		if (array_ptr != nullptr)
 		{
-			const auto& vertex_array = static_cast<GLVertexArray*>(array_ptr);
+			//const auto& vertex_array = static_cast<GLVertexArray*>(array_ptr);
 
 			//glDrawArrays(GL_TRIANGLES, 0, vertex_array->GetVertexCount());
-			glDrawElements(GL_TRIANGLES, vertex_array->GetIndexCount(), GL_UNSIGNED_SHORT, nullptr);
+			//glDrawElements(GL_TRIANGLES, vertex_array->GetIndexCount(), GL_UNSIGNED_SHORT, nullptr);
 		}
 	}
 

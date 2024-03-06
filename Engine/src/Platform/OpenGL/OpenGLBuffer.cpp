@@ -30,10 +30,10 @@ namespace CGEngine::OpenGL
 		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(p_size * length), data, GL_DYNAMIC_STORAGE_BIT);
 	}
 
-	GLBuffer::GLBuffer(const size_t size, const void* data) : Buffer(DataType::VOID, static_cast<int32_t>(size), 0, 0)
+	GLBuffer::GLBuffer(const size_t length, const void* data) : Buffer(DataType::VOID, 0, static_cast<int32_t>(length), 0)
 	{
 		glCreateBuffers(1, &p_id);
-		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(p_size), data, GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(length), data, GL_DYNAMIC_STORAGE_BIT);
 	}
 
 	void GLBuffer::SetData(const size_t size, const void* data) const
@@ -66,13 +66,41 @@ namespace CGEngine::OpenGL
 			glEnableVertexArrayAttrib(p_id, attribute.index);
 
 		for (const auto& attribute : attributes)
-			glVertexArrayAttribFormat(p_id, attribute.index, attribute.count, GL_FLOAT, attribute.normalized, attribute.offset);
+			glVertexArrayAttribFormat(p_id, attribute.index, attribute.count, Convert(attribute.type), attribute.normalized, attribute.offset);
 
 		for (const auto& attribute : attributes)
 			glVertexArrayAttribBinding(p_id, attribute.index, 0);
 
 		p_vertexCount = vertexBuffer->GetLength();
 		if (indexBuffer != nullptr) p_indexCount = indexBuffer->GetLength();
+	}
+
+	GLVertexArray::GLVertexArray(const GLBuffer* vertexBuffer, const VertexLayout& layout) : VertexArray(0, 0, 0)
+	{
+		if (vertexBuffer == nullptr) CG_ERROR("Vertex buffer is nullptr!");
+
+		glCreateVertexArrays(1, &p_id);
+
+		const std::vector<VertexAttribute>& attributes = layout.GetAttributes();
+
+		int32_t stride = 0;
+
+		for (const auto& attribute : attributes)
+			stride += attribute.stride;
+
+		glVertexArrayVertexBuffer(p_id, 0, vertexBuffer->GetID(), 8, stride);
+		glVertexArrayElementBuffer(p_id, vertexBuffer->GetID());
+
+		for (const auto& attribute : attributes)
+			glEnableVertexArrayAttrib(p_id, attribute.index);
+
+		for (const auto& attribute : attributes)
+			glVertexArrayAttribFormat(p_id, attribute.index, attribute.count, Convert(attribute.type), attribute.normalized, attribute.offset);
+
+		for (const auto& attribute : attributes)
+			glVertexArrayAttribBinding(p_id, attribute.index, 0);
+
+		p_vertexCount = vertexBuffer->GetLength();
 	}
 
 	GLVertexArray::~GLVertexArray()
