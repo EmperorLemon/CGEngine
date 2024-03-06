@@ -38,7 +38,7 @@ namespace CGEngine
 	{
 		VertexLayout layout;
 		{
-			layout.add(0, 3, 0, 3 * sizeof(float))
+			layout.add(0, 3, DataType::FLOAT, 0, 3 * sizeof(float))
 			      .end();
 		}
 

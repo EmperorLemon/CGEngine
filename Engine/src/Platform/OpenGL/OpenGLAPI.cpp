@@ -11,16 +11,27 @@ namespace CGEngine::OpenGL
 	{
 		switch (mask)
 		{
-		case ClearMask::CG_NULL_BUFFER_BIT:
-			break;
-		case ClearMask::CG_COLOR_BUFFER_BIT:
-			return GL_COLOR_BUFFER_BIT;
-		case ClearMask::CG_DEPTH_BUFFER_BIT:
-			return GL_DEPTH_BUFFER_BIT;
-		case ClearMask::CG_COLOR_DEPTH_BUFFER_BIT:
-			return GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
-		case ClearMask::CG_STENCIL_BUFFER_BIT:
-			return GL_STENCIL_BUFFER_BIT;
+		case ClearMask::CG_NULL_BUFFER_BIT: break;
+		case ClearMask::CG_COLOR_BUFFER_BIT:	   return GL_COLOR_BUFFER_BIT;
+		case ClearMask::CG_DEPTH_BUFFER_BIT:       return GL_DEPTH_BUFFER_BIT;
+		case ClearMask::CG_COLOR_DEPTH_BUFFER_BIT: return GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+		case ClearMask::CG_STENCIL_BUFFER_BIT:	   return GL_STENCIL_BUFFER_BIT;
+		}
+
+		return 0;
+	}
+	constexpr uint32_t Convert(const APICapability capability)
+	{
+		switch (capability)
+		{
+		case APICapability::CG_BLEND:			 return GL_BLEND;
+		case APICapability::CG_CULL_FACE:		 return GL_CULL_FACE;
+		case APICapability::CG_DEPTH_TEST:		 return GL_DEPTH_TEST;
+		case APICapability::CG_FRAMEBUFFER_SRGB: return GL_FRAMEBUFFER_SRGB;
+		case APICapability::CG_LINE_SMOOTH:		 return GL_LINE_SMOOTH;
+		case APICapability::CG_POLYGON_SMOOTH:   return GL_POLYGON_SMOOTH;
+		case APICapability::CG_SCISSOR_TEST:     return GL_SCISSOR_TEST;
+		case APICapability::CG_STENCIL_TEST:     return GL_STENCIL_TEST;
 		}
 
 		return 0;
@@ -32,11 +43,19 @@ namespace CGEngine::OpenGL
 		{
 			const auto& vertex_array = static_cast<GLVertexArray*>(array_ptr);
 
-			//glDrawArrays(GL_TRIANGLES, vertex_array->GetVertexOffset(), vertex_array->GetVertexCount());
-
 			const auto& indices = vertex_array->GetIndices();
 			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
 		}
+	}
+
+	void OpenGLAPI::Enable(uint32_t capability) const
+	{
+		
+	}
+
+	void OpenGLAPI::Disable(uint32_t capability) const
+	{
+		
 	}
 
 	void OpenGLAPI::Clear(const uint32_t mask)

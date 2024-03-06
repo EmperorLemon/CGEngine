@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-#include "Buffer.h"
-
 namespace CGEngine
 {
 	constexpr uint32_t CreateRGBA(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a = 255)
@@ -26,6 +24,18 @@ namespace CGEngine
 		CG_CLEAR_COLOR,
 	};
 
+	enum class APICapability : uint32_t
+	{
+		CG_BLEND,
+		CG_CULL_FACE,
+		CG_DEPTH_TEST,
+		CG_FRAMEBUFFER_SRGB,
+		CG_LINE_SMOOTH,
+		CG_POLYGON_SMOOTH,
+		CG_SCISSOR_TEST,
+		CG_STENCIL_TEST
+	};
+
 	class RenderAPI
 	{
 	public:
@@ -39,6 +49,10 @@ namespace CGEngine
 		virtual ~RenderAPI() = default;
 
 		virtual void Draw(void* array_ptr) const = 0;
+
+		virtual void Enable(uint32_t capability)  const = 0;
+		virtual void Disable(uint32_t capability) const = 0;
+
 		virtual void Clear(uint32_t mask) = 0;
 		virtual void ClearColor(float* rgba) = 0;
 	};

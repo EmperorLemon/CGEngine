@@ -21,37 +21,34 @@ namespace CGEngine
 	struct VertexAttribute
 	{
 		uint32_t index;
-		int32_t count;
-		bool normalized;
+		int32_t  count;
+		DataType type;
+		bool	 normalized;
 		uint32_t offset;
-		int32_t stride;
+		int32_t  stride;
 	};
 
-	constexpr int32_t GetDataSize(const DataType type)
+	constexpr int32_t GetAttributeTypeSize(const DataType type)
 	{
 		switch (type)
 		{
-		case DataType::VOID:
-			return 0 << 0;
+		case DataType::VOID:  return 0 << 0;
 		case DataType::UNSIGNED_BYTE:
-		case DataType::BYTE:
-			return 1 << 0;
+		case DataType::BYTE:  return 1 << 0;
 		case DataType::UNSIGNED_SHORT:
-		case DataType::SHORT:
-			return 1 << 1;
+		case DataType::SHORT: return 1 << 1;
 		case DataType::UNSIGNED_INT:
 		case DataType::INT:
-		case DataType::FLOAT:
-			return 1 << 2;
+		case DataType::FLOAT: return 1 << 2;
 		}
 
-		return 1 << 2;
+		return 0;
 	}
 
 	class VertexLayout
 	{
 	public:
-		VertexLayout& add(uint32_t index, int32_t count, uint32_t offset, int32_t stride, bool normalized = false);
+		VertexLayout& add(uint32_t index, int32_t count, DataType type, uint32_t offset, int32_t stride, bool normalized = false);
 		VertexLayout& end();
 
 		[[nodiscard]] const std::vector<VertexAttribute>& GetAttributes() const { return m_layout; }

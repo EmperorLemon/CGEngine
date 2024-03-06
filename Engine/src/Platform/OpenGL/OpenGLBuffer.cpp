@@ -11,8 +11,7 @@ namespace CGEngine::OpenGL
 		switch (type)
 		{
 		case DataType::VOID:		  
-		case DataType::UNSIGNED_BYTE:
-			return GL_UNSIGNED_BYTE;
+		case DataType::UNSIGNED_BYTE:  return GL_UNSIGNED_BYTE;
 		case DataType::BYTE:		   return GL_BYTE;
 		case DataType::UNSIGNED_SHORT: return GL_UNSIGNED_SHORT;
 		case DataType::SHORT:		   return GL_SHORT;
@@ -32,7 +31,7 @@ namespace CGEngine::OpenGL
 
 	GLBuffer::~GLBuffer()
 	{
-		CG_INFO("Deleted GLBuffer");
+		CG_INFO("Deleted GLBuffer {0}", p_id);
 		glDeleteBuffers(1, &p_id);
 	}
 
@@ -64,7 +63,7 @@ namespace CGEngine::OpenGL
 			glEnableVertexArrayAttrib(p_id, attribute.index);
 
 		for (const auto& attribute : attributes)
-			glVertexArrayAttribFormat(p_id, attribute.index, attribute.count, GL_FLOAT, attribute.normalized, attribute.offset);
+			glVertexArrayAttribFormat(p_id, attribute.index, attribute.count, Convert(attribute.type), attribute.normalized, attribute.offset);
 
 		for (const auto& attribute : attributes)
 			glVertexArrayAttribBinding(p_id, attribute.index, 0);
@@ -75,7 +74,7 @@ namespace CGEngine::OpenGL
 
 	GLVertexArray::~GLVertexArray()
 	{
-		CG_INFO("Deleted GLVertexArray");
+		CG_INFO("Deleted GLVertexArray {0}", p_id);
 		glDeleteVertexArrays(1, &p_id);
 	}
 
