@@ -79,7 +79,7 @@ namespace CGEngine
 
 		m_camera->fov = Math::DegToRad(45.0f);
 
-		const uint32_t height = m_window->height != 0 ? m_window->height : 1;
+		const int32_t height = m_window->height != 0 ? m_window->height : 1;
 		m_camera->aspect = static_cast<float>(m_window->width) / static_cast<float>(height);
 
 		m_camera->projection = Math::Perspective(m_camera->fov, m_camera->aspect, m_camera->near, m_camera->far);
