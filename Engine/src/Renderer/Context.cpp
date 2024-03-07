@@ -10,7 +10,7 @@ namespace CGEngine
 		OpenGL::QueryDeviceProperties(contextInfo.properties);
 	}
 
-	void SwapBuffers(const std::shared_ptr<Window>& window)
+	void SwapBuffers(const Window& window)
 	{
 		OpenGL::SwapBuffers(window);
 	}

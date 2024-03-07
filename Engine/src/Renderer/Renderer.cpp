@@ -24,13 +24,10 @@ namespace CGEngine
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
-	Renderer::Renderer(const RendererCreateInfo& rendererInfo)
+	Renderer::Renderer(const RendererCreateInfo& rendererInfo) : m_window(rendererInfo.window)
 	{
-		m_API = rendererInfo.API;
-		m_window = std::make_shared<Window>(rendererInfo.window);
-
 		DeviceProperties deviceProperties = {};
-		const ContextCreateInfo context = {m_window, deviceProperties};
+		const ContextCreateInfo context = { m_window, deviceProperties };
 
 		CreateContext(context);
 		m_backend = std::make_shared<OpenGL::OpenGLAPI>();
@@ -79,8 +76,8 @@ namespace CGEngine
 
 		m_camera->fov = Math::DegToRad(45.0f);
 
-		const int32_t height = m_window->height != 0 ? m_window->height : 1;
-		m_camera->aspect = static_cast<float>(m_window->width) / static_cast<float>(height);
+		const int32_t height = m_window.height != 0 ? m_window.height : 1;
+		m_camera->aspect = static_cast<float>(m_window.width) / static_cast<float>(height);
 
 		m_camera->projection = Math::Perspective(m_camera->fov, m_camera->aspect, m_camera->near, m_camera->far);
 		m_camera->view = Math::View(m_camera->position, m_camera->direction, m_camera->up);

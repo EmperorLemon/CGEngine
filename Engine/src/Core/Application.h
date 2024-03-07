@@ -35,9 +35,9 @@ namespace CGEngine
 		void Run();
 		void Quit();
 	private:
-		Renderer m_renderer;
+		Logger m_logger;
 
 		Window m_window;
-		Logger m_logger;
+		std::unique_ptr<Renderer> m_renderer = nullptr;
 	};
 }

@@ -25,20 +25,17 @@ void CreateGLFWWindow(const CGEngine::WindowCreateInfo& windowInfo, CGEngine::Wi
 	window.window = glfwCreateWindow(windowInfo.width, windowInfo.height, windowInfo.title.data(), nullptr, nullptr);
 	window.handle = nullptr;
 
-	s_WindowCount++;
-
 	glfwSetWindowUserPointer(static_cast<GLFWwindow*>(window.window), &window);
 
 	glfwSetWindowSizeCallback(static_cast<GLFWwindow*>(window.window), [](GLFWwindow* glfwWindow, const int width, const int height)
 	{
 		const auto winptr = static_cast<CGEngine::Window*>(glfwGetWindowUserPointer(glfwWindow));
 
-		winptr->width  = width;
+		winptr->width = width;
 		winptr->height = height;
-
-		CGEngine::WindowResizeEvent event(width, height);
-		winptr->windowEventCallback(event);
 	});
+
+	s_WindowCount++;
 }
 
 void DestroyGLFWWindow(const CGEngine::Window& window)
@@ -48,7 +45,8 @@ void DestroyGLFWWindow(const CGEngine::Window& window)
 		glfwDestroyWindow(static_cast<GLFWwindow*>(window.window));
 		s_WindowCount--;
 	}
-	else
+
+	if (s_WindowCount == 0)
 		glfwTerminate();
 }
 

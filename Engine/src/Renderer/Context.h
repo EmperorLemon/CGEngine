@@ -28,10 +28,10 @@ namespace CGEngine
 
 	struct ContextCreateInfo
 	{
-		std::shared_ptr<Window>& window;
+		Window& window;
 		DeviceProperties& properties;
 	};
 
 	void CreateContext(const ContextCreateInfo& contextInfo);
-	void SwapBuffers(const std::shared_ptr<Window>& window);
+	void SwapBuffers(const Window& window);
 }

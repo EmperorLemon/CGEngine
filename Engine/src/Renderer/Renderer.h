@@ -5,7 +5,7 @@
 namespace CGEngine
 {
 	struct Camera;
-	struct RenderAPI;
+	class RenderAPI;
 
 	enum class GraphicsAPI
 	{
@@ -19,13 +19,13 @@ namespace CGEngine
 	struct RendererCreateInfo
 	{
 		GraphicsAPI API = GraphicsAPI::CG_NO_API;
-		Window window;
+		Window& window;
 	};
 
 	class Renderer
 	{
 	public:
-		Renderer() = default;
+		Renderer() = delete;
 		explicit Renderer(const RendererCreateInfo& rendererInfo);
 
 		void PreRender();
@@ -36,7 +36,7 @@ namespace CGEngine
 	private:
 		static GraphicsAPI m_API;
 
-		std::shared_ptr<Window> m_window = nullptr;
+		Window& m_window;
 		std::shared_ptr<Camera> m_camera = nullptr;
 		std::shared_ptr<RenderAPI> m_backend = nullptr;
 	};

@@ -77,9 +77,9 @@ namespace CGEngine::OpenGL
 		}
 	}
 
-	void CreateContext(const std::shared_ptr<Window>& window)
+	void CreateContext(const Window& window)
 	{
-		glfwMakeContextCurrent(static_cast<GLFWwindow*>(window->window));
+		glfwMakeContextCurrent(static_cast<GLFWwindow*>(window.window));
 
 		if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
 			throw std::runtime_error("Failed to initialise GLAD!");
@@ -125,8 +125,8 @@ namespace CGEngine::OpenGL
 		}
 	}
 
-	void SwapBuffers(const std::shared_ptr<Window>& window)
+	void SwapBuffers(const Window& window)
 	{
-		glfwSwapBuffers(static_cast<GLFWwindow*>(window->window));
+		glfwSwapBuffers(static_cast<GLFWwindow*>(window.window));
 	}
 }

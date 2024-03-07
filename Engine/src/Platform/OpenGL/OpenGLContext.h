@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 namespace CGEngine
 {
 	struct Window;
@@ -10,8 +8,8 @@ namespace CGEngine
 
 namespace CGEngine::OpenGL
 {
-	void CreateContext(const std::shared_ptr<Window>& window);
+	void CreateContext(const Window& window);
 	void QueryDeviceProperties(DeviceProperties& properties);
 
-	void SwapBuffers(const std::shared_ptr<Window>& window);
+	void SwapBuffers(const Window& window);
 }
