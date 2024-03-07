@@ -53,7 +53,7 @@ namespace CGEngine::IO
 
 				for (size_t i = 0; i < accessor.count; ++i)
 				{
-					const auto  data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
+					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
 					vertices.insert(vertices.end(), data, data + accessor.type);
 				}
 			}
@@ -62,9 +62,16 @@ namespace CGEngine::IO
 			{
 				if (attribute.second != 0 && attribute.second != 2)
 				{
-					const auto& accessor = model.accessors[attribute.second];
+					const auto& accessor   = model.accessors[attribute.second];
 					const auto& bufferView = model.bufferViews[accessor.bufferView];
-					const auto& buffer = model.buffers[bufferView.buffer];
+					const auto& buffer	   = model.buffers[bufferView.buffer];
+					const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
+
+					for (size_t i = 0; i < accessor.count; ++i)
+					{
+						const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
+						vertices.insert(vertices.end(), data, data + accessor.type);
+					}
 				}
 			}
 
