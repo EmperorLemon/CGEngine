@@ -46,6 +46,8 @@ namespace CGEngine
 
 		if (!meshes.empty())
 		{
+			meshes.at(0).layout.add(0, 3, DataType::FLOAT).end();// .add(1, 3, DataType::FLOAT).end();
+
 			const size_t vBufferSize = sizeof(float) * meshes.at(0).vertices.size();
 			const size_t iBufferSize = sizeof(uint16_t) * meshes.at(0).indices.size();
 			const size_t bufferSize = vBufferSize + iBufferSize;

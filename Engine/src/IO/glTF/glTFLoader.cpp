@@ -8,6 +8,7 @@
 #include <tiny_gltf.h>
 
 #include <stack>
+#include <algorithm>
 
 #include "Core/Logger.hpp"
 
@@ -33,29 +34,41 @@ namespace CGEngine::IO
 	{
 		for (const auto& primitive : gltfMesh.primitives)
 		{
-			const auto& indexAccessor = model.accessors[primitive.indices];
-			const auto& indexView     = model.bufferViews[indexAccessor.bufferView];
-			const auto& indexBuffer   = model.buffers[indexView.buffer];
-			const auto  indexData     = reinterpret_cast<const uint16_t*>(indexBuffer.data.data() + indexView.byteOffset + indexAccessor.byteOffset);
+			{
+				const auto& accessor   = model.accessors[primitive.indices];
+				const auto& bufferView = model.bufferViews[accessor.bufferView];
+				const auto& buffer	   = model.buffers[bufferView.buffer];
+				const auto  indexData  = reinterpret_cast<const uint16_t*>(buffer.data.data() + bufferView.byteOffset + accessor.byteOffset);
 
-			mesh.indices.insert(mesh.indices.end(), indexData, indexData + indexAccessor.count);
+				mesh.indices.insert(mesh.indices.end(), indexData, indexData + accessor.count);
+			}
 
 			std::vector<float> vertices;
 
-			for (const auto& attribute : primitive.attributes)
 			{
-				const auto& accessor = model.accessors[attribute.second];
+				const auto& accessor   = model.accessors[primitive.attributes.at("POSITION")];
 				const auto& bufferView = model.bufferViews[accessor.bufferView];
-				const auto& buffer = model.buffers[bufferView.buffer];
-				const auto  vertexData = reinterpret_cast<const float*>(buffer.data.data() + bufferView.byteOffset + accessor.byteOffset);
-
-				const auto attributeOffset = bufferView.byteOffset + accessor.byteOffset;
+				const auto& buffer     = model.buffers[bufferView.buffer];
+				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
 
 				for (size_t i = 0; i < accessor.count; ++i)
 				{
-					
+					const auto  data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
+					vertices.insert(vertices.end(), data, data + accessor.type);
 				}
 			}
+
+			for (const auto& attribute : primitive.attributes)
+			{
+				if (attribute.second != 0 && attribute.second != 2)
+				{
+					const auto& accessor = model.accessors[attribute.second];
+					const auto& bufferView = model.bufferViews[accessor.bufferView];
+					const auto& buffer = model.buffers[bufferView.buffer];
+				}
+			}
+
+			std::swap(mesh.vertices, vertices);
 		}
 	}
 
