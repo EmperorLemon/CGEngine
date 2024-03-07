@@ -11,10 +11,10 @@
 
 namespace CGEngine::IO
 {
-	void LoadModelFile(const std::string_view filepath, const ModelFileType type, Object::Mesh& mesh)
+	void LoadModelFile(const std::string_view filepath, const ModelFileType type, std::vector<Object::Mesh>& meshes)
 	{
 		if (type == ModelFileType::glTF)
-			LoadglTFModel(filepath, mesh);
+			LoadglTFModel(filepath, meshes);
 	}
 
 	void ReadFile(const std::string_view filepath, std::vector<std::byte>& data)

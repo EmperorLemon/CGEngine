@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <vector>
 
 namespace CGEngine::Object
 {
@@ -9,5 +10,5 @@ namespace CGEngine::Object
 
 namespace CGEngine::IO
 {
-	bool LoadglTFModel(std::string_view filepath, Object::Mesh& mesh);
+	bool LoadglTFModel(std::string_view filepath, std::vector<Object::Mesh>& meshes);
 }

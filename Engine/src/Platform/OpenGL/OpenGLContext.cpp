@@ -1,6 +1,7 @@
 #include "OpenGLContext.h"
 
 #include "Core/Window.h"
+#include "Core/Logger.hpp"
 #include "Renderer/Context.h"
 
 #include <stdexcept>

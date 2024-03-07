@@ -2,11 +2,15 @@
 
 #include <vector>
 
+#include "Renderer/Vertex.h"
+
 namespace CGEngine::Object
 {
+
 	struct Mesh
 	{
-		std::vector<float>    vertices;
+		VertexLayout layout;
+		std::vector<float> vertices;
 		std::vector<uint16_t> indices;
 	};
 }

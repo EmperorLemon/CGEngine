@@ -2,6 +2,8 @@
 
 #include <glad/glad.h>
 
+#include "Renderer/Vertex.h"
+
 #include "Core/Logger.hpp"
 
 namespace CGEngine::OpenGL
@@ -45,18 +47,13 @@ namespace CGEngine::OpenGL
 		glNamedBufferSubData(p_id, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);
 	}
 
-	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const VertexLayout& layout) : VertexArray(vertexBuffer)
+	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const CGEngine::VertexLayout& layout) : VertexArray(vertexBuffer)
 	{
 		glCreateVertexArrays(1, &p_id);
 
 		const std::vector<VertexAttribute>& attributes = layout.GetAttributes();
 
-		int32_t stride = 0;
-
-		for (const auto& attribute : attributes)
-			stride += attribute.stride;
-
-		glVertexArrayVertexBuffer(p_id, 0, bufferID, static_cast<GLintptr>(vertexBuffer.offset), stride);
+		glVertexArrayVertexBuffer(p_id, 0, bufferID, static_cast<GLintptr>(vertexBuffer.offset), layout.GetStride());
 		glVertexArrayElementBuffer(p_id, bufferID);
 
 		for (const auto& attribute : attributes)

@@ -1,18 +1,20 @@
 #include "Renderer.h"
+
+#include "Core/Logger.hpp"
+
 #include "Context.h"
-
-#include "Platform/OpenGL/OpenGL.h"
-
 #include "Camera.h"
-#include "RenderAPI.h"
-#include "Shader.h"
+
+#include "Component/Mesh.h"
+#include "IO/FileSystem.h"
 
 #include "Math/Math.h"
 #include "Math/Transform.h"
+#include "Math/Vector3.h"
 
-#include "Component/Mesh.h"
-
-#include "IO/FileSystem.h"
+#include "Platform/OpenGL/OpenGLAPI.h"
+#include "Platform/OpenGL/OpenGLBuffer.h"
+#include "Platform/OpenGL/OpenGLShader.h"
 
 namespace CGEngine
 {
@@ -37,27 +39,26 @@ namespace CGEngine
 
 	void SetupRenderScene()
 	{
-		VertexLayout layout;
+		std::vector<Object::Mesh> meshes;
+		LoadModelFile("Assets/Models/cube.gltf", IO::ModelFileType::glTF, meshes);
+
+		CG_TRACE("Vertices size: {0}", meshes.at(0).vertices.size());
+
+		if (!meshes.empty())
 		{
-			layout.add(0, 3, DataType::FLOAT, 0, 3 * sizeof(float))
-				  .end();
+			const size_t vBufferSize = sizeof(float) * meshes.at(0).vertices.size();
+			const size_t iBufferSize = sizeof(uint16_t) * meshes.at(0).indices.size();
+			const size_t bufferSize = vBufferSize + iBufferSize;
+
+			const BufferInfo vBufferInfo = { vBufferSize, meshes.at(0).vertices.size(), 0 };
+			const BufferInfo iBufferInfo = { iBufferSize, meshes.at(0).indices.size(), vBufferInfo.size };
+
+			vertex_buffer = std::make_shared<OpenGL::GLBuffer>(bufferSize, nullptr);
+			vertex_buffer->SetSubData(vBufferInfo.offset, vBufferInfo.size, meshes.at(0).vertices.data());
+			vertex_buffer->SetSubData(iBufferInfo.offset, iBufferInfo.size, meshes.at(0).indices.data());
+
+			vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer->GetID(), vBufferInfo, &iBufferInfo, meshes.at(0).layout);
 		}
-
-		Object::Mesh mesh = {};
-		LoadModelFile("Assets/Models/cube.gltf", IO::ModelFileType::glTF, mesh);
-
-		const size_t vBufferSize = sizeof(float) * mesh.vertices.size();
-		const size_t iBufferSize = sizeof(uint16_t) * mesh.indices.size();
-		const size_t bufferSize = vBufferSize + iBufferSize;
-
-		const BufferInfo vBufferInfo = { vBufferSize, mesh.vertices.size(), 0 };
-		const BufferInfo iBufferInfo = { iBufferSize, mesh.indices.size(), vBufferInfo.size };
-
-		vertex_buffer = std::make_shared<OpenGL::GLBuffer>(bufferSize, nullptr);
-		vertex_buffer->SetSubData(vBufferInfo.offset, vBufferInfo.size, mesh.vertices.data());
-		vertex_buffer->SetSubData(iBufferInfo.offset, iBufferInfo.size, mesh.indices.data());
-
-		vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer->GetID(), vBufferInfo, &iBufferInfo, layout);
 
 		std::string vert_src, frag_src;
 		IO::ReadFile("Assets/Shaders/unlit.vert", vert_src);
@@ -104,6 +105,7 @@ namespace CGEngine
 
 		shader->Use();
 
+		if (vertex_array != nullptr)
 		{
 			vertex_array->Bind();
 			   m_backend->Draw(vertex_array.get());

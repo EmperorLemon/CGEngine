@@ -2,6 +2,8 @@
 
 #include "./Core/Window.h"
 
+#include <memory>
+
 namespace CGEngine
 {
 	struct Camera;

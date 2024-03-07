@@ -23,7 +23,7 @@ namespace CGEngine::IO
 		OBJ,
 	};
 
-	void LoadModelFile(std::string_view filepath, ModelFileType type, Object::Mesh& mesh);
+	void LoadModelFile(std::string_view filepath, ModelFileType type, std::vector<Object::Mesh>& meshes);
 
 	void ReadFile(std::string_view filepath, std::vector<std::byte>& data);
 	void ReadFile(std::string_view filepath, std::string& data);

@@ -1,81 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <cstdint>
 #include <optional>
 
-#include "Core/Base.h"
-
 namespace CGEngine
 {
-	enum class DataType : uint8_t
-	{
-		VOID,
-		UNSIGNED_BYTE,
-		BYTE,
-		UNSIGNED_SHORT,
-		SHORT,
-		UNSIGNED_INT,
-		INT,
-		FLOAT,
-	};
-
-	struct VertexAttribute
-	{
-		uint32_t index;
-		int32_t  count;
-		DataType type;
-		bool	 normalized;
-		uint32_t offset;
-		int32_t  stride;
-	};
-
-	constexpr int32_t GetAttributeTypeSize(const DataType type)
-	{
-		switch (type)
-		{
-		case DataType::VOID:  return BIT(0);
-		case DataType::UNSIGNED_BYTE:
-		case DataType::BYTE:  return BIT(0);
-		case DataType::UNSIGNED_SHORT:
-		case DataType::SHORT: return BIT(1);
-		case DataType::UNSIGNED_INT:
-		case DataType::INT:
-		case DataType::FLOAT: return BIT(2);
-		}
-
-		return 0;
-	}
-
-	class VertexLayout
-	{
-	public:
-		VertexLayout& add(uint32_t index, int32_t count, DataType type, uint32_t offset, int32_t stride, bool normalized = false)
-		{
-			m_layout.emplace_back(index, count, type, normalized, offset, stride);
-
-			return *this;
-		}
-		VertexLayout& end()
-		{
-			m_offset = 0;
-
-			for (auto& attribute : m_layout)
-			{
-				const int32_t stride = attribute.stride;
-				attribute.offset = m_offset;
-				m_offset += stride;
-			}
-
-			return *this;
-		}
-
-		[[nodiscard]] const std::vector<VertexAttribute>& GetAttributes() const { return m_layout; }
-	private:
-		uint32_t m_offset = 0;
-		std::vector<VertexAttribute> m_layout;
-	};
-
 	struct BufferInfo
 	{
 		size_t  size   = 0; // byte size of buffer

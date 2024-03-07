@@ -39,13 +39,10 @@ namespace CGEngine::OpenGL
 
 	void OpenGLAPI::Draw(void* array_ptr) const
 	{
-		if (array_ptr != nullptr)
-		{
-			const auto& vertex_array = static_cast<GLVertexArray*>(array_ptr);
+		const auto& vertex_array = static_cast<GLVertexArray*>(array_ptr);
 
-			const auto& indices = vertex_array->GetIndices();
-			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
-		}
+		const auto& indices = vertex_array->GetIndices();
+		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
 	}
 
 	void OpenGLAPI::Enable(uint32_t capability) const

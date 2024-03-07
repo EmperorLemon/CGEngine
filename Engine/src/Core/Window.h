@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Base.h"
+#include <cstdint>
+#include <string_view>
 
 namespace CGEngine
 {

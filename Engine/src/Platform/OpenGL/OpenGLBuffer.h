@@ -2,8 +2,13 @@
 
 #include "Renderer/Buffer.h"
 
+namespace CGEngine
+{
+	class VertexLayout;
+}
 namespace CGEngine::OpenGL
 {
+
 	class GLBuffer final : public Buffer
 	{
 	public:
