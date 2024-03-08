@@ -30,7 +30,7 @@ namespace CGEngine
 		Renderer() = delete;
 		explicit Renderer(const RendererCreateInfo& rendererInfo);
 
-		void PreRender();
+		void PreRender(const Camera& camera);
 		void Render();
 		void PostRender();
 
@@ -39,7 +39,6 @@ namespace CGEngine
 		static GraphicsAPI m_API;
 
 		Window& m_window;
-		std::shared_ptr<Camera> m_camera = nullptr;
 		std::shared_ptr<RenderAPI> m_backend = nullptr;
 	};
 }

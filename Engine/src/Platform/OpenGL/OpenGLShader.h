@@ -31,10 +31,10 @@ namespace CGEngine::OpenGL
 	public:
 		explicit GLShader(ShaderModule modules[], size_t count);
 
-		GLShader(GLShader&&) noexcept = default;
-		GLShader& operator=(GLShader&&) noexcept = default;
-		GLShader(const GLShader&) = delete;
-		GLShader& operator=(const GLShader&) = delete;
+		GLShader(GLShader&&) noexcept = delete;
+		GLShader& operator=(GLShader&&) noexcept = delete;
+		GLShader(const GLShader&) noexcept = delete;
+		GLShader& operator=(const GLShader&) noexcept = delete;
 
 		~GLShader() override;
 

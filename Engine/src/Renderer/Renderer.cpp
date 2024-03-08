@@ -60,24 +60,15 @@ namespace CGEngine
 		shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 	}
 
-	void Renderer::PreRender()
+	void Renderer::PreRender(const Camera& camera)
 	{
 		m_backend->Enable(static_cast<uint32_t>(APICapability::CG_DEPTH_TEST));
 
-		constexpr auto camera_position = Math::Vector3(0.0f, 0.0f, 5.0f);
-		m_camera = std::make_shared<Camera>(camera_position);
-
-		m_camera->fov = GetFieldOfView(65.0f);
-		m_camera->aspect = GetAspectRatio(m_window.width, m_window.height);
-
-		m_camera->projection = Math::Perspective(m_camera->fov, m_camera->aspect, m_camera->near, m_camera->far);
-		m_camera->view = Math::View(m_camera->position, m_camera->direction, m_camera->up);
-
 		shader->Use();
 
-		shader->BindUniform("uProjection", OpenGL::UniformType::MAT4, Math::value_ptr(m_camera->projection));
-		shader->BindUniform("uView", OpenGL::UniformType::MAT4, Math::value_ptr(m_camera->view));
-		shader->BindUniform("uModel", OpenGL::UniformType::MAT4, Math::value_ptr(Math::Mat4(1.0f)));
+		shader->BindUniform("uProjection", OpenGL::UniformType::MAT4, Math::value_ptr(camera.projection));
+		shader->BindUniform("uView",	    OpenGL::UniformType::MAT4, Math::value_ptr(camera.view));
+		shader->BindUniform("uModel",		OpenGL::UniformType::MAT4, Math::value_ptr(Math::Mat4(1.0f)));
 	}
 
 	void Renderer::Render()

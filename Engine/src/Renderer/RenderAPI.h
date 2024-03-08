@@ -41,10 +41,10 @@ namespace CGEngine
 	public:
 		RenderAPI() = default;
 
-		RenderAPI(RenderAPI&&) noexcept = default;
-		RenderAPI& operator=(RenderAPI&&) noexcept = default;
-		RenderAPI(const RenderAPI&) = delete;
-		RenderAPI& operator=(const RenderAPI&) = delete;
+		RenderAPI(RenderAPI&&) noexcept = delete;
+		RenderAPI& operator=(RenderAPI&&) noexcept = delete;
+		RenderAPI(const RenderAPI&) noexcept = delete;
+		RenderAPI& operator=(const RenderAPI&) noexcept = delete;
 
 		virtual ~RenderAPI() = default;
 

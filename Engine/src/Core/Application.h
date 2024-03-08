@@ -3,6 +3,7 @@
 #include "Logger.hpp"
 #include "Window.h"
 
+#include "Scene/SceneManager.h"
 #include "Renderer/Renderer.h"
 
 namespace CGEngine
@@ -36,6 +37,7 @@ namespace CGEngine
 		void Quit();
 	private:
 		Logger m_logger;
+		SceneManager m_sceneManager;
 
 		Window m_window;
 		std::unique_ptr<Renderer> m_renderer = nullptr;

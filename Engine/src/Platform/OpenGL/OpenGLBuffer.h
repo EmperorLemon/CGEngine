@@ -13,10 +13,10 @@ namespace CGEngine::OpenGL
 	public:
 		GLBuffer(size_t size, const void* data);
 
-		GLBuffer(GLBuffer&&) noexcept = default;
+		GLBuffer(GLBuffer&&) noexcept = delete;
 		GLBuffer& operator=(GLBuffer&&) noexcept = delete;
-		GLBuffer(const GLBuffer&) = delete;
-		GLBuffer& operator=(const GLBuffer&) = delete;
+		GLBuffer(const GLBuffer&) noexcept = delete;
+		GLBuffer& operator=(const GLBuffer&) noexcept = delete;
 
 		~GLBuffer() override;
 

@@ -17,10 +17,10 @@ namespace CGEngine
 	public:
 		Buffer() = default;
 
-		Buffer(Buffer&&) noexcept = default;
+		Buffer(Buffer&&) noexcept = delete;
 		Buffer& operator=(Buffer&&) noexcept = delete;
-		Buffer(const Buffer&) = delete;
-		Buffer& operator=(const Buffer&) = delete;
+		Buffer(const Buffer&) noexcept = delete;
+		Buffer& operator=(const Buffer&) noexcept = delete;
 
 		virtual ~Buffer() = default;
 

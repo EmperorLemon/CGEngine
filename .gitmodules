@@ -13,3 +13,6 @@
 [submodule "Engine/ThirdParty/entt"]
 	path = Engine/ThirdParty/entt
 	url = https://github.com/skypjack/entt
+[submodule "Engine/ThirdParty/crossguid"]
+	path = Engine/ThirdParty/crossguid
+	url = https://github.com/graeme-hill/crossguid

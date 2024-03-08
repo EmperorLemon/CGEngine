@@ -9,6 +9,7 @@ set(BUILD_DOC OFF CACHE INTERNAL "" FORCE)
 set(BUILD_SANDBOX OFF CACHE INTERNAL "" FORCE)
 set(SKIP_PERFORMANCE_COMPARISON ON CACHE INTERNAL "" FORCE)
 
+add_subdirectory(crossguid)
 add_subdirectory(entt INTERFACE)
 add_subdirectory(glad)
 add_subdirectory(glfw)
@@ -17,6 +18,7 @@ add_subdirectory(spdlog)
 add_subdirectory(tinygltf)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+    crossguid/include
     entt/src
     glad/include
     glfw/include
