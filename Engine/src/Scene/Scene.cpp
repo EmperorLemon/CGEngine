@@ -11,7 +11,7 @@ namespace CGEngine
 
 	void Scene::SetupCamera()
 	{
-		m_camera.fov = GetFieldOfView(65.0f);
+		m_camera.fov = GetFieldOfView(55.0f);
 
 		m_camera.projection = Math::Perspective(m_camera.fov, m_camera.aspect, m_camera.near, m_camera.far);
 		m_camera.view = Math::View(m_camera.position, m_camera.direction, m_camera.up);
@@ -21,4 +21,10 @@ namespace CGEngine
 	{
 		return m_name;
 	}
+
+	const Camera& Scene::GetMainCamera() const
+	{
+		return m_camera;
+	}
+
 }

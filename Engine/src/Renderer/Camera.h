@@ -7,9 +7,9 @@ namespace CGEngine
 {
 	struct Camera
 	{
-		Math::Vector3  position = Math::Vector3(0.0f, 0.0f,  0.0f);
-		Math::Vector3 direction = Math::Vector3(0.0f, 0.0f, -1.0f);
-		Math::Vector3		 up = Math::Vector3(0.0f, 1.0f,  0.0f);
+		Math::Vector3  position = Math::Vector3(0.0f, 0.0f,  10.0f);
+		Math::Vector3 direction = Math::Vector3(0.0f, 0.0f,  -1.0f);
+		Math::Vector3		 up = Math::Vector3(0.0f, 1.0f,   0.0f);
 
 		float fov	 = 0.0f;
 		float aspect = 1.0f;

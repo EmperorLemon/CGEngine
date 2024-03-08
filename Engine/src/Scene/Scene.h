@@ -18,15 +18,18 @@ namespace CGEngine
 	public:
 		explicit Scene(const SceneCreateInfo& sceneInfo);
 
-		Scene(Scene&&) noexcept = delete;
+		Scene(Scene&&) noexcept = default;
+		Scene(const Scene&) noexcept = default;
 		Scene& operator=(Scene&&) noexcept = delete;
-		Scene(const Scene&) noexcept = delete;
 		Scene& operator=(const Scene&) noexcept = delete;
 
-		[[nodiscard]] const std::string& GetName() const;
+		~Scene() = default;
 
-		void SetupCamera();
+		[[nodiscard]]  const std::string& GetName() const;
+		[[nodiscard]] const Camera& GetMainCamera() const;
 	private:
+		void SetupCamera();
+
 		std::string& m_name;
 
 		Camera m_camera;

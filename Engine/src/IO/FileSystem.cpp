@@ -9,15 +9,38 @@
 
 #include "IO/glTF/glTFLoader.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 namespace CGEngine::IO
 {
+	void LoadImageFile(const std::string_view filepath, int& width, int& height, int& channels, std::vector<unsigned char>& data)
+	{
+		if (!FileExists(filepath))
+			CG_ERROR("File {0} does not exist!", filepath.data());
+
+		const auto pixels = stbi_load(filepath.data(), &width, &height, &channels, STBI_rgb_alpha);
+
+		if (!pixels)
+		{
+			CG_ERROR("Unable to load image!");
+			stbi_image_free(pixels);
+
+			return;
+		}
+
+		data.insert(data.end(), *pixels);
+
+		stbi_image_free(pixels);
+	}
+
 	void LoadModelFile(const std::string_view filepath, const ModelFileType type, std::vector<Object::Mesh>& meshes)
 	{
 		if (type == ModelFileType::glTF)
 			LoadglTFModel(filepath, meshes);
 	}
 
-	void ReadFile(const std::string_view filepath, std::vector<std::byte>& data)
+	void ReadFile(const std::string_view filepath, std::vector<unsigned char>& data)
 	{
 		if (std::ifstream file(filepath.data(), std::ios::binary | std::ios::ate); file)
 		{

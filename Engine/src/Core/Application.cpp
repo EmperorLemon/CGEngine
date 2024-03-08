@@ -13,7 +13,7 @@ namespace CGEngine
 
 	void Application::Run()
 	{
-		m_renderer->PreRender(m_sceneManager.DefaultScene().GetCamera());
+		m_renderer->PreRender(m_sceneManager.DefaultScene().GetMainCamera());
 
 		while (PollEvents(m_window))
 		{

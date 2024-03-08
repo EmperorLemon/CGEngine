@@ -16,6 +16,8 @@
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/OpenGL/OpenGLDrawObject.h"
 
+#include "Texture.h"
+
 namespace CGEngine
 {
 	void SetupRenderScene();
@@ -49,8 +51,8 @@ namespace CGEngine
 			}
 		}
 
-		objects.at(0)->position = Math::Vector3(-1.5f, 0.0f, 0.0f);
-		objects.at(1)->position = Math::Vector3(1.5f, 0.0f, 0.0f);
+		objects.at(0)->position = Math::Vector3(-2.0f, 0.0f, 0.0f);
+		objects.at(1)->position = Math::Vector3(2.0f, 0.0f, 0.0f);
 
 		std::string vert_src, frag_src;
 		IO::ReadFile("Assets/Shaders/unlit.vert", vert_src);
@@ -69,11 +71,13 @@ namespace CGEngine
 		shader->BindUniform("uProjection", OpenGL::UniformType::MAT4, Math::value_ptr(camera.projection));
 		shader->BindUniform("uView",	    OpenGL::UniformType::MAT4, Math::value_ptr(camera.view));
 		shader->BindUniform("uModel",		OpenGL::UniformType::MAT4, Math::value_ptr(Math::Mat4(1.0f)));
+
+		shader->Disable();
 	}
 
 	void Renderer::Render()
 	{
-		float RGBA[4] = { 0.2f, 0.45f, 0.6f, 1.0f };
+		float RGBA[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
 
 		m_backend->Clear(static_cast<uint32_t>(ClearMask::CG_COLOR_DEPTH_BUFFER_BIT));
 		m_backend->ClearColor(RGBA);

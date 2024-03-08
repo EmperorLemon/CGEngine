@@ -10,12 +10,6 @@ namespace CGEngine::Object
 
 namespace CGEngine::IO
 {
-	enum class FileType : uint8_t
-	{
-		TEXT_FILE,
-		BINARY_FILE
-	};
-
 	enum class ModelFileType : uint8_t
 	{
 		glTF,
@@ -23,9 +17,10 @@ namespace CGEngine::IO
 		OBJ,
 	};
 
+	void LoadImageFile(std::string_view filepath, int& width, int& height, int& channels, std::vector<unsigned char>& data);
 	void LoadModelFile(std::string_view filepath, ModelFileType type, std::vector<Object::Mesh>& meshes);
 
-	void ReadFile(std::string_view filepath, std::vector<std::byte>& data);
+	void ReadFile(std::string_view filepath, std::vector<unsigned char>& data);
 	void ReadFile(std::string_view filepath, std::string& data);
 
 	bool FileExists(std::string_view filepath);
