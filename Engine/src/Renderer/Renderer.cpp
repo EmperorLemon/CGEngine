@@ -13,7 +13,6 @@
 #include "Math/Vector3.h"
 
 #include "Platform/OpenGL/OpenGLAPI.h"
-#include "Platform/OpenGL/OpenGLBuffer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/OpenGL/OpenGLDrawObject.h"
 
@@ -22,7 +21,6 @@ namespace CGEngine
 	void SetupRenderScene();
 
 	std::vector<std::shared_ptr<OpenGL::GLDrawObject>> objects;
-
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;

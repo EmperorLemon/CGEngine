@@ -47,7 +47,7 @@ namespace CGEngine::OpenGL
 		glNamedBufferSubData(p_id, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);
 	}
 
-	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const CGEngine::VertexLayout& layout) : VertexArray(vertexBuffer)
+	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const VertexLayout& layout) : VertexArray(vertexBuffer)
 	{
 		glCreateVertexArrays(1, &p_id);
 

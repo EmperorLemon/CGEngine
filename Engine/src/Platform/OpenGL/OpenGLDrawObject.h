@@ -16,8 +16,9 @@ namespace CGEngine::OpenGL
 	class GLDrawObject
 	{
 	public:
-		GLDrawObject() = default;
 		GLDrawObject(std::vector<float>&& vertices, std::vector<uint16_t>&& indices, VertexLayout&& layout);
+
+		[[nodiscard]] const GLVertexArray& GetVertexArray() const;
 	private:
 		std::shared_ptr<GLBuffer>	   m_vertexBuffer = nullptr;
 		std::shared_ptr<GLVertexArray> m_vertexArray  = nullptr;

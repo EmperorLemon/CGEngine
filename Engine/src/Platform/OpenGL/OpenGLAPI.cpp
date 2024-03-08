@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 
+#include "OpenGLBuffer.h"
 #include "OpenGLDrawObject.h"
 
 namespace CGEngine::OpenGL
@@ -39,20 +40,28 @@ namespace CGEngine::OpenGL
 
 	void OpenGLAPI::Draw(void* ptr) const
 	{
-		const auto& drawable_object = static_cast<GLDrawObject*>(ptr);
+		if (ptr != nullptr)
+		{
+			const auto& drawable_object = static_cast<GLDrawObject*>(ptr);
 
-		//const auto& indices = vertex_array->GetIndices();
-		//glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
+			const auto& vertexArray = drawable_object->GetVertexArray();
+			const auto& indices = vertexArray.GetIndices();
+
+			vertexArray.Bind();
+			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
+			vertexArray.Unbind();
+		}
+
 	}
 
 	void OpenGLAPI::Enable(uint32_t capability) const
 	{
-		
+
 	}
 
 	void OpenGLAPI::Disable(uint32_t capability) const
 	{
-		
+
 	}
 
 	void OpenGLAPI::Clear(const uint32_t mask)

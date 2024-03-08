@@ -6,8 +6,8 @@ namespace CGEngine::OpenGL
 {
 	GLDrawObject::GLDrawObject(std::vector<float>&& vertices, std::vector<uint16_t>&& indices, VertexLayout&& layout)
 	{
-		const auto vBufferSize = sizeof(float) * vertices.size();
-		const auto iBufferSize = sizeof(uint16_t) * indices.size();
+		const auto  vBufferSize = sizeof(float) * vertices.size();
+		const auto  iBufferSize = sizeof(uint16_t) * indices.size();
 		const size_t bufferSize = vBufferSize + iBufferSize;
 
 		const BufferInfo vBufferInfo = { vBufferSize, vertices.size(), 0 };
@@ -18,5 +18,10 @@ namespace CGEngine::OpenGL
 		m_vertexBuffer->SetSubData(iBufferInfo.offset, iBufferInfo.size, indices.data());
 
 		m_vertexArray = std::make_shared<GLVertexArray>(m_vertexBuffer->GetID(), vBufferInfo, &iBufferInfo, layout);
+	}
+
+	const GLVertexArray& GLDrawObject::GetVertexArray() const
+	{
+		return *m_vertexArray;
 	}
 }
