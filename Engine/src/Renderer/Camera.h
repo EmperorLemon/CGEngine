@@ -19,4 +19,7 @@ namespace CGEngine
 		Math::Mat4 projection = Math::Mat4(1.0f);
 		Math::Mat4		 view = Math::Mat4(1.0f);
 	};
+
+	float GetFieldOfView(float degrees);
+	float GetAspectRatio(int32_t width, int32_t height);
 }

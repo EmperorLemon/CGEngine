@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 
+#include "Math/Vector3.h"
+
 namespace CGEngine
 {
 	class VertexLayout;
@@ -17,6 +19,8 @@ namespace CGEngine::OpenGL
 	{
 	public:
 		GLDrawObject(std::vector<float>&& vertices, std::vector<uint16_t>&& indices, VertexLayout&& layout);
+
+		Math::Vector3 position = Math::Vector3(0.0f);
 
 		[[nodiscard]] const GLVertexArray& GetVertexArray() const;
 	private:

@@ -7,7 +7,9 @@ in VS_OUT {
     vec2 TexCoords;
 } fs_in;
 
+uniform vec3 uMeshColor = vec3(1.0);
+
 void main()
 {
-	FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+	FragColor = vec4(uMeshColor, 1.0);
 }
