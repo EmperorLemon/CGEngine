@@ -5,7 +5,7 @@
 #include <filesystem>
 
 #include "Core/Logger.hpp"
-#include "Component/Mesh.h"
+#include "Renderer/Assets/Mesh.h"
 
 #include "IO/glTF/glTFLoader.h"
 

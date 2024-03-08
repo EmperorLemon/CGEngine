@@ -5,7 +5,7 @@
 #include "Context.h"
 #include "Camera.h"
 
-#include "Component/Mesh.h"
+#include "Renderer/Assets/Mesh.h"
 #include "IO/FileSystem.h"
 
 #include "Math/Math.h"

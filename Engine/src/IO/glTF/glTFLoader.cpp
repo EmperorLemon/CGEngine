@@ -1,6 +1,6 @@
 #include "glTFLoader.h"
 
-#include "Component/Mesh.h"
+#include "Renderer/Assets/Mesh.h"
 
 #define TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_NO_STB_IMAGE

@@ -1,5 +1,7 @@
 #include "Core/Application.h"
 
+#include "ECS/Entity/Entity.hpp"
+
 namespace CGEngine
 {
 	Application::Application(const ApplicationCreateInfo& appInfo [[maybe_unused]] ) : m_logger(Logger("APP"))
