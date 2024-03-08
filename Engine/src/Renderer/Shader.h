@@ -29,8 +29,8 @@ namespace CGEngine
 		explicit Shader(const uint32_t id) : p_id(id) {}
 
 		Shader(Shader&&) noexcept = default;
-		Shader& operator=(Shader&&) noexcept = default;
 		Shader(const Shader&) = delete;
+		Shader& operator=(Shader&&) noexcept = default;
 		Shader& operator=(const Shader&) = delete;
 
 		virtual ~Shader() = default;

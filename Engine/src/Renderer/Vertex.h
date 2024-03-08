@@ -1,7 +1,8 @@
 #pragma once
 
+#include "Types.h"
+
 #include <vector>
-#include <array>
 
 #include "Math/Vector2.h"
 #include "Math/Vector3.h"
@@ -9,18 +10,6 @@
 namespace CGEngine
 {
 #define BIT(x) (1 << (x))
-
-	enum class DataType : uint8_t
-	{
-		VOID,
-		UNSIGNED_BYTE,
-		BYTE,
-		UNSIGNED_SHORT,
-		SHORT,
-		UNSIGNED_INT,
-		INT,
-		FLOAT,
-	};
 
 	struct VertexAttribute
 	{

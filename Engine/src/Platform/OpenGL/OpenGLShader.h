@@ -32,8 +32,8 @@ namespace CGEngine::OpenGL
 		explicit GLShader(ShaderModule modules[], size_t count);
 
 		GLShader(GLShader&&) noexcept = delete;
-		GLShader& operator=(GLShader&&) noexcept = delete;
 		GLShader(const GLShader&) noexcept = delete;
+		GLShader& operator=(GLShader&&) noexcept = delete;
 		GLShader& operator=(const GLShader&) noexcept = delete;
 
 		~GLShader() override;
