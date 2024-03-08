@@ -5,6 +5,7 @@
 #define TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_NO_STB_IMAGE
 #define TINYGLTF_NO_STB_IMAGE_WRITE
+#define TINYGLTF_NO_EXTERNAL_IMAGE
 #include <tiny_gltf.h>
 
 #include <stack>
@@ -30,6 +31,8 @@ namespace CGEngine::IO
 		}
 	}
 
+	//static void ProcessBuffer()
+
 	static void ProcessMesh(const tinygltf::Model& model, const tinygltf::Mesh& gltfMesh, Object::Mesh& mesh)
 	{
 		for (const auto& primitive : gltfMesh.primitives)
@@ -43,39 +46,55 @@ namespace CGEngine::IO
 				mesh.indices.insert(mesh.indices.end(), indexData, indexData + accessor.count);
 			}
 
-			std::vector<float> vertices;
-
+			if (primitive.attributes.contains("POSITION"))
 			{
 				const auto& accessor   = model.accessors[primitive.attributes.at("POSITION")];
 				const auto& bufferView = model.bufferViews[accessor.bufferView];
 				const auto& buffer     = model.buffers[bufferView.buffer];
 				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
 
+				mesh.layout.add(0, accessor.type, DataType::FLOAT, byteOffset, accessor.normalized);
+
 				for (size_t i = 0; i < accessor.count; ++i)
 				{
 					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
-					vertices.insert(vertices.end(), data, data + accessor.type);
+					mesh.vertices.insert(mesh.vertices.end(), data, data + accessor.type);
 				}
 			}
 
-			for (const auto& attribute : primitive.attributes)
+			if (primitive.attributes.contains("NORMAL"))
 			{
-				if (attribute.second != 0 && attribute.second != 2)
-				{
-					const auto& accessor   = model.accessors[attribute.second];
-					const auto& bufferView = model.bufferViews[accessor.bufferView];
-					const auto& buffer	   = model.buffers[bufferView.buffer];
-					const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
+				const auto& accessor = model.accessors[primitive.attributes.at("NORMAL")];
+				const auto& bufferView = model.bufferViews[accessor.bufferView];
+				const auto& buffer = model.buffers[bufferView.buffer];
+				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
 
-					for (size_t i = 0; i < accessor.count; ++i)
-					{
-						const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
-						vertices.insert(vertices.end(), data, data + accessor.type);
-					}
+				mesh.layout.add(1, accessor.type, DataType::FLOAT, byteOffset, accessor.normalized);
+
+				for (size_t i = 0; i < accessor.count; ++i)
+				{
+					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
+					mesh.vertices.insert(mesh.vertices.end(), data, data + accessor.type);
 				}
 			}
 
-			std::swap(mesh.vertices, vertices);
+			if (primitive.attributes.contains("TEXCOORD_0"))
+			{
+				const auto& accessor = model.accessors[primitive.attributes.at("TEXCOORD_0")];
+				const auto& bufferView = model.bufferViews[accessor.bufferView];
+				const auto& buffer = model.buffers[bufferView.buffer];
+				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
+
+				mesh.layout.add(2, accessor.type, DataType::FLOAT, byteOffset, accessor.normalized);
+
+				for (size_t i = 0; i < accessor.count; ++i)
+				{
+					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
+					mesh.vertices.insert(mesh.vertices.end(), data, data + 2);
+				}
+			}
+
+			mesh.layout.SetStride(3 * sizeof(float));
 		}
 	}
 
@@ -112,36 +131,6 @@ namespace CGEngine::IO
 		}
 	}
 
-	//static void CheckModel(const tinygltf::Model& model, Object::Mesh& mesh)
-	//{
-	//	const auto& gltfMesh = model.meshes[0];
-	//	const auto& primitive = gltfMesh.primitives[0];
-
-	//	const auto& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
-	//	const auto& posView = model.bufferViews[posAccessor.bufferView];
-	//	const auto& posBuffer = model.buffers[posView.buffer];
-	//	const auto  posData = reinterpret_cast<const float*>(posBuffer.data.data() + posView.byteOffset + posAccessor.byteOffset);
-
-	//	const auto& indexAccessor = model.accessors[primitive.indices];
-	//	const auto& indexView     = model.bufferViews[indexAccessor.bufferView];
-	//	const auto& indexBuffer   = model.buffers[indexView.buffer];
-	//	const auto  indexData = reinterpret_cast<const uint16_t*>(indexBuffer.data.data() + indexView.byteOffset + indexAccessor.byteOffset);
-
-	//	const int32_t nComponents = posAccessor.componentType == TINYGLTF_TYPE_SCALAR ? 1 : posAccessor.componentType == TINYGLTF_TYPE_VEC2 ? 2 : 3;
-
-	//	mesh.vertices.reserve(posAccessor.count * nComponents);
-	//	mesh.indices.reserve(indexAccessor.count);
-
-	//	const size_t v_size = posAccessor.count * nComponents;
-	//	const size_t i_size = indexAccessor.count;
-
-	//	for (size_t i = 0; i < v_size; ++i)
-	//		mesh.vertices.push_back(posData[i]);
-
-	//	for (size_t i = 0; i < i_size; ++i)
-	//		mesh.indices.push_back(indexData[i]);
-	//}
-
 	bool LoadglTFModel(const std::string_view filepath, std::vector<Object::Mesh>& meshes)
 	{
 		tinygltf::TinyGLTF loader;
@@ -155,7 +144,7 @@ namespace CGEngine::IO
 			CG_ERROR("glTF Error: {0}", error.c_str());
 
 		if (!warn.empty())
-			CG_ERROR("glTF Warning: {0}", warn.c_str());
+			CG_WARN("glTF Warning: {0}", warn.c_str());
 
 		if (!success)
 			CG_ERROR("Failed to load glTF: {0}", filepath.data());
@@ -163,7 +152,6 @@ namespace CGEngine::IO
 			CG_INFO("Loaded glTF: {0}", filepath.data());
 
 		SubmitModel(model, meshes);
-		//CheckModel(model, meshes);
 
 		return success;
 	}

@@ -3,7 +3,7 @@
 
 #include <glad/glad.h>
 
-#include "OpenGLBuffer.h"
+#include "OpenGLDrawObject.h"
 
 namespace CGEngine::OpenGL
 {
@@ -37,12 +37,12 @@ namespace CGEngine::OpenGL
 		return 0;
 	}
 
-	void OpenGLAPI::Draw(void* array_ptr) const
+	void OpenGLAPI::Draw(void* ptr) const
 	{
-		const auto& vertex_array = static_cast<GLVertexArray*>(array_ptr);
+		const auto& drawable_object = static_cast<GLDrawObject*>(ptr);
 
-		const auto& indices = vertex_array->GetIndices();
-		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
+		//const auto& indices = vertex_array->GetIndices();
+		//glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
 	}
 
 	void OpenGLAPI::Enable(uint32_t capability) const

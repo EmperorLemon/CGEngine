@@ -48,7 +48,7 @@ namespace CGEngine
 
 		virtual ~RenderAPI() = default;
 
-		virtual void Draw(void* array_ptr) const = 0;
+		virtual void Draw(void* ptr) const = 0;
 
 		virtual void Enable(uint32_t capability)  const = 0;
 		virtual void Disable(uint32_t capability) const = 0;

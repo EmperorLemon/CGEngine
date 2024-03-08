@@ -15,13 +15,14 @@
 #include "Platform/OpenGL/OpenGLAPI.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Platform/OpenGL/OpenGLDrawObject.h"
 
 namespace CGEngine
 {
 	void SetupRenderScene();
 
-	std::shared_ptr<OpenGL::GLBuffer> vertex_buffer = nullptr;
-	std::shared_ptr<OpenGL::GLVertexArray> vertex_array = nullptr;
+	std::vector<std::shared_ptr<OpenGL::GLDrawObject>> objects;
+
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
@@ -40,26 +41,14 @@ namespace CGEngine
 	void SetupRenderScene()
 	{
 		std::vector<Object::Mesh> meshes;
-		LoadModelFile("Assets/Models/cube.gltf", IO::ModelFileType::glTF, meshes);
-
-		CG_TRACE("Vertices size: {0}", meshes.at(0).vertices.size());
+		LoadModelFile("Assets/Models/Test/test.gltf", IO::ModelFileType::glTF, meshes);
 
 		if (!meshes.empty())
 		{
-			meshes.at(0).layout.add(0, 3, DataType::FLOAT).add(1, 3, DataType::FLOAT).end();// .add(1, 3, DataType::FLOAT).end();
-
-			const size_t vBufferSize = sizeof(float) * meshes.at(0).vertices.size();
-			const size_t iBufferSize = sizeof(uint16_t) * meshes.at(0).indices.size();
-			const size_t bufferSize = vBufferSize + iBufferSize;
-
-			const BufferInfo vBufferInfo = { vBufferSize, meshes.at(0).vertices.size(), 0 };
-			const BufferInfo iBufferInfo = { iBufferSize, meshes.at(0).indices.size(), vBufferInfo.size };
-
-			vertex_buffer = std::make_shared<OpenGL::GLBuffer>(bufferSize, nullptr);
-			vertex_buffer->SetSubData(vBufferInfo.offset, vBufferInfo.size, meshes.at(0).vertices.data());
-			vertex_buffer->SetSubData(iBufferInfo.offset, iBufferInfo.size, meshes.at(0).indices.data());
-
-			vertex_array = std::make_shared<OpenGL::GLVertexArray>(vertex_buffer->GetID(), vBufferInfo, &iBufferInfo, meshes.at(0).layout);
+			for (auto& mesh : meshes)
+			{
+				objects.emplace_back(std::make_shared<OpenGL::GLDrawObject>(std::move(mesh.vertices), std::move(mesh.indices), std::move(mesh.layout)));
+			}
 		}
 
 		std::string vert_src, frag_src;
@@ -107,11 +96,9 @@ namespace CGEngine
 
 		shader->Use();
 
-		if (vertex_array != nullptr)
+		for (const auto& object : objects)
 		{
-			vertex_array->Bind();
-			   m_backend->Draw(vertex_array.get());
-			vertex_array->Unbind();
+			m_backend->Draw(object.get());
 		}
 
 		SwapBuffers(m_window);

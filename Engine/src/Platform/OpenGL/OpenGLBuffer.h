@@ -8,7 +8,6 @@ namespace CGEngine
 }
 namespace CGEngine::OpenGL
 {
-
 	class GLBuffer final : public Buffer
 	{
 	public:

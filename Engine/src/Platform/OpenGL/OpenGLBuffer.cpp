@@ -54,7 +54,7 @@ namespace CGEngine::OpenGL
 		const std::vector<VertexAttribute>& attributes = layout.GetAttributes();
 
 		glVertexArrayVertexBuffer(p_id, 0, bufferID, static_cast<GLintptr>(vertexBuffer.offset), layout.GetStride());
-		glVertexArrayElementBuffer(p_id, bufferID);
+		if (indexBuffer != nullptr) glVertexArrayElementBuffer(p_id, bufferID);
 
 		for (const auto& attribute : attributes)
 			glEnableVertexArrayAttrib(p_id, attribute.index);

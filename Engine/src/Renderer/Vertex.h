@@ -3,6 +3,9 @@
 #include <vector>
 #include <array>
 
+#include "Math/Vector2.h"
+#include "Math/Vector3.h"
+
 namespace CGEngine
 {
 #define BIT(x) (1 << (x))
@@ -47,17 +50,17 @@ namespace CGEngine
 
 	struct Vertex
 	{
-		std::array<float, 3> position;
-		std::array<float, 3> normal;
-		std::array<float, 2> uv;
+		Math::Vector3 position;
+		Math::Vector3 normal;
+		Math::Vector2 uv;
 	};
 
 	class VertexLayout
 	{
 	public:
-		VertexLayout& add(const uint32_t index, const int32_t count, const DataType type, const uint32_t offset, const bool normalized = false)
+		VertexLayout& add(const uint32_t index, const int32_t count, const DataType type, const size_t offset, const bool normalized = false)
 		{
-			m_layout.emplace_back(index, count, type, normalized, offset);
+			m_layout.emplace_back(index, count, type, normalized, static_cast<uint32_t>(offset));
 
 			return *this;
 		}
@@ -69,24 +72,8 @@ namespace CGEngine
 			return *this;
 		}
 
-		VertexLayout& end()
-		{
-			int32_t offset = 0;
-			m_stride = 0;
-
-			for (auto& attribute : m_layout)
-			{
-				const int32_t size = attribute.count * GetAttributeTypeSize(attribute.type);
-				attribute.offset = offset;
-				offset += size;
-			}
-
-			m_stride = offset;
-
-			return *this;
-		}
-
 		[[nodiscard]] int32_t GetStride() const { return m_stride; }
+		void SetStride(const int32_t stride) { m_stride = stride; }
 		[[nodiscard]] const std::vector<VertexAttribute>& GetAttributes() const { return m_layout; }
 	private:
 		int32_t m_stride = 0;
