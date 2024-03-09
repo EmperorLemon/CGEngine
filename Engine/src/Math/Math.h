@@ -27,4 +27,10 @@ namespace CGEngine::Math
 	const void* value_ptr(const Vector4& vector);
 	const void* value_ptr(const Mat3& matrix);
 	const void* value_ptr(const Mat4& matrix);
+
+	Vector2 make_vec2(const float* data);
+	Vector3 make_vec3(const float* data);
+	Vector4 make_vec4(const float* data);
+	Mat3	make_mat3(const float* data);
+	Mat4	make_mat4(const float* data);
 }

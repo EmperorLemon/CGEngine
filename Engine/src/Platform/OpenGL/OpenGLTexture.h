@@ -7,6 +7,7 @@ namespace CGEngine::OpenGL
 	class GLTexture final : public Texture
 	{
 	public:
+		GLTexture(TextureTarget target, PixelFormat format, int32_t width, int32_t height, const void* pixels);
 		GLTexture(TextureTarget target, PixelFormat format, int32_t width, int32_t height);
 
 		GLTexture(GLTexture&&) noexcept = delete;

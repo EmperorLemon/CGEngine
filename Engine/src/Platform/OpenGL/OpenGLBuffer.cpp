@@ -20,6 +20,7 @@ namespace CGEngine::OpenGL
 		case DataType::UNSIGNED_INT:   return GL_UNSIGNED_INT;
 		case DataType::INT:            return GL_INT;
 		case DataType::FLOAT:	       return GL_FLOAT;
+		case DataType::DOUBLE:		   return GL_DOUBLE;
 		}
 
 		return GL_FLOAT;

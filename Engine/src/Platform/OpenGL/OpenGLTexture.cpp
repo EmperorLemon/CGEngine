@@ -2,6 +2,8 @@
 
 #include <glad/glad.h>
 
+#include "Core/Logger.hpp"
+
 namespace CGEngine::OpenGL
 {
 	constexpr GLenum Convert(const TextureTarget target)
@@ -50,9 +52,23 @@ namespace CGEngine::OpenGL
 		case DataType::UNSIGNED_INT:   return GL_UNSIGNED_INT;
 		case DataType::INT:            return GL_INT;
 		case DataType::FLOAT:	       return GL_FLOAT;
+		case DataType::DOUBLE:		   return GL_DOUBLE;
 		}
 
 		return GL_UNSIGNED_BYTE;
+	}
+
+	GLTexture::GLTexture(const TextureTarget target, const PixelFormat format, const int32_t width, const int32_t height, const void* pixels) : Texture(width, height)
+	{
+		glCreateTextures(Convert(target), 1, &p_id);
+
+		glTextureParameteri(p_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(p_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(p_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTextureParameteri(p_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glTextureStorage2D(p_id, 1, Convert(format), width, height);
+		glTextureSubImage2D(p_id, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	}
 
 	GLTexture::GLTexture(const TextureTarget target, const PixelFormat format, const int32_t width, const int32_t height) : Texture(width, height)
@@ -69,6 +85,7 @@ namespace CGEngine::OpenGL
 
 	GLTexture::~GLTexture()
 	{
+		CG_TRACE("Deleted GLTexture {0}", p_id);
 		glDeleteTextures(1, &p_id);
 	}
 

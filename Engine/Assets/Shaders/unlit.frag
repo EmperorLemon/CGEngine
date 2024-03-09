@@ -7,9 +7,15 @@ in VS_OUT {
     vec2 TexCoords;
 } fs_in;
 
-uniform vec3 uMeshColor = vec3(1.0);
+struct Material
+{
+    vec4 baseColor;
+    sampler2D baseTexture;
+};
+
+uniform Material uMaterial;
 
 void main()
 {
-	FragColor = vec4(uMeshColor, 1.0);
+	FragColor =  texture(uMaterial.baseTexture, fs_in.TexCoords);
 }

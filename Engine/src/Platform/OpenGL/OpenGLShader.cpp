@@ -171,6 +171,7 @@ namespace CGEngine::OpenGL
 			return m_uniforms.at(name);
 
 		CG_WARN("Shader uniform {0} could not be found!", name.c_str());
+		CG_WARN("Make sure that the shader uniform is being actively used in the shader!");
 
 		throw std::runtime_error("Unable to fetch uniform!");
 	}

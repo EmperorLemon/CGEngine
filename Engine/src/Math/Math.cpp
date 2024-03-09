@@ -51,4 +51,28 @@ namespace CGEngine::Math
 		return glm::value_ptr(matrix);
 	}
 
+	Vector2 make_vec2(const float* data)
+	{
+		return glm::make_vec2(data);
+	}
+
+	Vector3 make_vec3(const float* data)
+	{
+		return glm::make_vec3(data);
+	}
+
+	Vector4 make_vec4(const float* data)
+	{
+		return glm::make_vec4(data);
+	}
+
+	Mat3 make_mat3(const float* data)
+	{
+		return glm::make_mat3x3(data);
+	}
+
+	Mat4 make_mat4(const float* data)
+	{
+		return glm::make_mat4x4(data);
+	}
 }

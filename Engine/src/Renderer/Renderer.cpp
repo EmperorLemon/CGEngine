@@ -15,8 +15,7 @@
 #include "Platform/OpenGL/OpenGLAPI.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/OpenGL/OpenGLDrawObject.h"
-
-#include "Texture.h"
+#include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace CGEngine
 {
@@ -40,19 +39,19 @@ namespace CGEngine
 
 	void SetupRenderScene()
 	{
-		std::vector<Object::Mesh> meshes;
-		LoadModelFile("Assets/Models/Test/test.gltf", IO::ModelFileType::glTF, meshes);
+		std::vector<Assets::Mesh> meshes;
+		LoadModelFile("Assets/Models/Test/test2.gltf", IO::ModelFileType::glTF, meshes);
 
 		if (!meshes.empty())
 		{
 			for (auto& mesh : meshes)
 			{
-				objects.emplace_back(std::make_shared<OpenGL::GLDrawObject>(std::move(mesh.vertices), std::move(mesh.indices), std::move(mesh.layout)));
+				objects.emplace_back(std::make_shared<OpenGL::GLDrawObject>(std::move(mesh)));
 			}
 		}
 
-		objects.at(0)->position = Math::Vector3(-2.0f, 0.0f, 0.0f);
-		objects.at(1)->position = Math::Vector3(2.0f, 0.0f, 0.0f);
+		objects.at(0)->position = Math::Vector3(0.0f, 0.0f, 4.0f);
+		objects.at(0)->scale = Math::Vector3(0.0f, 0.0f, 4.0f);
 
 		std::string vert_src, frag_src;
 		IO::ReadFile("Assets/Shaders/unlit.vert", vert_src);
@@ -86,9 +85,24 @@ namespace CGEngine
 		for (const auto& object : objects)
 		{
 			auto model = Math::Mat4(1.0f);
+
 			model = Math::Translate(model, object->position);
 
+			model = Math::Rotate(model, 0.0f, Math::X_AXIS);
+			model = Math::Rotate(model, 45.0f, Math::Y_AXIS);
+			model = Math::Rotate(model, 0.0f, Math::Z_AXIS);
+
+			for (const auto& texture : object->GetTextures())
+			{
+				texture->Bind(0);
+			}
+
+			constexpr int texture = 0;
+
 			shader->BindUniform("uModel", OpenGL::UniformType::MAT4, Math::value_ptr(model));
+			//shader->BindUniform("uMaterial.baseColor", OpenGL::UniformType::VEC4, Math::value_ptr(object->GetMaterial().baseColor));
+			shader->BindUniform("uMaterial.baseTexture", OpenGL::UniformType::INT, &texture);
+
 			m_backend->Draw(object.get());
 		}
 

@@ -34,7 +34,7 @@ namespace CGEngine::IO
 		stbi_image_free(pixels);
 	}
 
-	void LoadModelFile(const std::string_view filepath, const ModelFileType type, std::vector<Object::Mesh>& meshes)
+	void LoadModelFile(const std::string_view filepath, const ModelFileType type, std::vector<Assets::Mesh>& meshes)
 	{
 		if (type == ModelFileType::glTF)
 			LoadglTFModel(filepath, meshes);

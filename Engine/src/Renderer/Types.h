@@ -14,5 +14,6 @@ namespace CGEngine
 		UNSIGNED_INT,
 		INT,
 		FLOAT,
+		DOUBLE
 	};
 }

@@ -2,10 +2,10 @@
 
 #include "Renderer/Assets/Mesh.h"
 
+#include "Math/Math.h"
+
 #define TINYGLTF_IMPLEMENTATION
-#define TINYGLTF_NO_STB_IMAGE
 #define TINYGLTF_NO_STB_IMAGE_WRITE
-#define TINYGLTF_NO_EXTERNAL_IMAGE
 #include <tiny_gltf.h>
 
 #include <stack>
@@ -15,6 +15,22 @@
 
 namespace CGEngine::IO
 {
+	constexpr DataType Convert(const int32_t type)
+	{
+		switch (type)
+		{
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:  return DataType::UNSIGNED_BYTE;
+		case TINYGLTF_COMPONENT_TYPE_BYTE:			 return DataType::BYTE;
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: return DataType::UNSIGNED_SHORT;
+		case TINYGLTF_COMPONENT_TYPE_SHORT:			 return DataType::SHORT;
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:	 return DataType::UNSIGNED_INT;
+		case TINYGLTF_COMPONENT_TYPE_INT:			 return DataType::INT;
+		case TINYGLTF_COMPONENT_TYPE_FLOAT:			 return DataType::FLOAT;
+		case TINYGLTF_COMPONENT_TYPE_DOUBLE:		 return DataType::DOUBLE;
+		default: return DataType::FLOAT; // Unknown component type
+		}
+	}
+
 	constexpr size_t GetSizeOfComponentType(const int32_t type)
 	{
 		switch (type)
@@ -31,52 +47,43 @@ namespace CGEngine::IO
 		}
 	}
 
-	//static void ProcessBuffer()
-
-	static void ProcessMesh(const tinygltf::Model& model, const tinygltf::Mesh& gltfMesh, Object::Mesh& mesh)
+	static void ProcessMesh(const tinygltf::Model& model, const tinygltf::Mesh& gltfMesh, Assets::Mesh& mesh)
 	{
+		mesh.layout.SetStride(3 * sizeof(float));
+
+		mesh.layout.add(0, 3, DataType::FLOAT,   0, false);
+		mesh.layout.add(1, 2, DataType::FLOAT, 3 * sizeof(float), false);
+		//mesh.layout.add(2, 2, DataType::FLOAT, 576, false);
+
 		for (const auto& primitive : gltfMesh.primitives)
 		{
 			{
-				const auto& accessor   = model.accessors[primitive.indices];
-				const auto& bufferView = model.bufferViews[accessor.bufferView];
-				const auto& buffer	   = model.buffers[bufferView.buffer];
+				const auto& accessor   = model.accessors.at(primitive.indices);
+				const auto& bufferView = model.bufferViews.at(accessor.bufferView);
+				const auto& buffer	   = model.buffers.at(bufferView.buffer);
 				const auto  indexData  = reinterpret_cast<const uint16_t*>(buffer.data.data() + bufferView.byteOffset + accessor.byteOffset);
 
 				mesh.indices.insert(mesh.indices.end(), indexData, indexData + accessor.count);
 			}
 
+			std::vector<Math::Vector3> positions;
+
 			if (primitive.attributes.contains("POSITION"))
 			{
-				const auto& accessor   = model.accessors[primitive.attributes.at("POSITION")];
-				const auto& bufferView = model.bufferViews[accessor.bufferView];
-				const auto& buffer     = model.buffers[bufferView.buffer];
-				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
-
-				mesh.layout.add(0, accessor.type, DataType::FLOAT, byteOffset, accessor.normalized);
-
-				for (size_t i = 0; i < accessor.count; ++i)
-				{
-					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
-					mesh.vertices.insert(mesh.vertices.end(), data, data + accessor.type);
-				}
-			}
-
-			if (primitive.attributes.contains("NORMAL"))
-			{
-				const auto& accessor = model.accessors[primitive.attributes.at("NORMAL")];
+				const auto& accessor = model.accessors[primitive.attributes.at("POSITION")];
 				const auto& bufferView = model.bufferViews[accessor.bufferView];
 				const auto& buffer = model.buffers[bufferView.buffer];
 				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
 
-				mesh.layout.add(1, accessor.type, DataType::FLOAT, byteOffset, accessor.normalized);
-
 				for (size_t i = 0; i < accessor.count; ++i)
 				{
 					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
-					mesh.vertices.insert(mesh.vertices.end(), data, data + accessor.type);
+
+					positions.emplace_back(Math::make_vec3(data));
 				}
 			}
+
+			std::vector<Math::Vector2> uvs;
 
 			if (primitive.attributes.contains("TEXCOORD_0"))
 			{
@@ -85,53 +92,72 @@ namespace CGEngine::IO
 				const auto& buffer = model.buffers[bufferView.buffer];
 				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
 
-				mesh.layout.add(2, accessor.type, DataType::FLOAT, byteOffset, accessor.normalized);
-
 				for (size_t i = 0; i < accessor.count; ++i)
 				{
 					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
-					mesh.vertices.insert(mesh.vertices.end(), data, data + 2);
+
+					uvs.emplace_back(Math::make_vec2(data));
 				}
 			}
 
-			mesh.layout.SetStride(3 * sizeof(float));
-		}
-	}
-
-	static void ExtractMeshes(const tinygltf::Model& model, const tinygltf::Node& parentNode, std::vector<Object::Mesh>& meshes)
-	{
-		std::stack<tinygltf::Node> nodeStack;
-		nodeStack.push(parentNode);
-
-		while (!nodeStack.empty())
-		{
-			const auto& currentNode = nodeStack.top();
-			nodeStack.pop();
-
-			if (currentNode.mesh >= 0 && currentNode.mesh < static_cast<int32_t>(model.meshes.size()))
+			if (!model.materials.empty() && primitive.material >= 0 && primitive.material < static_cast<int32_t>(model.materials.size()))
 			{
-				Object::Mesh mesh = {};
-				ProcessMesh(model, model.meshes[currentNode.mesh], mesh);
+				const auto& material = model.materials.at(primitive.material);
 
-				meshes.push_back(mesh);
+				if (!material.pbrMetallicRoughness.baseColorFactor.empty())
+				{
+					const auto& baseColorFactor= material.pbrMetallicRoughness.baseColorFactor;
+					mesh.material.baseColor = Math::Vector4(baseColorFactor.at(0), baseColorFactor.at(1), baseColorFactor.at(2), baseColorFactor.at(3));
+
+					if (material.pbrMetallicRoughness.baseColorTexture.index >= 0)
+					{
+						const auto& texture = model.textures.at(material.pbrMetallicRoughness.baseColorTexture.index);
+						auto& gltfImage	= model.images.at(texture.source);
+
+						mesh.textures.emplace_back(gltfImage.width, gltfImage.width, 4, gltfImage.image);
+					}
+				}
+
+				if (!material.doubleSided)
+				{
+					
+				}
 			}
 
-			for (const int node : currentNode.children)
-				nodeStack.push(model.nodes[node]);
+			for (const auto& position : positions)
+			{
+				mesh.vertices.emplace_back(position.x);
+				mesh.vertices.emplace_back(position.y);
+				mesh.vertices.emplace_back(position.z);
+			}
+
+			for (const auto& uv : uvs)
+			{
+				mesh.vertices.emplace_back(uv.s);
+				mesh.vertices.emplace_back(uv.t);
+			}
 		}
 	}
 
-	static void SubmitModel(const tinygltf::Model& model, std::vector<Object::Mesh>& meshes)
+	static void ExtractMeshes(const tinygltf::Model& model, const tinygltf::Node& parentNode, std::vector<Assets::Mesh>& meshes)
 	{
-		const auto& scene = model.scenes[model.defaultScene];
+		Assets::Mesh mesh = {};
 
-		for (const int node : scene.nodes)
+		if (parentNode.mesh < static_cast<int>(model.meshes.size()))
 		{
-			ExtractMeshes(model, model.nodes[node], meshes);
+			ProcessMesh(model, model.meshes.at(parentNode.mesh), mesh);
+			meshes.push_back(mesh);
 		}
 	}
 
-	bool LoadglTFModel(const std::string_view filepath, std::vector<Object::Mesh>& meshes)
+	static void SubmitModel(const tinygltf::Model& model, std::vector<Assets::Mesh>& meshes)
+	{
+		const auto& scene = model.scenes.at(model.defaultScene);
+
+		ExtractMeshes(model, model.nodes.at(0), meshes);
+	}
+
+	bool LoadglTFModel(const std::string_view filepath, std::vector<Assets::Mesh>& meshes)
 	{
 		tinygltf::TinyGLTF loader;
 		tinygltf::Model model;

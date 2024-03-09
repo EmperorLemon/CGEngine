@@ -3,7 +3,7 @@
 #include <string_view>
 #include <vector>
 
-namespace CGEngine::Object
+namespace CGEngine::Assets
 {
 	struct Mesh;
 }
@@ -18,7 +18,7 @@ namespace CGEngine::IO
 	};
 
 	void LoadImageFile(std::string_view filepath, int& width, int& height, int& channels, std::vector<unsigned char>& data);
-	void LoadModelFile(std::string_view filepath, ModelFileType type, std::vector<Object::Mesh>& meshes);
+	void LoadModelFile(std::string_view filepath, ModelFileType type, std::vector<Assets::Mesh>& meshes);
 
 	void ReadFile(std::string_view filepath, std::vector<unsigned char>& data);
 	void ReadFile(std::string_view filepath, std::string& data);

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Types.h"
+
 #include <cstdint>
+#include <vector>
 
 namespace CGEngine
 {
@@ -22,6 +24,14 @@ namespace CGEngine
 	enum class PixelFormat : uint8_t
 	{
 		RGBA8
+	};
+
+	struct Image
+	{
+		int32_t width = 0;
+		int32_t height = 0;
+		int32_t channels = 0;
+		std::vector<unsigned char> pixels;
 	};
 
 	class Texture
