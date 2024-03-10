@@ -23,12 +23,11 @@ namespace CGEngine
 	void SetupRenderScene();
 
 	std::vector<std::shared_ptr<OpenGL::GLDrawObject>> objects;
-	std::vector<Assets::Light> lights;
 
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
-
 	std::shared_ptr<OpenGL::GLBuffer> uniformBuffer = nullptr;
-	std::shared_ptr<OpenGL::GLBuffer> lightBuffer   = nullptr;
+
+	Assets::Light light;
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
@@ -51,7 +50,7 @@ namespace CGEngine
 		objects.emplace_back(std::make_shared<OpenGL::GLDrawObject>(std::move(model)));
 		objects.at(0)->position = Math::Vector3(0.0f, 0.0f, 4.0f);
 
-		lights.emplace_back();
+		light.position = Math::Vector3(2.0f, 0.0f, 10.0f);
 
 		std::string vert_src, frag_src;
 		IO::ReadFile("Assets/Shaders/lit.vert", vert_src);
@@ -60,11 +59,9 @@ namespace CGEngine
 		ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
 		shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 
-		uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4), nullptr);
+		uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light), nullptr);
 		uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4));
-
-		lightBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::SHADER_STORAGE_BUFFER, sizeof(Assets::Light), nullptr);
-		lightBuffer->BindBufferRange(1, 0, sizeof(Assets::Light));
+		uniformBuffer->BindBufferRange(1, 2 * sizeof(Math::Mat4), sizeof(Assets::Light));
 	}
 
 	void Renderer::PreRender(const Camera& camera)
@@ -73,8 +70,7 @@ namespace CGEngine
 
 		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
 		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
-
-		lightBuffer->SetSubData(0, sizeof(Assets::Light), lights.data());
+		uniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Assets::Light), &light);
 
 		shader->Use();
 
@@ -107,7 +103,8 @@ namespace CGEngine
 			model = Math::Rotate(model, 45.0f, Math::Y_AXIS);
 			model = Math::Rotate(model, 0.0f, Math::Z_AXIS);
 
-			shader->BindUniform("model", OpenGL::UniformType::MAT4, Math::value_ptr(model));
+			shader->BindUniform("MODEL_MATRIX", OpenGL::UniformType::MAT4, Math::value_ptr(model));
+			shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::value_ptr(Math::Mat3(Math::Transpose(Math::Inverse(model)))));
 
 			int unit = 0;
 

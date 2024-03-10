@@ -36,27 +36,36 @@ struct Light
 //	float outerCutOff;
 };
 
-layout (std430, binding = 1) buffer LightBuffer
+layout (std140, binding = 1) uniform LightBuffer
+{   
+    Light light;
+};
+
+layout (std140, binding = 2) uniform CameraBuffer
 {
-//    uint  numLights;
-    Light lights[];
+    vec3 VIEW_POSITION;
 };
 
 uniform Material material;
 
 vec3 Lighting(in vec3 normal, in vec3 albedo)
 {
-    vec3 result = vec3(0.0);
-
-    vec3  lightDir      = normalize(vec3(0.0, 0.0, 10.0) - fs_in.FragPos);
+    vec3  lightDir        = normalize(light.position.xyz - fs_in.FragPos);
         
-    float ambientFactor = 0.3;
-    vec3  ambient       = ambientFactor * vec3(1.0); // change light color
+    float ambientFactor   = 0.1;
+    vec3  ambient         = ambientFactor * vec3(1.0);                   // change light color
 
-    float diffuseFactor = max(dot(normal, lightDir), 0.0); 
-    vec3  diffuse       = diffuseFactor * vec3(1.0);    // change light color
+    float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
+    vec3  diffuse         = diffuseFactor * vec3(1.0);                   // change light color
 
-    result = (ambient + diffuse) * albedo;
+    vec3  viewDir         = normalize(VIEW_POSITION - fs_in.FragPos);
+    vec3  reflectDir      = reflect(-lightDir, normal);
+
+    float specularStength = 0.5;
+    float specularFactor  = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3  specular        = specularStength * specularFactor * vec3(1.0); // change light color
+
+    vec3 result = (ambient + diffuse + specular) * albedo;
 
     return result;
 }
@@ -72,8 +81,6 @@ void main()
 
     float metallic  = material.metallicFactor;
     float roughness = material.roughnessFactor;
-
-    //albedo = albedo * baseColorTexture;
 
     vec3 lighting = Lighting(normal, albedo.rgb);
 

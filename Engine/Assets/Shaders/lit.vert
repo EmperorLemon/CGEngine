@@ -13,17 +13,18 @@ out VS_OUT {
 
 layout (std140, binding = 0) uniform Matrices
 {
-    mat4 projection;
-    mat4 view;
+    mat4 PROJECTION_MATRIX;
+    mat4 VIEW_MATRIX;
 };
 
-uniform mat4 model;
+uniform mat4  MODEL_MATRIX;
+uniform mat3 NORMAL_MATRIX;
 
 void main()
 {
-    vs_out.FragPos   = vec3(model * vec4(aPos, 1.0));
-    vs_out.Normal    = aNormal;
+    vs_out.FragPos   = vec3(MODEL_MATRIX * vec4(aPos, 1.0));
+    vs_out.Normal    = NORMAL_MATRIX * aNormal;
     vs_out.TexCoords = aTexCoords;
 
-	gl_Position = projection * view * model * vec4(aPos, 1.0);
+	gl_Position = PROJECTION_MATRIX * VIEW_MATRIX * MODEL_MATRIX * vec4(aPos, 1.0);
 }

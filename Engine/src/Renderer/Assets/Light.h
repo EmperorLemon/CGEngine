@@ -16,7 +16,7 @@ namespace CGEngine::Assets
 
 	struct Light
 	{
-		Math::Vector4 position = Math::Vector4(Math::Vector3(1.0f, 0.0f, 0.0f), 0.0f);
+		Math::Vector3 position = Math::Vector3(0.0f);
 		//Math::Vector3 direction = Math::Vector3(0.0f);
 
 		//LightType type = LightType::DIRECTIONAL_LIGHT;
