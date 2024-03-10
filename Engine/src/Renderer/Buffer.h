@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Types.h"
+
 #include <cstdint>
 #include <optional>
 
@@ -10,15 +12,6 @@ namespace CGEngine
 		size_t  size   = 0; // byte size of buffer
 		size_t  count  = 0; // number of elements in buffer
 		size_t  offset = 0; // byte offset of buffer (used for combining multiple buffers)
-	};
-
-	enum class BufferTarget : uint8_t
-	{
-		NONE,
-		VERTEX_BUFFER,
-		INDEX_BUFFER,
-		UNIFORM_BUFFER,
-		SHADER_STORAGE_BUFFER
 	};
 
 	class Buffer

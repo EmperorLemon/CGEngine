@@ -7,25 +7,6 @@
 
 namespace CGEngine
 {
-	enum class TextureTarget : uint8_t
-	{
-		TEXTURE_2D,
-		TEXTURE_3D
-	};
-
-	enum class TextureFormat : uint8_t
-	{
-		RED,
-		RG,
-		RGB,
-		RGBA
-	};
-
-	enum class PixelFormat : uint8_t
-	{
-		RGBA8
-	};
-
 	struct Image
 	{
 		int32_t width = 0;

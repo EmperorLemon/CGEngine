@@ -4,10 +4,10 @@
 
 namespace CGEngine::OpenGL
 {
-	class GLFramebuffer : public Framebuffer
+	class GLFramebuffer final : public Framebuffer
 	{
 	public:
-		GLFramebuffer();
+		explicit GLFramebuffer(BufferTarget target);
 
 		GLFramebuffer(GLFramebuffer&&) noexcept = default;
 		GLFramebuffer(const GLFramebuffer&) noexcept = delete;
@@ -16,9 +16,8 @@ namespace CGEngine::OpenGL
 
 		~GLFramebuffer() override;
 
-		bool CheckStatus(uint32_t target);
+		[[nodiscard]] bool CheckStatus() const;
+	private:
 
-
-		void AddFramebufferTexture();
 	};
 }

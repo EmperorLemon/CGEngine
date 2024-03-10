@@ -1,21 +1,10 @@
 #pragma once
 
+#include "Types.h"
 #include <string_view>
 
 namespace CGEngine
 {
-	enum class ShaderType : uint8_t
-	{
-		NONE,
-		VERTEX,
-		GEOMETRY,
-		TESSELATION_CONTROL,
-		TESSELATION_EVALUATION,
-		FRAGMENT,
-		COMPUTE,
-		PROGRAM,
-	};
-
 	struct ShaderModule
 	{
 		std::string_view source;

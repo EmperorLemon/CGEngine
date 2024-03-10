@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Types.h"
+
 #include <cstdint>
 
 namespace CGEngine
@@ -7,7 +9,7 @@ namespace CGEngine
 	class Framebuffer
 	{
 	public:
-		Framebuffer() = default;
+		explicit Framebuffer(const BufferTarget target) : p_target(target) {}
 
 		Framebuffer(Framebuffer&&) noexcept = default;
 		Framebuffer(const Framebuffer&) noexcept = delete;
@@ -17,5 +19,6 @@ namespace CGEngine
 		virtual ~Framebuffer() = default;
 	protected:
 		uint32_t p_id = 0;
+		BufferTarget p_target = BufferTarget::NONE;
 	};
 }

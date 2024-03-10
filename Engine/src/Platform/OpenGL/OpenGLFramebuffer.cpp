@@ -1,12 +1,12 @@
 #include "OpenGLFramebuffer.h"
 
-#include <glad/glad.h>
+#include "OpenGLTypes.hpp"
 
 #include "Core/Logger.hpp"
 
 namespace CGEngine::OpenGL
 {
-	GLFramebuffer::GLFramebuffer() : Framebuffer()
+	GLFramebuffer::GLFramebuffer(const BufferTarget target) : Framebuffer(target)
 	{
 		CG_TRACE("Created GLFramebuffer!");
 
@@ -20,9 +20,9 @@ namespace CGEngine::OpenGL
 		glDeleteFramebuffers(1, &p_id);
 	}
 
-	bool GLFramebuffer::CheckStatus(uint32_t target)
+	bool GLFramebuffer::CheckStatus() const
 	{
-		
+		return glCheckNamedFramebufferStatus(p_id, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 	}
 
 
