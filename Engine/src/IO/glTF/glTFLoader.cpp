@@ -138,6 +138,8 @@ namespace CGEngine::IO
 			if (HAS_TEXCOORDS)
 				mesh.layout.add(2, 2, DataType::FLOAT, 6 * sizeof(float), false);
 
+			mesh.layout.SetStride(stride);
+
 			for (size_t i = 0; i < count; ++i)
 			{
 				if (!positions.empty() && HAS_POSITIONS)

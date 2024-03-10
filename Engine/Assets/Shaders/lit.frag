@@ -48,20 +48,15 @@ vec3 Lighting(in vec3 normal, in vec3 albedo)
 {
     vec3 result = vec3(0.0);
 
-    for (uint i = 0; i < 1; ++i)
-    {
-        Light light   = lights[i];
-
-        vec3  lightDir      = normalize(light.position.xyz - fs_in.FragPos);
+    vec3  lightDir      = normalize(vec3(0.0, 0.0, 10.0) - fs_in.FragPos);
         
-        float ambientFactor = 0.3;
-        vec3  ambient       = ambientFactor * vec3(1.0); // change light color
+    float ambientFactor = 0.3;
+    vec3  ambient       = ambientFactor * vec3(1.0); // change light color
 
-        float diffuseFactor = max(dot(normal, lightDir), 0.0); 
-        vec3  diffuse       = diffuseFactor * vec3(1.0);    // change light color
+    float diffuseFactor = max(dot(normal, lightDir), 0.0); 
+    vec3  diffuse       = diffuseFactor * vec3(1.0);    // change light color
 
-        result = (ambient + diffuse) * albedo;
-    }
+    result = (ambient + diffuse) * albedo;
 
     return result;
 }

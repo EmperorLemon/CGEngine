@@ -11,6 +11,7 @@
 #include <stb_image.h>
 
 #include "assimp/AssimpLoader.h"
+#include "glTF/glTFLoader.h"
 
 namespace CGEngine::IO
 {
@@ -39,7 +40,8 @@ namespace CGEngine::IO
 		if (!FileExists(filepath))
 			CG_ERROR("File {0} does not exist!", filepath.data());
 
-		AssimpLoadModel(filepath, model);
+		LoadglTFModel(filepath, model);
+		//AssimpLoadModel(filepath, model);
 	}
 
 	void ReadFile(const std::string_view filepath, std::vector<unsigned char>& data)

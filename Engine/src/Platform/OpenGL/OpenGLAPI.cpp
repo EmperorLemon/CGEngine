@@ -8,7 +8,7 @@
 
 namespace CGEngine::OpenGL
 {
-	constexpr uint32_t Convert(const ClearMask mask)
+	constexpr GLenum Convert(const ClearMask mask)
 	{
 		switch (mask)
 		{
@@ -21,7 +21,7 @@ namespace CGEngine::OpenGL
 
 		return 0;
 	}
-	constexpr uint32_t Convert(const APICapability capability)
+	constexpr GLenum Convert(const APICapability capability)
 	{
 		switch (capability)
 		{
@@ -58,12 +58,12 @@ namespace CGEngine::OpenGL
 
 	void OpenGLAPI::Enable(uint32_t capability) const
 	{
-
+		glEnable(Convert(static_cast<APICapability>(capability)));
 	}
 
 	void OpenGLAPI::Disable(uint32_t capability) const
 	{
-
+		glDisable(Convert(static_cast<APICapability>(capability)));
 	}
 
 	void OpenGLAPI::Clear(const uint32_t mask)
