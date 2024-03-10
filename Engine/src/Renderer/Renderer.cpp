@@ -23,9 +23,12 @@ namespace CGEngine
 	void SetupRenderScene();
 
 	std::vector<std::shared_ptr<OpenGL::GLDrawObject>> objects;
+	std::vector<Assets::Light> lights;
 
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
+
 	std::shared_ptr<OpenGL::GLBuffer> uniformBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer> lightBuffer   = nullptr;
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
@@ -43,22 +46,25 @@ namespace CGEngine
 	void SetupRenderScene()
 	{
 		Assets::Model model;
-		LoadModelFile("Assets/Models/Test/cube.gltf", IO::ModelFileType::glTF, model);
+		IO::LoadModelFile("Assets/Models/Cube/cube.gltf", model);
 
 		objects.emplace_back(std::make_shared<OpenGL::GLDrawObject>(std::move(model)));
-
 		objects.at(0)->position = Math::Vector3(0.0f, 0.0f, 4.0f);
-		objects.at(0)->GetMaterial(0).albedo = Math::Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+
+		lights.emplace_back();
 
 		std::string vert_src, frag_src;
-		IO::ReadFile("Assets/Shaders/unlit.vert", vert_src);
-		IO::ReadFile("Assets/Shaders/unlit.frag", frag_src);
+		IO::ReadFile("Assets/Shaders/lit.vert", vert_src);
+		IO::ReadFile("Assets/Shaders/lit.frag", frag_src);
 
 		ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
 		shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 
 		uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4), nullptr);
 		uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4));
+
+		lightBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::SHADER_STORAGE_BUFFER, sizeof(Assets::Light), nullptr);
+		lightBuffer->BindBufferRange(1, 0, sizeof(Assets::Light));
 	}
 
 	void Renderer::PreRender(const Camera& camera)
@@ -68,14 +74,16 @@ namespace CGEngine
 		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
 		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
 
+		lightBuffer->SetSubData(0, sizeof(Assets::Light), lights.data());
+
 		shader->Use();
 
-		constexpr int albedo_texture_sampler = 0;
-		constexpr int normal_texture_sampler = 1;
+		constexpr int albedo_texture_sampler	= 0;
+		constexpr int normal_texture_sampler	= 1;
 		constexpr int occlusion_texture_sampler = 2;
 
-		shader->BindUniform("material.baseAlbedoSampler", OpenGL::UniformType::INT,    &albedo_texture_sampler);
-		shader->BindUniform("material.baseNormalSampler", OpenGL::UniformType::INT,    &normal_texture_sampler);
+		shader->BindUniform("material.baseAlbedoSampler",	  OpenGL::UniformType::INT, &albedo_texture_sampler);
+		shader->BindUniform("material.baseNormalSampler",	  OpenGL::UniformType::INT, &normal_texture_sampler);
 		shader->BindUniform("material.baseOcclusionSampler", OpenGL::UniformType::INT, &occlusion_texture_sampler);
 
 		shader->Disable();

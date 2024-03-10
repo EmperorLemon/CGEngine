@@ -16,3 +16,6 @@
 [submodule "Engine/ThirdParty/crossguid"]
 	path = Engine/ThirdParty/crossguid
 	url = https://github.com/graeme-hill/crossguid
+[submodule "Engine/ThirdParty/assimp"]
+	path = Engine/ThirdParty/assimp
+	url = https://github.com/assimp/assimp

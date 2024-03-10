@@ -63,7 +63,7 @@ namespace CGEngine::IO
 				const auto& bufferView = model.bufferViews.at(accessor.bufferView);
 				const auto& buffer	   = model.buffers.at(bufferView.buffer);
 				const auto  indexData  = reinterpret_cast<const uint16_t*>(buffer.data.data() + bufferView.byteOffset + accessor.byteOffset);
-
+					
 				mesh.indices.insert(mesh.indices.end(), indexData, indexData + accessor.count);
 			}
 
@@ -136,9 +136,7 @@ namespace CGEngine::IO
 			if (HAS_NORMALS)
 				mesh.layout.add(1, 3, DataType::FLOAT, 3 * sizeof(float), false);
 			if (HAS_TEXCOORDS)
-				mesh.layout.add(HAS_NORMALS ? 2 : 1, 2, DataType::FLOAT, HAS_NORMALS ? 6 * sizeof(float) : 3 * sizeof(float), false);
-
-			mesh.layout.SetStride(stride);
+				mesh.layout.add(2, 2, DataType::FLOAT, 6 * sizeof(float), false);
 
 			for (size_t i = 0; i < count; ++i)
 			{
@@ -164,8 +162,11 @@ namespace CGEngine::IO
 				{
 					const auto& uv = uvs.at(i);
 
-					mesh.vertices.emplace_back((uv.s + 1.0f) * 0.5f);
-					mesh.vertices.emplace_back((uv.t + 1.0f) * 0.5f);
+					//mesh.vertices.emplace_back((uv.s + 1.0f) * 0.5f);
+					//mesh.vertices.emplace_back((uv.t + 1.0f) * 0.5f);
+
+					mesh.vertices.emplace_back(uv.s);
+					mesh.vertices.emplace_back(uv.t);
 				}
 			}
 		}
@@ -276,5 +277,4 @@ namespace CGEngine::IO
 
 		return success;
 	}
-
 }

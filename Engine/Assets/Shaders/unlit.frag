@@ -31,5 +31,7 @@ void main()
     float metallic  = material.metallicFactor;
     float roughness = material.roughnessFactor;
 
+    albedo = albedo * baseColorTexture;
+
 	FragColor = albedo;
 }

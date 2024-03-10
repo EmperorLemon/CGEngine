@@ -7,10 +7,10 @@
 #include "Core/Logger.hpp"
 #include "Renderer/Assets/Model.h"
 
-#include "IO/glTF/glTFLoader.h"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#include "assimp/AssimpLoader.h"
 
 namespace CGEngine::IO
 {
@@ -34,10 +34,12 @@ namespace CGEngine::IO
 		stbi_image_free(pixels);
 	}
 
-	void LoadModelFile(const std::string_view filepath, const ModelFileType type, Assets::Model& model)
+	void LoadModelFile(const std::string_view filepath, Assets::Model& model)
 	{
-		if (type == ModelFileType::glTF)
-			LoadglTFModel(filepath, model);
+		if (!FileExists(filepath))
+			CG_ERROR("File {0} does not exist!", filepath.data());
+
+		AssimpLoadModel(filepath, model);
 	}
 
 	void ReadFile(const std::string_view filepath, std::vector<unsigned char>& data)

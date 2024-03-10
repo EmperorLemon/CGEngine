@@ -26,23 +26,17 @@ namespace CGEngine
 		{
 		case DataType::VOID:
 		case DataType::UNSIGNED_BYTE:
-		case DataType::BYTE:  return BIT(0);
+		case DataType::BYTE:   return BIT(0);
 		case DataType::UNSIGNED_SHORT:
-		case DataType::SHORT: return BIT(1);
+		case DataType::SHORT:  return BIT(1);
 		case DataType::UNSIGNED_INT:
 		case DataType::INT:
-		case DataType::FLOAT: return BIT(2);
+		case DataType::FLOAT:  return BIT(2);
+		case DataType::DOUBLE: return BIT(3);
 		}
 
 		return 0;
 	}
-
-	struct Vertex
-	{
-		Math::Vector3 position;
-		Math::Vector3 normal;
-		Math::Vector2 uv;
-	};
 
 	class VertexLayout
 	{
@@ -50,13 +44,6 @@ namespace CGEngine
 		VertexLayout& add(const uint32_t index, const int32_t count, const DataType type, const size_t offset, const bool normalized = false)
 		{
 			m_layout.emplace_back(index, count, type, normalized, static_cast<uint32_t>(offset));
-
-			return *this;
-		}
-
-		VertexLayout& add(const uint32_t index, const int32_t count, const DataType type, bool normalized = false)
-		{
-			m_layout.emplace_back(index, count, type, normalized, 0);
 
 			return *this;
 		}
