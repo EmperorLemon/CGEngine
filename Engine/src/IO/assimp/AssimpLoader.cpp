@@ -5,6 +5,7 @@
 #include <assimp/scene.h>
 
 #include "Core/Logger.hpp"
+#include "IO/FileSystem.h"
 
 #include "Renderer/Assets/Model.h"
 
@@ -20,6 +21,8 @@ namespace CGEngine::IO
 
 	static void ExtractMaterials(const aiScene& scene, Assets::Model& model);
 	static void ProcessMaterial(const aiMaterial* assimpMaterial, Assets::Material& material);
+
+	static void ExtractTextures(const aiMaterial* material, const aiTextureType type, Assets::Model& model);
 
 	void AssimpLoadModel(const std::string_view filepath, Assets::Model& model)
 	{
@@ -59,6 +62,7 @@ namespace CGEngine::IO
 			model.meshes.emplace_back(std::move(mesh));
 		}
 	}
+
 	void ProcessMesh(const aiMesh* assimpMesh, Assets::Mesh& mesh)
 	{
 		const bool HAS_NORMALS   = assimpMesh->HasNormals();
@@ -113,6 +117,7 @@ namespace CGEngine::IO
 			const auto& assimpMaterial = scene.mMaterials[i];
 
 			ProcessMaterial(assimpMaterial, material);
+			ExtractTextures(assimpMaterial, aiTextureType_DIFFUSE, model);
 
 			model.materials.emplace_back(material);
 		}
@@ -125,5 +130,24 @@ namespace CGEngine::IO
 		assimpMaterial->Get(AI_MATKEY_BASE_COLOR, albedo);
 
 		material.albedo = Math::Vector4(albedo.r, albedo.g, albedo.b, albedo.a);
+	}
+
+	void ExtractTextures(const aiMaterial* material, const aiTextureType type, Assets::Model& model)
+	{
+		const auto count = material->GetTextureCount(type);
+
+		for (unsigned int i = 0; i < count; ++i)
+		{
+			auto importedPath = aiString{};
+
+			if (material->GetTexture(type, i, &importedPath) == AI_SUCCESS)
+			{
+				const std::string path(std::string("Assets/Models/Cube/") + importedPath.C_Str());
+
+				Image image = {};
+				LoadImageFile(path.c_str(), image.width, image.height, image.channels, image.pixels);
+				model.textures.emplace_back(std::move(image));
+			}
+		}
 	}
 }

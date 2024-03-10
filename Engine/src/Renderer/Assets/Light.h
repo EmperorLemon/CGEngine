@@ -16,15 +16,15 @@ namespace CGEngine::Assets
 
 	struct Light
 	{
-		Math::Vector3 position = Math::Vector3(0.0f);
-		//Math::Vector3 direction = Math::Vector3(0.0f);
+		// set w component to 0 for directional and 1 for using light position
+		Math::Vector4 direction = Math::Vector4(0.0f); 
 
-		//LightType type = LightType::DIRECTIONAL_LIGHT;
+		LightType type			= LightType::DIRECTIONAL_LIGHT;
 
-		//float linear	= 0.045f;
-		//float quadratic = 0.0075f;
+		float linear			= 0.045f;
+		float quadratic			= 0.0075f;
 
-		//float cutOff      =  7.5f;
-		//float outerCutOff = 12.5f;
+		float cutOff			= 12.5f;
+		float outerCutOff		= 17.5f;
 	};
 }

@@ -62,8 +62,8 @@ namespace CGEngine::OpenGL
 	{
 		glCreateTextures(Convert(target), 1, &p_id);
 
-		glTextureParameteri(p_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTextureParameteri(p_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(p_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(p_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTextureParameteri(p_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTextureParameteri(p_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -75,8 +75,8 @@ namespace CGEngine::OpenGL
 	{
 		glCreateTextures(Convert(target), 1, &p_id);
 
-		glTextureParameteri(p_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTextureParameteri(p_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(p_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(p_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTextureParameteri(p_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTextureParameteri(p_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 

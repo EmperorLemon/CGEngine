@@ -17,6 +17,10 @@ namespace CGEngine::Math
 	// out: radians
 	float DegToRad(float degrees);
 
+	float Sin(float angle);
+	float Cos(float angle);
+	float Tan(float angle);
+
 	// out: degrees
 	Vector3 RadToDeg(const Vector3& radians);
 	// out: radians

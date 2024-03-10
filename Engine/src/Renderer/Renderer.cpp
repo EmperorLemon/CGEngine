@@ -14,8 +14,9 @@
 
 #include "Platform/OpenGL/OpenGLAPI.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
-#include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/OpenGL/OpenGLDrawObject.h"
+#include "Platform/OpenGL/OpenGLFramebuffer.h"
+#include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace CGEngine
@@ -26,6 +27,7 @@ namespace CGEngine
 
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
 	std::shared_ptr<OpenGL::GLBuffer> uniformBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLFramebuffer> frameBuffer = nullptr;
 
 	Assets::Light light;
 
@@ -50,7 +52,10 @@ namespace CGEngine
 		objects.emplace_back(std::make_shared<OpenGL::GLDrawObject>(std::move(model)));
 		objects.at(0)->position = Math::Vector3(0.0f, 0.0f, 4.0f);
 
-		light.position = Math::Vector3(2.0f, 0.0f, 10.0f);
+		light.direction = Math::Vector4(0.0f);
+		light.type = Assets::LightType::DIRECTIONAL_LIGHT;
+		light.cutOff = Math::Cos(Math::DegToRad(light.cutOff));
+		light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
 
 		std::string vert_src, frag_src;
 		IO::ReadFile("Assets/Shaders/lit.vert", vert_src);

@@ -30,7 +30,8 @@ namespace CGEngine::IO
 			return;
 		}
 
-		data.insert(data.end(), *pixels);
+		const size_t size = static_cast<size_t>(width * height) * STBI_rgb_alpha;
+		data.insert(data.end(), pixels, pixels + size);
 
 		stbi_image_free(pixels);
 	}
@@ -40,8 +41,8 @@ namespace CGEngine::IO
 		if (!FileExists(filepath))
 			CG_ERROR("File {0} does not exist!", filepath.data());
 
-		LoadglTFModel(filepath, model);
-		//AssimpLoadModel(filepath, model);
+		//LoadglTFModel(filepath, model);
+		AssimpLoadModel(filepath, model);
 	}
 
 	void ReadFile(const std::string_view filepath, std::vector<unsigned char>& data)

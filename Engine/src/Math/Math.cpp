@@ -26,6 +26,21 @@ namespace CGEngine::Math
 		return radians(degrees);
 	}
 
+	float Sin(const float angle)
+	{
+		return glm::sin(angle);
+	}
+
+	float Cos(const float angle)
+	{
+		return glm::cos(angle);
+	}
+
+	float Tan(const float angle)
+	{
+		return glm::tan(angle);
+	}
+
 	const void* value_ptr(const Vector2& vector)
 	{
 		return glm::value_ptr(vector);

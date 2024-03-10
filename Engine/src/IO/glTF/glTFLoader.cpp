@@ -164,9 +164,6 @@ namespace CGEngine::IO
 				{
 					const auto& uv = uvs.at(i);
 
-					//mesh.vertices.emplace_back((uv.s + 1.0f) * 0.5f);
-					//mesh.vertices.emplace_back((uv.t + 1.0f) * 0.5f);
-
 					mesh.vertices.emplace_back(uv.s);
 					mesh.vertices.emplace_back(uv.t);
 				}
