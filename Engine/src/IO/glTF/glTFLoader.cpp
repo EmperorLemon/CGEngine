@@ -1,7 +1,6 @@
 #include "glTFLoader.h"
 
-#include "Renderer/Assets/Mesh.h"
-
+#include "Renderer/Assets/Model.h"
 #include "Math/Math.h"
 
 #define TINYGLTF_IMPLEMENTATION
@@ -48,16 +47,17 @@ namespace CGEngine::IO
 
 	static void ProcessMesh(const tinygltf::Model& model, const tinygltf::Mesh& gltfMesh, Assets::Mesh& mesh)
 	{
-		mesh.layout.SetStride(8 * sizeof(float));
+		size_t count  = 0;
+		int32_t stride = 0;
 
-		mesh.layout.add(0, 3, DataType::FLOAT, 0, false);
-		mesh.layout.add(1, 3, DataType::FLOAT, 3 * sizeof(float), false);
-		mesh.layout.add(2, 2, DataType::FLOAT, 6 * sizeof(float), false);
-
-		size_t count = 0;
+		bool HAS_POSITIONS = false;
+		bool HAS_NORMALS   = false;
+		bool HAS_TEXCOORDS = false;
+		//bool HAS_TANGENTS  = false;
 
 		for (const auto& primitive : gltfMesh.primitives)
 		{
+			if (primitive.indices >= 0)
 			{
 				const auto& accessor   = model.accessors.at(primitive.indices);
 				const auto& bufferView = model.bufferViews.at(accessor.bufferView);
@@ -71,12 +71,15 @@ namespace CGEngine::IO
 
 			if (primitive.attributes.contains("POSITION"))
 			{
+				HAS_POSITIONS = true;
+
 				const auto& accessor = model.accessors[primitive.attributes.at("POSITION")];
 				const auto& bufferView = model.bufferViews[accessor.bufferView];
 				const auto& buffer = model.buffers[bufferView.buffer];
 				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
 
 				count = accessor.count;
+				stride += accessor.ByteStride(bufferView);
 
 				for (size_t i = 0; i < accessor.count; ++i)
 				{
@@ -90,10 +93,14 @@ namespace CGEngine::IO
 
 			if (primitive.attributes.contains("NORMAL"))
 			{
+				HAS_NORMALS = true;
+
 				const auto& accessor = model.accessors[primitive.attributes.at("NORMAL")];
 				const auto& bufferView = model.bufferViews[accessor.bufferView];
 				const auto& buffer = model.buffers[bufferView.buffer];
 				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
+
+				stride += accessor.ByteStride(bufferView);
 
 				for (size_t i = 0; i < accessor.count; ++i)
 				{
@@ -107,10 +114,14 @@ namespace CGEngine::IO
 
 			if (primitive.attributes.contains("TEXCOORD_0"))
 			{
+				HAS_TEXCOORDS = true;
+
 				const auto& accessor = model.accessors[primitive.attributes.at("TEXCOORD_0")];
 				const auto& bufferView = model.bufferViews[accessor.bufferView];
 				const auto& buffer = model.buffers[bufferView.buffer];
 				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
+
+				stride += accessor.ByteStride(bufferView);
 
 				for (size_t i = 0; i < accessor.count; ++i)
 				{
@@ -120,84 +131,135 @@ namespace CGEngine::IO
 				}
 			}
 
-			if (!model.materials.empty() && primitive.material >= 0 && primitive.material < static_cast<int32_t>(model.materials.size()))
-			{
-				const auto& material = model.materials.at(primitive.material);
+			if (HAS_POSITIONS)
+				mesh.layout.add(0, 3, DataType::FLOAT, 0, false);
+			if (HAS_NORMALS)
+				mesh.layout.add(1, 3, DataType::FLOAT, 3 * sizeof(float), false);
+			if (HAS_TEXCOORDS)
+				mesh.layout.add(HAS_NORMALS ? 2 : 1, 2, DataType::FLOAT, HAS_NORMALS ? 6 * sizeof(float) : 3 * sizeof(float), false);
 
-
-				if (!material.pbrMetallicRoughness.baseColorFactor.empty())
-				{
-					const auto& baseColorFactor = material.pbrMetallicRoughness.baseColorFactor;
-					mesh.material.baseColor = Math::Vector4(baseColorFactor.at(0), baseColorFactor.at(1), baseColorFactor.at(2), baseColorFactor.at(3));
-
-					if (material.pbrMetallicRoughness.baseColorTexture.index >= 0)
-					{
-						const auto& texture = model.textures.at(material.pbrMetallicRoughness.baseColorTexture.index);
-						auto& gltfImage	= model.images.at(texture.source);
-
-						mesh.textures.emplace_back(gltfImage.width, gltfImage.width, 4, gltfImage.image);
-					}
-
-					mesh.material.metallicFactor  = static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
-					mesh.material.roughnessFactor = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);
-				}
-
-				if (material.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0)
-				{
-					const auto& texture = model.textures.at(material.pbrMetallicRoughness.metallicRoughnessTexture.index);
-					auto& gltfImage = model.images.at(texture.source);
-
-					mesh.textures.emplace_back(gltfImage.width, gltfImage.height, 4, gltfImage.image);
-				}
-			}
+			mesh.layout.SetStride(stride);
 
 			for (size_t i = 0; i < count; ++i)
 			{
-				const auto& position = positions.at(i);
-				const auto& normal   = normals.at(i);
-				const auto& uv	     = uvs.at(i);
+				if (!positions.empty() && HAS_POSITIONS)
+				{
+					const auto& position = positions.at(i);
 
-				mesh.vertices.emplace_back(position.x);
-				mesh.vertices.emplace_back(position.y);
-				mesh.vertices.emplace_back(position.z);
+					mesh.vertices.emplace_back(position.x);
+					mesh.vertices.emplace_back(position.y);
+					mesh.vertices.emplace_back(position.z);
+				}
 
-				mesh.vertices.emplace_back(normal.x);
-				mesh.vertices.emplace_back(normal.y);
-				mesh.vertices.emplace_back(normal.z);
+				if (!normals.empty() && HAS_NORMALS)
+				{
+					const auto& normal = normals.at(i);
 
-				mesh.vertices.emplace_back((uv.s + 1.0f) * 0.5f);
-				mesh.vertices.emplace_back((uv.t + 1.0f) * 0.5f);
+					mesh.vertices.emplace_back(normal.x);
+					mesh.vertices.emplace_back(normal.y);
+					mesh.vertices.emplace_back(normal.z);
+				}
+
+				if (!uvs.empty() && HAS_TEXCOORDS)
+				{
+					const auto& uv = uvs.at(i);
+
+					mesh.vertices.emplace_back((uv.s + 1.0f) * 0.5f);
+					mesh.vertices.emplace_back((uv.t + 1.0f) * 0.5f);
+				}
 			}
 		}
 	}
 
-	static void ExtractMeshes(const tinygltf::Model& model, const tinygltf::Node& parentNode, std::vector<Assets::Mesh>& meshes)
+	static void ExtractMaterialsAndTextures(const tinygltf::Model& importModel, const tinygltf::Mesh& gltfMesh, Assets::Model& model)
 	{
-		Assets::Mesh mesh = {};
-
-		if (parentNode.mesh < static_cast<int>(model.meshes.size()))
+		for (const auto& primitive : gltfMesh.primitives)
 		{
-			ProcessMesh(model, model.meshes.at(parentNode.mesh), mesh);
-			meshes.push_back(mesh);
+			if (primitive.material >= 0 && primitive.material < static_cast<int32_t>(importModel.materials.size()))
+			{
+				const auto& gltfMaterial = importModel.materials.at(primitive.material);
+
+				const auto& baseColorFactor = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
+				const auto& baseColor = Math::Vector4(baseColorFactor.at(0), baseColorFactor.at(1), baseColorFactor.at(2), baseColorFactor.at(3));
+				const auto  metallicFactor  = static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor);
+				const auto  roughnessFactor = static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor);
+
+				model.materials.emplace_back(baseColor, metallicFactor, roughnessFactor);
+
+				if (!importModel.textures.empty())
+				{
+					if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0)
+					{
+						const auto& texture = importModel.textures.at(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index);
+								auto& image = importModel.images.at(texture.source);
+
+						model.textures.emplace_back(image.width, image.height, 4, image.image);
+					}
+
+					if (gltfMaterial.normalTexture.index >= 0)
+					{
+						const auto& texture = importModel.textures.at(gltfMaterial.normalTexture.index);
+								auto& image = importModel.images.at(texture.source);
+
+						model.textures.emplace_back(image.width, image.height, 4, image.image);
+					}
+
+					if (gltfMaterial.occlusionTexture.index >= 0)
+					{
+						const auto& texture = importModel.textures.at(gltfMaterial.occlusionTexture.index);
+						auto& image = importModel.images.at(texture.source);
+
+						model.textures.emplace_back(image.width, image.height, 4, image.image);
+					}
+
+					//if (gltfMaterial.emissiveTexture.index >= 0)
+					//{
+					//	const auto& texture = importModel.textures.at(gltfMaterial.emissiveTexture.index);
+					//	auto& image = importModel.images.at(texture.source);
+
+					//	model.textures.emplace_back(image.width, image.height, 4, image.image);
+					//}
+				}
+			}
 		}
 	}
 
-	static void SubmitModel(const tinygltf::Model& model, std::vector<Assets::Mesh>& meshes)
+	static void ProcessModel(const tinygltf::Model& importModel, const tinygltf::Node& node, Assets::Model& model)
 	{
-		const auto& scene = model.scenes.at(model.defaultScene);
+		Assets::Mesh	 mesh = {};
 
-		for (const auto node : scene.nodes)
-			ExtractMeshes(model, model.nodes.at(node), meshes);
+		if (node.mesh < static_cast<int>(importModel.meshes.size()))
+		{
+			const auto& gltfMesh = importModel.meshes.at(node.mesh);
+
+			ProcessMesh(importModel, gltfMesh, mesh);
+			model.meshes.push_back(std::move(mesh));
+
+			if (!importModel.materials.empty())
+			{
+				ExtractMaterialsAndTextures(importModel, gltfMesh, model);
+			}
+		}
 	}
 
-	bool LoadglTFModel(const std::string_view filepath, std::vector<Assets::Mesh>& meshes)
+	static void ExtractModel(const tinygltf::Model& importModel, Assets::Model& model)
+	{
+		const auto& scene = importModel.scenes.at(importModel.defaultScene);
+
+		for (const auto node : scene.nodes)
+		{
+			ProcessModel(importModel, importModel.nodes.at(node), model);
+		}
+	}
+
+	bool LoadglTFModel(const std::string_view filepath, Assets::Model& model)
 	{
 		tinygltf::TinyGLTF loader;
-		tinygltf::Model model;
+		tinygltf::Model importModel;
 
 		std::string error, warn;
 
-		const bool success = loader.LoadASCIIFromFile(&model, &error, &warn, filepath.data());
+		const bool success = loader.LoadASCIIFromFile(&importModel, &error, &warn, filepath.data());
 
 		if (!error.empty())
 			CG_ERROR("glTF Error: {0}", error.c_str());
@@ -210,7 +272,7 @@ namespace CGEngine::IO
 		else
 			CG_INFO("Loaded glTF: {0}", filepath.data());
 
-		SubmitModel(model, meshes);
+		ExtractModel(importModel, model);
 
 		return success;
 	}

@@ -13,7 +13,7 @@ namespace CGEngine
 namespace CGEngine::Assets
 {
 	struct Material;
-	struct Mesh;
+	struct Model;
 }
 
 namespace CGEngine::OpenGL
@@ -25,21 +25,20 @@ namespace CGEngine::OpenGL
 	class GLDrawObject
 	{
 	public:
-		explicit GLDrawObject(Assets::Mesh&& mesh);
+		explicit GLDrawObject(Assets::Model&& model);
 
 		Math::Vector3 position = Math::Vector3(0.0f);
-		Math::Vector3 scale    = Math::Vector3(1.0f);
 
-		[[nodiscard]] const GLVertexArray& GetVertexArray() const;
-		[[nodiscard]]		Assets::Material& GetMaterial() const;
+		[[nodiscard]] Assets::Material& GetMaterial(size_t index);
 
-		[[nodiscard]] const std::vector<std::shared_ptr<GLTexture>>& GetTextures() const;
+		[[nodiscard]] const std::vector<GLVertexArray>& GetVertexArrays() const;
+		[[nodiscard]] const std::vector<GLTexture>& GetTextures() const;
+		[[nodiscard]] const std::vector<Assets::Material>& GetMaterials() const;
 	private:
-		std::shared_ptr<GLBuffer>	   m_vertexBuffer = nullptr;
-		std::shared_ptr<GLVertexArray> m_vertexArray  = nullptr;
+		std::vector<GLBuffer>	   m_vertexBuffers;
+		std::vector<GLVertexArray> m_vertexArrays;
 
-		std::shared_ptr<Assets::Material> m_material  = nullptr;
-
-		std::vector<std::shared_ptr<GLTexture>> m_textures;
+		std::vector<Assets::Material> m_materials;
+		std::vector<GLTexture> m_textures;
 	};
 }

@@ -10,7 +10,7 @@ namespace CGEngine::OpenGL
 		GLTexture(TextureTarget target, PixelFormat format, int32_t width, int32_t height, const void* pixels);
 		GLTexture(TextureTarget target, PixelFormat format, int32_t width, int32_t height);
 
-		GLTexture(GLTexture&&) noexcept = delete;
+		GLTexture(GLTexture&&) noexcept = default;
 		GLTexture(const GLTexture&) noexcept = delete;
 		GLTexture& operator=(GLTexture&&) noexcept = delete;
 		GLTexture& operator=(const GLTexture&) noexcept = delete;

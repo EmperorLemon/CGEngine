@@ -13,7 +13,7 @@ namespace CGEngine::OpenGL
 	public:
 		GLBuffer(BufferTarget target, size_t size, const void* data);
 
-		GLBuffer(GLBuffer&&) noexcept = delete;
+		GLBuffer(GLBuffer&&) noexcept = default;
 		GLBuffer(const GLBuffer&) noexcept = delete;
 		GLBuffer& operator=(GLBuffer&&) noexcept = delete;
 		GLBuffer& operator=(const GLBuffer&) noexcept = delete;

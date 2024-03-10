@@ -5,7 +5,7 @@
 #include <filesystem>
 
 #include "Core/Logger.hpp"
-#include "Renderer/Assets/Mesh.h"
+#include "Renderer/Assets/Model.h"
 
 #include "IO/glTF/glTFLoader.h"
 
@@ -34,10 +34,10 @@ namespace CGEngine::IO
 		stbi_image_free(pixels);
 	}
 
-	void LoadModelFile(const std::string_view filepath, const ModelFileType type, std::vector<Assets::Mesh>& meshes)
+	void LoadModelFile(const std::string_view filepath, const ModelFileType type, Assets::Model& model)
 	{
 		if (type == ModelFileType::glTF)
-			LoadglTFModel(filepath, meshes);
+			LoadglTFModel(filepath, model);
 	}
 
 	void ReadFile(const std::string_view filepath, std::vector<unsigned char>& data)

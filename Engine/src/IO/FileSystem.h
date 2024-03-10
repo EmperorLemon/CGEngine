@@ -5,7 +5,7 @@
 
 namespace CGEngine::Assets
 {
-	struct Mesh;
+	struct Model;
 }
 
 namespace CGEngine::IO
@@ -18,7 +18,7 @@ namespace CGEngine::IO
 	};
 
 	void LoadImageFile(std::string_view filepath, int& width, int& height, int& channels, std::vector<unsigned char>& data);
-	void LoadModelFile(std::string_view filepath, ModelFileType type, std::vector<Assets::Mesh>& meshes);
+	void LoadModelFile(std::string_view filepath, ModelFileType type, Assets::Model& model);
 
 	void ReadFile(std::string_view filepath, std::vector<unsigned char>& data);
 	void ReadFile(std::string_view filepath, std::string& data);

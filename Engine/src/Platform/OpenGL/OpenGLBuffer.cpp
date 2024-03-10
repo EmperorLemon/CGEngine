@@ -32,6 +32,7 @@ namespace CGEngine::OpenGL
 		{
 		case BufferTarget::NONE: break;
 		case BufferTarget::VERTEX_BUFFER:		  return GL_ARRAY_BUFFER;
+		case BufferTarget::INDEX_BUFFER:		  return GL_ELEMENT_ARRAY_BUFFER;
 		case BufferTarget::UNIFORM_BUFFER:		  return GL_UNIFORM_BUFFER;
 		case BufferTarget::SHADER_STORAGE_BUFFER: return GL_SHADER_STORAGE_BUFFER;
 		}

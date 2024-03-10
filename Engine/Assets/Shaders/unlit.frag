@@ -10,9 +10,10 @@ in VS_OUT {
 
 struct Material
 {
-    vec4 baseColor;
-    sampler2D baseColorSampler;
-    sampler2D metallicRoughnessSampler;
+    vec4 albedo;
+    sampler2D baseAlbedoSampler;
+    sampler2D baseNormalSampler;
+    sampler2D baseOcclusionSampler;
     float metallicFactor;
     float roughnessFactor;
 };
@@ -21,16 +22,14 @@ uniform Material material;
 
 void main()
 {
-    vec4 baseColor = material.baseColor;
+    vec4 albedo = material.albedo;
 
-    vec4 baseColorTexture         = texture(material.baseColorSampler, fs_in.TexCoords);
-    vec4 metallicRoughnessTexture = texture(material.metallicRoughnessSampler, fs_in.TexCoords);
+    vec4 baseColorTexture     = texture(material.baseAlbedoSampler, fs_in.TexCoords);
+    vec4 baseNormalTexture    = texture(material.baseNormalSampler, fs_in.TexCoords);
+    vec4 baseOcclusionTexture = texture(material.baseOcclusionSampler, fs_in.TexCoords);
 
     float metallic  = material.metallicFactor;
     float roughness = material.roughnessFactor;
 
-    //baseColor = mix(baseColorTexture * (1.0 - metallic), metallicRoughnessTexture, metallic);
-    baseColor = baseColorTexture;
-
-	FragColor = baseColor;
+	FragColor = albedo;
 }

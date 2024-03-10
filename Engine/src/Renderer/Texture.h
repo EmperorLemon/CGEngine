@@ -39,7 +39,7 @@ namespace CGEngine
 	public:
 		Texture(const int32_t width, const int32_t height) : p_width(width), p_height(height) {}
 
-		Texture(Texture&&) noexcept = delete;
+		Texture(Texture&&) noexcept = default;
 		Texture(const Texture&) noexcept = delete;
 		Texture& operator=(Texture&&) noexcept = delete;
 		Texture& operator=(const Texture&) noexcept = delete;

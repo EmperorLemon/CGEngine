@@ -44,12 +44,14 @@ namespace CGEngine::OpenGL
 		{
 			const auto& drawable_object = static_cast<GLDrawObject*>(ptr);
 
-			const auto& vertexArray = drawable_object->GetVertexArray();
-			const auto& indices = vertexArray.GetIndices();
+			for (const auto& vertexArray : drawable_object->GetVertexArrays())
+			{
+				const auto& indices = vertexArray.GetIndices();
 
-			vertexArray.Bind();
-			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
-			vertexArray.Unbind();
+				vertexArray.Bind();
+				glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
+				vertexArray.Unbind();
+			}
 		}
 
 	}

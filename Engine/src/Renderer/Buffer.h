@@ -16,6 +16,7 @@ namespace CGEngine
 	{
 		NONE,
 		VERTEX_BUFFER,
+		INDEX_BUFFER,
 		UNIFORM_BUFFER,
 		SHADER_STORAGE_BUFFER
 	};
@@ -25,7 +26,7 @@ namespace CGEngine
 	public:
 		explicit Buffer(const BufferTarget target) : p_target(target) {}
 
-		Buffer(Buffer&&) noexcept = delete;
+		Buffer(Buffer&&) noexcept = default;
 		Buffer& operator=(Buffer&&) noexcept = delete;
 		Buffer(const Buffer&) noexcept = delete;
 		Buffer& operator=(const Buffer&) noexcept = delete;

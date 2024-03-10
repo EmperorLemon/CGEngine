@@ -5,7 +5,7 @@
 #include "Context.h"
 #include "Camera.h"
 
-#include "Renderer/Assets/Mesh.h"
+#include "Renderer/Assets/Model.h"
 #include "IO/FileSystem.h"
 
 #include "Math/Math.h"
@@ -42,19 +42,13 @@ namespace CGEngine
 
 	void SetupRenderScene()
 	{
-		std::vector<Assets::Mesh> meshes;
-		LoadModelFile("Assets/Models/Test/cube.gltf", IO::ModelFileType::glTF, meshes);
+		Assets::Model model;
+		LoadModelFile("Assets/Models/Test/cube.gltf", IO::ModelFileType::glTF, model);
 
-		if (!meshes.empty())
-		{
-			for (auto& mesh : meshes)
-			{
-				objects.emplace_back(std::make_shared<OpenGL::GLDrawObject>(std::move(mesh)));
-			}
-		}
+		objects.emplace_back(std::make_shared<OpenGL::GLDrawObject>(std::move(model)));
 
 		objects.at(0)->position = Math::Vector3(0.0f, 0.0f, 4.0f);
-		objects.at(0)->scale = Math::Vector3(0.0f, 0.0f, 4.0f);
+		objects.at(0)->GetMaterial(0).albedo = Math::Vector4(1.0f, 0.0f, 0.0f, 1.0f);
 
 		std::string vert_src, frag_src;
 		IO::ReadFile("Assets/Shaders/unlit.vert", vert_src);
@@ -73,6 +67,18 @@ namespace CGEngine
 
 		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
 		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
+
+		shader->Use();
+
+		constexpr int albedo_texture_sampler = 0;
+		constexpr int normal_texture_sampler = 1;
+		constexpr int occlusion_texture_sampler = 2;
+
+		shader->BindUniform("material.baseAlbedoSampler", OpenGL::UniformType::INT,    &albedo_texture_sampler);
+		shader->BindUniform("material.baseNormalSampler", OpenGL::UniformType::INT,    &normal_texture_sampler);
+		shader->BindUniform("material.baseOcclusionSampler", OpenGL::UniformType::INT, &occlusion_texture_sampler);
+
+		shader->Disable();
 	}
 
 	void Renderer::Render()
@@ -81,9 +87,6 @@ namespace CGEngine
 
 		m_backend->Clear(static_cast<uint32_t>(ClearMask::CG_COLOR_DEPTH_BUFFER_BIT));
 		m_backend->ClearColor(RGBA);
-
-		constexpr int base_color_texture_sampler = 0;
-		constexpr int metallic_roughness_texture_sampler = 1;
 
 		shader->Use();
 		for (const auto& object : objects)
@@ -96,23 +99,23 @@ namespace CGEngine
 			model = Math::Rotate(model, 45.0f, Math::Y_AXIS);
 			model = Math::Rotate(model, 0.0f, Math::Z_AXIS);
 
+			shader->BindUniform("model", OpenGL::UniformType::MAT4, Math::value_ptr(model));
+
 			int unit = 0;
 
 			for (const auto& texture : object->GetTextures())
 			{
-				texture->Bind(unit);
+				texture.Bind(unit);
 				unit++;
 			}
 
-			shader->BindUniform("model", OpenGL::UniformType::MAT4, Math::value_ptr(model));
+			for (const auto& material : object->GetMaterials())
+			{
+				shader->BindUniform("material.albedo", OpenGL::UniformType::VEC4, Math::value_ptr(material.albedo));
 
-			const auto& material = object->GetMaterial();
-
-			shader->BindUniform("material.baseColor", OpenGL::UniformType::VEC4, Math::value_ptr(material.baseColor));
-			shader->BindUniform("material.baseColorSampler", OpenGL::UniformType::INT, &base_color_texture_sampler);
-			shader->BindUniform("material.metallicRoughnessSampler", OpenGL::UniformType::INT, &metallic_roughness_texture_sampler);
-			shader->BindUniform("material.metallicFactor", OpenGL::UniformType::FLOAT, &material.metallicFactor);
-			shader->BindUniform("material.roughnessFactor", OpenGL::UniformType::FLOAT, &material.roughnessFactor);
+				shader->BindUniform("material.metallicFactor", OpenGL::UniformType::FLOAT, &material.metallicFactor);
+				shader->BindUniform("material.roughnessFactor", OpenGL::UniformType::FLOAT, &material.roughnessFactor);
+			}
 
 			m_backend->Draw(object.get());
 		}
