@@ -10,18 +10,18 @@ out VS_OUT {
     vec3 Tangent;
 } vs_out;
 
-layout (std140, binding = 1) uniform Matrices
+layout (std140, binding = 0) uniform Matrices
 {
     mat4 projection;
     mat4 view;
 };
 
-uniform mat4 uModel;
+uniform mat4 model;
 
 void main()
 {
     vs_out.Normal    = aNormal;
     vs_out.TexCoords = aTexCoords;
 
-	gl_Position = projection * view * uModel * vec4(aPos, 1.0);
+	gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

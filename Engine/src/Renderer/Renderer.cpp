@@ -64,7 +64,7 @@ namespace CGEngine
 		shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 
 		uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4), nullptr);
-		uniformBuffer->BindBufferRange(1, 0, 2 * sizeof(Math::Mat4));
+		uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4));
 	}
 
 	void Renderer::PreRender(const Camera& camera)
@@ -72,7 +72,7 @@ namespace CGEngine
 		m_backend->Enable(static_cast<uint32_t>(APICapability::CG_DEPTH_TEST));
 
 		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
-		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.projection));
+		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
 	}
 
 	void Renderer::Render()
@@ -104,7 +104,7 @@ namespace CGEngine
 				unit++;
 			}
 
-			shader->BindUniform("uModel", OpenGL::UniformType::MAT4, Math::value_ptr(model));
+			shader->BindUniform("model", OpenGL::UniformType::MAT4, Math::value_ptr(model));
 
 			const auto& material = object->GetMaterial();
 
