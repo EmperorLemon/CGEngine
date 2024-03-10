@@ -12,10 +12,18 @@ namespace CGEngine
 		size_t  offset = 0; // byte offset of buffer (used for combining multiple buffers)
 	};
 
+	enum class BufferTarget : uint8_t
+	{
+		NONE,
+		VERTEX_BUFFER,
+		UNIFORM_BUFFER,
+		SHADER_STORAGE_BUFFER
+	};
+
 	class Buffer
 	{
 	public:
-		Buffer() = default;
+		explicit Buffer(const BufferTarget target) : p_target(target) {}
 
 		Buffer(Buffer&&) noexcept = delete;
 		Buffer& operator=(Buffer&&) noexcept = delete;
@@ -27,9 +35,13 @@ namespace CGEngine
 		virtual void SetData(size_t size, const void* data) const = 0;
 		virtual void SetSubData(size_t offset, size_t size, const void* data) const = 0;
 
+		virtual void BindBufferBase(uint32_t binding)  const = 0;
+		virtual void BindBufferRange(uint32_t binding, size_t offset, size_t size) const = 0;
+
 		[[nodiscard]] virtual uint32_t GetID() const = 0;
 	protected:
 		uint32_t p_id = 0;
+		BufferTarget p_target = BufferTarget::NONE;
 	};
 
 	class VertexArray

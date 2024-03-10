@@ -26,7 +26,20 @@ namespace CGEngine::OpenGL
 		return GL_FLOAT;
 	}
 
-	GLBuffer::GLBuffer(const size_t size, const void* data) : Buffer()
+	constexpr GLenum Convert(const BufferTarget target)
+	{
+		switch (target)
+		{
+		case BufferTarget::NONE: break;
+		case BufferTarget::VERTEX_BUFFER:		  return GL_ARRAY_BUFFER;
+		case BufferTarget::UNIFORM_BUFFER:		  return GL_UNIFORM_BUFFER;
+		case BufferTarget::SHADER_STORAGE_BUFFER: return GL_SHADER_STORAGE_BUFFER;
+		}
+
+		return GL_UNIFORM_BUFFER;
+	}
+
+	GLBuffer::GLBuffer(const BufferTarget target, const size_t size, const void* data) : Buffer(target)
 	{
 		glCreateBuffers(1, &p_id);
 		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(size), data, GL_DYNAMIC_STORAGE_BIT);
@@ -46,6 +59,16 @@ namespace CGEngine::OpenGL
 	void GLBuffer::SetSubData(const size_t offset, const size_t size, const void* data) const
 	{
 		glNamedBufferSubData(p_id, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);
+	}
+
+	void GLBuffer::BindBufferBase(const uint32_t binding) const
+	{
+		glBindBufferBase(Convert(p_target), binding, p_id);
+	}
+
+	void GLBuffer::BindBufferRange(const uint32_t binding, const size_t offset, const size_t size) const
+	{
+		glBindBufferRange(Convert(p_target), binding, p_id, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size));
 	}
 
 	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const VertexLayout& layout) : VertexArray(vertexBuffer)

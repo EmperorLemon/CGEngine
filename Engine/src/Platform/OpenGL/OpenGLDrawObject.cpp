@@ -18,7 +18,7 @@ namespace CGEngine::OpenGL
 		const BufferInfo vBufferInfo = { vBufferSize, mesh.vertices.size(), 0 };
 		const BufferInfo iBufferInfo = { iBufferSize, mesh.indices.size(),  vBufferInfo.size};
 
-		m_vertexBuffer = std::make_shared<GLBuffer>(bufferSize, nullptr);
+		m_vertexBuffer = std::make_shared<GLBuffer>(BufferTarget::VERTEX_BUFFER, bufferSize, nullptr);
 		m_vertexBuffer->SetSubData(vBufferInfo.offset, vBufferInfo.size, mesh.vertices.data());
 		m_vertexBuffer->SetSubData(iBufferInfo.offset, iBufferInfo.size, mesh.indices.data());
 

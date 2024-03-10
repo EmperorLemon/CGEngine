@@ -9,7 +9,6 @@
 #include <tiny_gltf.h>
 
 #include <stack>
-#include <algorithm>
 
 #include "Core/Logger.hpp"
 
@@ -49,11 +48,13 @@ namespace CGEngine::IO
 
 	static void ProcessMesh(const tinygltf::Model& model, const tinygltf::Mesh& gltfMesh, Assets::Mesh& mesh)
 	{
-		mesh.layout.SetStride(3 * sizeof(float));
+		mesh.layout.SetStride(8 * sizeof(float));
 
-		mesh.layout.add(0, 3, DataType::FLOAT,   0, false);
-		mesh.layout.add(1, 2, DataType::FLOAT, 3 * sizeof(float), false);
-		//mesh.layout.add(2, 2, DataType::FLOAT, 576, false);
+		mesh.layout.add(0, 3, DataType::FLOAT, 0, false);
+		mesh.layout.add(1, 3, DataType::FLOAT, 3 * sizeof(float), false);
+		mesh.layout.add(2, 2, DataType::FLOAT, 6 * sizeof(float), false);
+
+		size_t count = 0;
 
 		for (const auto& primitive : gltfMesh.primitives)
 		{
@@ -75,11 +76,30 @@ namespace CGEngine::IO
 				const auto& buffer = model.buffers[bufferView.buffer];
 				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
 
+				count = accessor.count;
+
 				for (size_t i = 0; i < accessor.count; ++i)
 				{
 					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
 
 					positions.emplace_back(Math::make_vec3(data));
+				}
+			}
+
+			std::vector<Math::Vector3> normals;
+
+			if (primitive.attributes.contains("NORMAL"))
+			{
+				const auto& accessor = model.accessors[primitive.attributes.at("NORMAL")];
+				const auto& bufferView = model.bufferViews[accessor.bufferView];
+				const auto& buffer = model.buffers[bufferView.buffer];
+				const auto  byteOffset = bufferView.byteOffset + accessor.byteOffset;
+
+				for (size_t i = 0; i < accessor.count; ++i)
+				{
+					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
+
+					normals.emplace_back(Math::make_vec3(data));
 				}
 			}
 
@@ -104,9 +124,10 @@ namespace CGEngine::IO
 			{
 				const auto& material = model.materials.at(primitive.material);
 
+
 				if (!material.pbrMetallicRoughness.baseColorFactor.empty())
 				{
-					const auto& baseColorFactor= material.pbrMetallicRoughness.baseColorFactor;
+					const auto& baseColorFactor = material.pbrMetallicRoughness.baseColorFactor;
 					mesh.material.baseColor = Math::Vector4(baseColorFactor.at(0), baseColorFactor.at(1), baseColorFactor.at(2), baseColorFactor.at(3));
 
 					if (material.pbrMetallicRoughness.baseColorTexture.index >= 0)
@@ -116,25 +137,36 @@ namespace CGEngine::IO
 
 						mesh.textures.emplace_back(gltfImage.width, gltfImage.width, 4, gltfImage.image);
 					}
+
+					mesh.material.metallicFactor  = static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
+					mesh.material.roughnessFactor = static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);
 				}
 
-				if (!material.doubleSided)
+				if (material.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0)
 				{
-					
+					const auto& texture = model.textures.at(material.pbrMetallicRoughness.metallicRoughnessTexture.index);
+					auto& gltfImage = model.images.at(texture.source);
+
+					mesh.textures.emplace_back(gltfImage.width, gltfImage.height, 4, gltfImage.image);
 				}
 			}
 
-			for (const auto& position : positions)
+			for (size_t i = 0; i < count; ++i)
 			{
+				const auto& position = positions.at(i);
+				const auto& normal   = normals.at(i);
+				const auto& uv	     = uvs.at(i);
+
 				mesh.vertices.emplace_back(position.x);
 				mesh.vertices.emplace_back(position.y);
 				mesh.vertices.emplace_back(position.z);
-			}
 
-			for (const auto& uv : uvs)
-			{
-				mesh.vertices.emplace_back(uv.s);
-				mesh.vertices.emplace_back(uv.t);
+				mesh.vertices.emplace_back(normal.x);
+				mesh.vertices.emplace_back(normal.y);
+				mesh.vertices.emplace_back(normal.z);
+
+				mesh.vertices.emplace_back((uv.s + 1.0f) * 0.5f);
+				mesh.vertices.emplace_back((uv.t + 1.0f) * 0.5f);
 			}
 		}
 	}
@@ -154,7 +186,8 @@ namespace CGEngine::IO
 	{
 		const auto& scene = model.scenes.at(model.defaultScene);
 
-		ExtractMeshes(model, model.nodes.at(0), meshes);
+		for (const auto node : scene.nodes)
+			ExtractMeshes(model, model.nodes.at(node), meshes);
 	}
 
 	bool LoadglTFModel(const std::string_view filepath, std::vector<Assets::Mesh>& meshes)

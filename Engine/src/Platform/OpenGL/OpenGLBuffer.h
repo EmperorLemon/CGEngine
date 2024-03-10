@@ -11,7 +11,7 @@ namespace CGEngine::OpenGL
 	class GLBuffer final : public Buffer
 	{
 	public:
-		GLBuffer(size_t size, const void* data);
+		GLBuffer(BufferTarget target, size_t size, const void* data);
 
 		GLBuffer(GLBuffer&&) noexcept = delete;
 		GLBuffer(const GLBuffer&) noexcept = delete;
@@ -22,6 +22,9 @@ namespace CGEngine::OpenGL
 
 		void SetData(size_t size, const void* data) const override;
 		void SetSubData(size_t offset, size_t size, const void* data) const override;
+
+		void BindBufferBase(uint32_t binding) const override;
+		void BindBufferRange(uint32_t binding, size_t offset, size_t size) const override;
 
 		[[nodiscard]] uint32_t GetID() const override { return p_id; }
 	};
