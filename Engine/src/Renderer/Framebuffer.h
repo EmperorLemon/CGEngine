@@ -19,6 +19,12 @@ namespace CGEngine
 		virtual ~Framebuffer() = default;
 
 		virtual void AttachTexture(FramebufferTextureAttachment attachment, uint32_t texture) const = 0;
+		virtual void AttachRenderbuffer(FramebufferTextureAttachment attachment, uint32_t renderbuffer) const = 0;
+
+		virtual void Bind(FramebufferTarget target) const = 0;
+		virtual void Unbind(FramebufferTarget target) const = 0;
+
+		virtual void Clear(BufferType type, int32_t index, const float* value) const = 0;
 	protected:
 		uint32_t p_id = 0;
 		BufferTarget p_target = BufferTarget::NONE;
@@ -36,6 +42,7 @@ namespace CGEngine
 
 		virtual ~Renderbuffer() = default;
 
+		[[nodiscard]] virtual uint32_t GetID() const = 0;
 	protected:
 		uint32_t p_id = 0;
 		BufferTarget p_target = BufferTarget::NONE;

@@ -8,8 +8,6 @@ namespace CGEngine::OpenGL
 {
 	GLFramebuffer::GLFramebuffer(const BufferTarget target) : Framebuffer(target)
 	{
-		CG_TRACE("Created GLFramebuffer!");
-
 		glCreateFramebuffers(1, &p_id);
 	}
 
@@ -23,6 +21,26 @@ namespace CGEngine::OpenGL
 	void GLFramebuffer::AttachTexture(const FramebufferTextureAttachment attachment, const uint32_t texture) const
 	{
 		glNamedFramebufferTexture(p_id, Convert(attachment), texture, 0);
+	}
+
+	void GLFramebuffer::AttachRenderbuffer(const FramebufferTextureAttachment attachment, const uint32_t renderbuffer) const
+	{
+		glNamedFramebufferRenderbuffer(p_id, Convert(attachment), GL_RENDERBUFFER, renderbuffer);
+	}
+
+	void GLFramebuffer::Bind(const FramebufferTarget target) const
+	{
+		glBindFramebuffer(Convert(target), p_id);
+	}
+
+	void GLFramebuffer::Unbind(const FramebufferTarget target) const
+	{
+		glBindFramebuffer(Convert(target), 0);
+	}
+
+	void GLFramebuffer::Clear(const BufferType type, const int32_t index, const float* value) const
+	{
+		glClearNamedFramebufferfv(p_id, Convert(type), index, value);
 	}
 
 	bool GLFramebuffer::CheckStatus() const

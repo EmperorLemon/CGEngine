@@ -37,7 +37,12 @@ namespace CGEngine::OpenGL
 
 	void GLBuffer::BindBufferRange(const uint32_t binding, const size_t offset, const size_t size) const
 	{
-		glBindBufferRange(Convert(p_target), binding, p_id, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size));
+		GLint alignment;
+		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment);
+
+		const GLintptr alignedOffset = static_cast<GLintptr>(offset) / alignment * alignment;
+
+		glBindBufferRange(Convert(p_target), binding, p_id, alignedOffset, static_cast<GLsizeiptr>(size));
 	}
 
 	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const VertexLayout& layout) : VertexArray(vertexBuffer)

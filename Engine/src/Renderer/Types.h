@@ -4,6 +4,27 @@
 
 namespace CGEngine
 {
+	enum class ClearMask : uint8_t
+	{
+		NULL_BUFFER_BIT,
+		COLOR_BUFFER_BIT,
+		DEPTH_BUFFER_BIT,
+		COLOR_DEPTH_BUFFER_BIT,
+		STENCIL_BUFFER_BIT
+	};
+
+	enum class APICapability : uint8_t
+	{
+		BLEND,
+		CULL_FACE,
+		DEPTH_TEST,
+		STENCIL_TEST,
+		FRAMEBUFFER_SRGB,
+		LINE_SMOOTH,
+		POLYGON_SMOOTH,
+		SCISSOR_TEST,
+	};
+
 	enum class DataType : uint8_t
 	{
 		VOID,
@@ -29,10 +50,29 @@ namespace CGEngine
 		PROGRAM,
 	};
 
-	enum class TextureTarget : uint8_t
+	enum class BufferType : uint8_t
 	{
-		TEXTURE_2D,
-		TEXTURE_3D
+		COLOR,
+		DEPTH,
+		STENCIL
+	};
+
+	enum class BufferTarget : uint8_t
+	{
+		NONE,
+		VERTEX_BUFFER,
+		INDEX_BUFFER,
+		UNIFORM_BUFFER,
+		SHADER_STORAGE_BUFFER,
+		FRAMEBUFFER,
+		RENDERBUFFER
+	};
+
+	enum class FramebufferTarget : uint8_t
+	{
+		FRAMEBUFFER,
+		READ_FRAMEBUFFER,
+		DRAW_FRAMEBUFFER
 	};
 
 	enum class FramebufferTextureAttachment : uint8_t
@@ -48,15 +88,10 @@ namespace CGEngine
 		DEPTH24_STENCIL8
 	};
 
-	enum class BufferTarget : uint8_t
+	enum class TextureTarget : uint8_t
 	{
-		NONE,
-		VERTEX_BUFFER,
-		INDEX_BUFFER,
-		UNIFORM_BUFFER,
-		SHADER_STORAGE_BUFFER,
-		FRAMEBUFFER,
-		RENDERBUFFER
+		TEXTURE_2D,
+		TEXTURE_3D
 	};
 
 	enum class TextureFormat : uint8_t

@@ -2,7 +2,7 @@
 
 #include "Core/Logger.hpp"
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 
 namespace CGEngine::OpenGL
 {
@@ -143,7 +143,9 @@ namespace CGEngine::OpenGL
 
 	void GLShader::BindUniform(const std::string_view name, const UniformType type, const void* value, const bool transpose) const
 	{
-		const auto& uniform = GetUniform(name.data());
+		GLUniform uniform = {};
+
+		if (!GetUniform(name.data(), uniform)) return;
 
 		if (value == nullptr)
 		{
@@ -165,14 +167,16 @@ namespace CGEngine::OpenGL
 		}
 	}
 
-	const GLUniform& GLShader::GetUniform(const std::string& name) const
+	bool GLShader::GetUniform(const std::string& name, GLUniform& uniform) const
 	{
 		if (m_uniforms.contains(name))
-			return m_uniforms.at(name);
+		{
+			uniform = m_uniforms.at(name);
+			return true;
+		}
 
 		CG_WARN("Shader uniform {0} could not be found!", name.c_str());
-		CG_WARN("Make sure that the shader uniform is being actively used in the shader!");
 
-		throw std::runtime_error("Unable to fetch uniform!");
+		return false;
 	}
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Logger.hpp"
+#include "Time.h"
 #include "Window.h"
 
 #include "Scene/SceneManager.h"
@@ -40,6 +41,7 @@ namespace CGEngine
 		SceneManager m_sceneManager;
 
 		Window m_window;
+		Time m_time;
 		std::unique_ptr<Renderer> m_renderer = nullptr;
 	};
 }

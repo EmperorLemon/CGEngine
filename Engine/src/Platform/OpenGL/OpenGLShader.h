@@ -43,7 +43,7 @@ namespace CGEngine::OpenGL
 
 		void BindUniform(std::string_view name, UniformType type, const void* value, bool transpose = false) const;
 	private:
-		[[nodiscard]] const GLUniform& GetUniform(const std::string& name) const;
+		[[nodiscar]] bool GetUniform(const std::string& name, GLUniform& uniform) const;
 
 		std::unordered_map<std::string, GLUniform> m_uniforms;
 	};

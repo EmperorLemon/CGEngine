@@ -6,6 +6,7 @@
 
 namespace CGEngine
 {
+	struct Time;
 	struct Camera;
 	class RenderAPI;
 
@@ -31,7 +32,7 @@ namespace CGEngine
 		explicit Renderer(const RendererCreateInfo& rendererInfo);
 
 		void PreRender(const Camera& camera);
-		void Render();
+		void Render(const Time& time);
 		void PostRender();
 
 		static GraphicsAPI GetAPI();

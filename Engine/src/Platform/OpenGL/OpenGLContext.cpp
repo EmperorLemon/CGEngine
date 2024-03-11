@@ -6,13 +6,16 @@
 
 #include <stdexcept>
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
 namespace CGEngine::OpenGL
 {
-	static void DebugMessageCallback(const GLenum source, const GLenum type, const GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userData)
+	static void APIENTRY DebugMessageCallback(const GLenum source, const GLenum type, const GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userData)
 	{
+		// ignore non-significant error/warning codes
+		if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
 		const auto src_str = [source]
 		{
 			switch (source)
@@ -82,13 +85,21 @@ namespace CGEngine::OpenGL
 	{
 		glfwMakeContextCurrent(static_cast<GLFWwindow*>(window.window));
 
-		if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
+		if (!gladLoadGL(glfwGetProcAddress))
 			throw std::runtime_error("Failed to initialise GLAD!");
 
+		int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+
 #ifdef CG_DEBUG
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(DebugMessageCallback, nullptr);
+		if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+		{
+			CG_INFO("OpenGL Debug Enabled!");
+
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+			glDebugMessageCallback(DebugMessageCallback, nullptr);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+		}
 #endif
 	}
 

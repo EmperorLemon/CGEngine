@@ -17,6 +17,12 @@ namespace CGEngine::OpenGL
 		~GLFramebuffer() override;
 
 		void AttachTexture(FramebufferTextureAttachment attachment, uint32_t texture) const override;
+		void AttachRenderbuffer(FramebufferTextureAttachment attachment, uint32_t renderbuffer) const override;
+
+		void Bind(FramebufferTarget target = FramebufferTarget::FRAMEBUFFER) const override;
+		void Unbind(FramebufferTarget target = FramebufferTarget::FRAMEBUFFER) const override;
+
+		void Clear(BufferType type, int32_t index, const float* value) const override;
 
 		[[nodiscard]] bool CheckStatus() const;
 	};
@@ -32,5 +38,7 @@ namespace CGEngine::OpenGL
 		GLRenderbuffer& operator=(const GLRenderbuffer&) noexcept = delete;
 
 		~GLRenderbuffer() override;
+
+		[[nodiscard]] uint32_t GetID() const override { return p_id; }
 	};
 }

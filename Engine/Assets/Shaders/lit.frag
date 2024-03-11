@@ -60,10 +60,10 @@ vec3 Lighting(in vec3 normal, in vec3 albedo)
     vec3  halfwayDir      = normalize(lightDir + viewDir);
 
     float ambientFactor   = 0.1;
-    vec3  ambient         = ambientFactor * vec3(0.4);                   
+    vec3  ambient         = ambientFactor * albedo;                   
 
     float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
-    vec3  diffuse         = diffuseFactor * vec3(1.0);                  
+    vec3  diffuse         = diffuseFactor * albedo;                  
 
     float specularFactor  = pow(max(dot(normal, halfwayDir), 0.0), 32);
     vec3  specular        = specularFactor * vec3(0.2);

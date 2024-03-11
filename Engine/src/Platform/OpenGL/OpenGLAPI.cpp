@@ -1,43 +1,14 @@
 #include "OpenGLAPI.h"
 #include "Renderer/RenderAPI.h"
 
-#include <glad/glad.h>
+#include "OpenGLTypes.hpp"
 
 #include "OpenGLBuffer.h"
 #include "OpenGLDrawObject.h"
+#include "Core/Logger.hpp"
 
 namespace CGEngine::OpenGL
 {
-	constexpr GLenum Convert(const ClearMask mask)
-	{
-		switch (mask)
-		{
-		case ClearMask::NULL_BUFFER_BIT:		break;
-		case ClearMask::COLOR_BUFFER_BIT:	    return GL_COLOR_BUFFER_BIT;
-		case ClearMask::DEPTH_BUFFER_BIT:       return GL_DEPTH_BUFFER_BIT;
-		case ClearMask::COLOR_DEPTH_BUFFER_BIT: return GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
-		case ClearMask::STENCIL_BUFFER_BIT:	    return GL_STENCIL_BUFFER_BIT;
-		}
-
-		return 0;
-	}
-	constexpr GLenum Convert(const APICapability capability)
-	{
-		switch (capability)
-		{
-		case APICapability::BLEND:			  return GL_BLEND;
-		case APICapability::CULL_FACE:		  return GL_CULL_FACE;
-		case APICapability::DEPTH_TEST:		  return GL_DEPTH_TEST;
-		case APICapability::STENCIL_TEST:     return GL_STENCIL_TEST;
-		case APICapability::FRAMEBUFFER_SRGB: return GL_FRAMEBUFFER_SRGB;
-		case APICapability::LINE_SMOOTH:	  return GL_LINE_SMOOTH;
-		case APICapability::POLYGON_SMOOTH:   return GL_POLYGON_SMOOTH;
-		case APICapability::SCISSOR_TEST:     return GL_SCISSOR_TEST;
-		}
-
-		return GL_DEPTH_TEST;
-	}
-
 	void OpenGLAPI::Draw(void* ptr) const
 	{
 		if (ptr != nullptr)
@@ -56,22 +27,24 @@ namespace CGEngine::OpenGL
 
 	}
 
-	void OpenGLAPI::Enable(uint32_t capability) const
+	void OpenGLAPI::Enable(const APICapability capability) const
 	{
-		glEnable(Convert(static_cast<APICapability>(capability)));
+		glEnable(Convert(capability));
+
+		if (!glIsEnabled(Convert(capability))) CG_ERROR("Renderdoc was right!");
 	}
 
-	void OpenGLAPI::Disable(uint32_t capability) const
+	void OpenGLAPI::Disable(const APICapability capability) const
 	{
-		glDisable(Convert(static_cast<APICapability>(capability)));
+		glDisable(Convert(capability));
 	}
 
-	void OpenGLAPI::Clear(const uint32_t mask)
+	void OpenGLAPI::Clear(const ClearMask mask)
 	{
-		glClear(Convert(static_cast<ClearMask>(mask)));
+		glClear(Convert(mask));
 	}
 
-	void OpenGLAPI::ClearColor(float* rgba)
+	void OpenGLAPI::ClearColor(const float* rgba)
 	{
 		glClearColor(rgba[0], rgba[1], rgba[2], rgba[3]);
 	}

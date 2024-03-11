@@ -15,6 +15,10 @@ void CreateGLFWWindow(const CGEngine::WindowCreateInfo& windowInfo, CGEngine::Wi
 			throw std::runtime_error("Unable to initialize glfw!");
 	}
 
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // Request OpenGL version 4.x
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6); // Request OpenGL version x.6
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Use core profile
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	glfwWindowHint(GLFW_SAMPLES, 4); // take advantage of multi-sample anti-aliasing
 
 	window.title = windowInfo.title;

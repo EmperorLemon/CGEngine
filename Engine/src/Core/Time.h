@@ -6,6 +6,9 @@ namespace CGEngine
 
 	struct Time
 	{
+		void Start();
+		void Update();
+
 		double timer = 0.0;
 
 		double prevTime = 0.0;
@@ -13,7 +16,7 @@ namespace CGEngine
 
 		double deltaTime = 0.0;
 
-		int frames = 0;
 		int ticks  = 0;
+		int frames = 0;
 	};
 }

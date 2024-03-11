@@ -1,6 +1,7 @@
 #include "Renderer.h"
 
 #include "Core/Logger.hpp"
+#include "Core/Time.h"
 
 #include "Context.h"
 #include "Camera.h"
@@ -26,14 +27,27 @@ namespace CGEngine
 	std::vector<std::shared_ptr<OpenGL::GLDrawObject>> objects;
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
 
+	std::shared_ptr<OpenGL::GLShader> screenShader = nullptr;
 	std::shared_ptr<OpenGL::GLTexture> screenTexture = nullptr;
 
 	std::shared_ptr<OpenGL::GLBuffer> uniformBuffer = nullptr;
 	std::shared_ptr<OpenGL::GLFramebuffer> frameBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLRenderbuffer> renderBuffer = nullptr;
 
 	Assets::Light light;
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
+
+	constexpr float QUAD_VERTICES[] =
+	{
+		-1.0f,  1.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f,
+		 1.0f, -1.0f, 1.0f, 0.0f,
+
+		-1.0f,  1.0f, 0.0f, 1.0f,
+		 1.0f, -1.0f, 1.0f, 0.0f,
+		 1.0f,  1.0f, 1.0f, 1.0f
+	};
 
 	Renderer::Renderer(const RendererCreateInfo& rendererInfo) : m_window(rendererInfo.window)
 	{
@@ -46,7 +60,7 @@ namespace CGEngine
 		SetupRenderScene(m_window.width, m_window.height);
 	}
 
-	void SetupRenderScene(const uint32_t width, const uint32_t height)
+	void SetupRenderScene(const int32_t width, const int32_t height)
 	{
 		Assets::Model model;
 		IO::LoadModelFile("Assets/Models/Cube/cube.gltf", model);
@@ -68,44 +82,73 @@ namespace CGEngine
 			shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 		}
 
-		uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light), nullptr);
+		{
+			std::string vert_src, frag_src;
+			IO::ReadFile("Assets/Shaders/screen.vert", vert_src);
+			IO::ReadFile("Assets/Shaders/screen.frag", frag_src);
+
+			ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
+			screenShader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
+		}
+
+		uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light) + sizeof(Math::Vector3), nullptr);
 		uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4));
 		uniformBuffer->BindBufferRange(1, 2 * sizeof(Math::Mat4), sizeof(Assets::Light));
+		uniformBuffer->BindBufferRange(2, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light), sizeof(Math::Vector3));
 
-		screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, PixelFormat::RGB, width, height);
+		screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, PixelFormat::RGB8, width, height);
 
 		frameBuffer = std::make_shared<OpenGL::GLFramebuffer>(BufferTarget::FRAMEBUFFER);
-		frameBuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, )
+		frameBuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, screenTexture->GetID());
+
+		renderBuffer = std::make_shared<OpenGL::GLRenderbuffer>(BufferTarget::RENDERBUFFER, FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8, width, height);
+		frameBuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_STENCIL_ATTACHMENT, renderBuffer->GetID());
+
+		if (!frameBuffer->CheckStatus())
+		{
+			CG_ERROR("Error: Framebuffer is incomplete!");
+		}
 	}
 
 	void Renderer::PreRender(const Camera& camera)
 	{
-		m_backend->Enable(static_cast<uint32_t>(APICapability::DEPTH_TEST));
-		m_backend->Enable(static_cast<uint32_t>(APICapability::FRAMEBUFFER_SRGB));
+		m_backend->Enable(APICapability::DEPTH_TEST);
+		m_backend->Enable(APICapability::FRAMEBUFFER_SRGB);
 
 		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
 		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
 		uniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Assets::Light), &light);
+		uniformBuffer->SetSubData(2 * sizeof(Math::Mat4) + sizeof(Assets::Light), sizeof(Math::Vector3), &camera.position);
 
-		shader->Use();
+		{
+			shader->Use();
 
-		constexpr int albedo_texture_sampler	= 0;
-		constexpr int normal_texture_sampler	= 1;
-		constexpr int occlusion_texture_sampler = 2;
+			constexpr int albedo_texture_sampler = 0;
+			constexpr int normal_texture_sampler = 1;
+			constexpr int occlusion_texture_sampler = 2;
+			shader->BindUniform("material.baseAlbedoSampler", OpenGL::UniformType::INT, &albedo_texture_sampler);
+			//shader->BindUniform("material.baseNormalSampler",	  OpenGL::UniformType::INT, &normal_texture_sampler);
+			//shader->BindUniform("material.baseOcclusionSampler", OpenGL::UniformType::INT, &occlusion_texture_sampler);
 
-		shader->BindUniform("material.baseAlbedoSampler",	  OpenGL::UniformType::INT, &albedo_texture_sampler);
-		shader->BindUniform("material.baseNormalSampler",	  OpenGL::UniformType::INT, &normal_texture_sampler);
-		shader->BindUniform("material.baseOcclusionSampler", OpenGL::UniformType::INT, &occlusion_texture_sampler);
+			shader->Disable();
+		}
 
-		shader->Disable();
+		{
+			screenShader->Use();
+
+			constexpr int screen_texture_sampler = 0;
+			screenShader->BindUniform("screenSampler", OpenGL::UniformType::INT, &screen_texture_sampler);
+
+			screenShader->Disable();
+		}
 	}
 
-	void Renderer::Render()
+	void Renderer::Render(const Time& time)
 	{
-		float RGBA[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
+		constexpr float RGBA[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
 
-		m_backend->Clear(static_cast<uint32_t>(ClearMask::COLOR_DEPTH_BUFFER_BIT));
 		m_backend->ClearColor(RGBA);
+		m_backend->Clear(ClearMask::COLOR_DEPTH_BUFFER_BIT);
 
 		shader->Use();
 		for (const auto& object : objects)
@@ -115,7 +158,7 @@ namespace CGEngine
 			model = Math::Translate(model, object->position);
 
 			model = Math::Rotate(model, 0.0f, Math::X_AXIS);
-			model = Math::Rotate(model, 45.0f, Math::Y_AXIS);
+			model = Math::Rotate(model, -static_cast<float>(time.currTime), Math::Y_AXIS);
 			model = Math::Rotate(model, 0.0f, Math::Z_AXIS);
 
 			shader->BindUniform("MODEL_MATRIX", OpenGL::UniformType::MAT4, Math::value_ptr(model));
@@ -131,10 +174,10 @@ namespace CGEngine
 
 			for (const auto& material : object->GetMaterials())
 			{
-				shader->BindUniform("material.albedo", OpenGL::UniformType::VEC4, Math::value_ptr(material.albedo));
+				//shader->BindUniform("material.albedo", OpenGL::UniformType::VEC4, Math::value_ptr(material.albedo));
 
-				shader->BindUniform("material.metallicFactor", OpenGL::UniformType::FLOAT, &material.metallicFactor);
-				shader->BindUniform("material.roughnessFactor", OpenGL::UniformType::FLOAT, &material.roughnessFactor);
+				//shader->BindUniform("material.metallicFactor", OpenGL::UniformType::FLOAT, &material.metallicFactor);
+				//shader->BindUniform("material.roughnessFactor", OpenGL::UniformType::FLOAT, &material.roughnessFactor);
 			}
 
 			m_backend->Draw(object.get());
