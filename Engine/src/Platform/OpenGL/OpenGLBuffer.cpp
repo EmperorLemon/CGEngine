@@ -64,7 +64,7 @@ namespace CGEngine::OpenGL
 			glVertexArrayAttribBinding(p_id, attribute.index, 0);
 
 		if (indexBuffer != nullptr)
-			p_indexBuffer = std::make_optional<BufferInfo>(*indexBuffer);
+			p_indexBuffer = BufferInfo(indexBuffer->size, indexBuffer->count, indexBuffer->offset);
 	}
 
 	GLVertexArray::~GLVertexArray()

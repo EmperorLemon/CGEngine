@@ -35,9 +35,9 @@ namespace CGEngine::OpenGL
 		GLVertexArray(uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const VertexLayout& layout);
 
 		GLVertexArray(GLVertexArray&&) noexcept = default;
+		GLVertexArray(const GLVertexArray&) noexcept = delete;
 		GLVertexArray& operator=(GLVertexArray&&) noexcept = delete;
-		GLVertexArray(const GLVertexArray&) = delete;
-		GLVertexArray& operator=(const GLVertexArray&) = delete;
+		GLVertexArray& operator=(const GLVertexArray&) noexcept = delete;
 
 		~GLVertexArray() override;
 
@@ -46,7 +46,13 @@ namespace CGEngine::OpenGL
 
 		[[nodiscard]] uint32_t GetID() const override { return p_id; }
 
+		void SetDrawType(const DrawType type) { m_drawType = type; }
+		[[nodiscard]] DrawType GetDrawType() const { return m_drawType; }
+
 		[[nodiscard]] const BufferInfo& GetVertices() const override { return p_vertexBuffer; }
-		[[nodiscard]] const BufferInfo&  GetIndices() const override { if (p_indexBuffer.has_value()) return p_indexBuffer.value(); return p_vertexBuffer; }
+		[[nodiscard]] const BufferInfo& GetIndices()  const override { return p_indexBuffer; }
+
+	private:
+		DrawType m_drawType = DrawType::DRAW_ARRAYS;
 	};
 }

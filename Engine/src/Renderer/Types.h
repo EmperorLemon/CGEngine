@@ -116,4 +116,10 @@ namespace CGEngine
 		RGB8,
 		RGBA8
 	};
+
+	enum class DrawType : uint8_t
+	{
+		DRAW_ARRAYS,
+		DRAW_ELEMENTS
+	};
 }

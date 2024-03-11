@@ -2,12 +2,17 @@
 
 #include "Renderer/RenderAPI.h"
 
+namespace CGEngine
+{
+	class VertexArray;
+}
+
 namespace CGEngine::OpenGL
 {
 	class OpenGLAPI final : public RenderAPI
 	{
 	public:
-		void Draw(void* ptr) const override;
+		void Draw(const VertexArray* vertexArrayPtr) const override;
 
 		void Enable(APICapability capability) const override;
 		void Disable(APICapability capability) const override;

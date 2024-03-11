@@ -6,6 +6,8 @@
 
 namespace CGEngine
 {
+	class VertexArray;
+
 	constexpr uint32_t CreateRGBA(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a = 255)
 	{
 		return ((r & 0xFF) << 24) + ((g & 0xFF) << 16) + ((b & 0xFF) << 8) + (a & 0xFF);
@@ -23,7 +25,7 @@ namespace CGEngine
 
 		virtual ~RenderAPI() = default;
 
-		virtual void Draw(void* ptr) const = 0;
+		virtual void Draw(const VertexArray* vertexArrayPtr) const = 0;
 
 		virtual void Enable(APICapability capability)  const = 0;
 		virtual void Disable(APICapability capability) const = 0;

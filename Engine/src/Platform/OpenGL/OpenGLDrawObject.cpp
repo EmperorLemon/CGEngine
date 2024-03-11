@@ -27,6 +27,7 @@ namespace CGEngine::OpenGL
 			m_vertexBuffers.at(index).SetSubData(iBufferInfo.offset, iBufferInfo.size, mesh.indices.data());
 
 			m_vertexArrays.emplace_back(m_vertexBuffers.at(index).GetID(), vBufferInfo, &iBufferInfo, mesh.layout);
+			m_vertexArrays.at(index).SetDrawType(DrawType::DRAW_ELEMENTS);
 			index++;
 		}
 

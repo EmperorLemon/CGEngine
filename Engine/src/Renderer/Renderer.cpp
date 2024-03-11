@@ -27,18 +27,21 @@ namespace CGEngine
 	std::vector<std::shared_ptr<OpenGL::GLDrawObject>> objects;
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
 
-	std::shared_ptr<OpenGL::GLShader> screenShader = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer>      screenQuadVertexBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLVertexArray> screenQuadVertexArray  = nullptr;
+
+	std::shared_ptr<OpenGL::GLShader>   screenShader = nullptr;
 	std::shared_ptr<OpenGL::GLTexture> screenTexture = nullptr;
 
-	std::shared_ptr<OpenGL::GLBuffer> uniformBuffer = nullptr;
-	std::shared_ptr<OpenGL::GLFramebuffer> frameBuffer = nullptr;
-	std::shared_ptr<OpenGL::GLRenderbuffer> renderBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer>       uniformBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLFramebuffer>  frameBuffer   = nullptr;
+	std::shared_ptr<OpenGL::GLRenderbuffer> renderBuffer  = nullptr;
 
 	Assets::Light light;
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
-	constexpr float QUAD_VERTICES[] =
+	std::vector<float> QUAD_VERTICES =
 	{
 		-1.0f,  1.0f, 0.0f, 1.0f,
 		-1.0f, -1.0f, 0.0f, 0.0f,
@@ -89,6 +92,22 @@ namespace CGEngine
 
 			ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
 			screenShader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
+		}
+
+		{
+			Assets::Mesh mesh;
+
+			mesh.vertices.swap(QUAD_VERTICES);
+
+			mesh.layout.add(0, 2, DataType::FLOAT, 0)
+			           .add(1, 2, DataType::FLOAT, 2 * sizeof(float));
+
+			mesh.layout.SetStride(4 * sizeof(float));
+
+			const BufferInfo vertexBuffer = {mesh.vertices.size() * sizeof(float), mesh.vertices.size(), 0};
+
+			screenQuadVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
+			screenQuadVertexArray  = std::make_shared<OpenGL::GLVertexArray>(screenQuadVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
 		}
 
 		uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light) + sizeof(Math::Vector3), nullptr);
@@ -145,12 +164,14 @@ namespace CGEngine
 
 	void Renderer::Render(const Time& time)
 	{
+		// First pass
 		frameBuffer->Bind();
 
 		constexpr float clearColor[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
 		constexpr float clearDepth    = 1.0f;
 		frameBuffer->Clear(BufferType::COLOR, 0, clearColor);
 		frameBuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
+		m_backend->Enable(APICapability::DEPTH_TEST);
 
 		shader->Use();
 
@@ -183,11 +204,21 @@ namespace CGEngine
 				//shader->BindUniform("material.roughnessFactor", OpenGL::UniformType::FLOAT, &material.roughnessFactor);
 			}
 
-			m_backend->Draw(object.get());
+			for (const auto& vertexArray : object->GetVertexArrays())
+			{
+				m_backend->Draw(&vertexArray);
+			}
 		}
 
+		// Second pass
 		frameBuffer->Unbind();
 		frameBuffer->Blit(Math::IVector4(0, 0, 800, 800), Math::IVector4(0, 0, 800, 800), BufferMask::COLOR_BUFFER_BIT, TextureFilter::NEAREST);
+
+		screenShader->Use();
+
+		m_backend->Disable(APICapability::DEPTH_TEST);
+		screenTexture->Bind(0);
+		m_backend->Draw(screenQuadVertexArray.get());
 
 		SwapBuffers(m_window);
 	}

@@ -20,9 +20,9 @@ namespace CGEngine
 		explicit Buffer(const BufferTarget target) : p_target(target) {}
 
 		Buffer(Buffer&&) noexcept = default;
-		Buffer& operator=(Buffer&&) noexcept = delete;
 		Buffer(const Buffer&) noexcept = delete;
-		Buffer& operator=(const Buffer&) noexcept = delete;
+		Buffer& operator=(Buffer&&) noexcept = default;
+		Buffer& operator=(const Buffer&) noexcept = default;
 
 		virtual ~Buffer() = default;
 
@@ -41,12 +41,12 @@ namespace CGEngine
 	class VertexArray
 	{
 	public:
-		explicit VertexArray(const BufferInfo& vertexBuffer) : p_vertexBuffer(vertexBuffer) {}
+		explicit VertexArray(const BufferInfo& vertexBuffer) : p_vertexBuffer(vertexBuffer.size, vertexBuffer.count, vertexBuffer.offset) {}
 
 		VertexArray(VertexArray&&) noexcept = default;
+		VertexArray(const VertexArray&) noexcept = delete;
 		VertexArray& operator=(VertexArray&&) noexcept = delete;
-		VertexArray(const VertexArray&) = delete;
-		VertexArray& operator=(const VertexArray&) = delete;
+		VertexArray& operator=(const VertexArray&) noexcept = delete;
 
 		virtual ~VertexArray() = default;
 
@@ -60,7 +60,7 @@ namespace CGEngine
 	protected:
 		uint32_t p_id = 0;
 
-		const BufferInfo&		  p_vertexBuffer;
-		std::optional<BufferInfo> p_indexBuffer;
+		BufferInfo p_vertexBuffer;
+		BufferInfo p_indexBuffer;
 	};
 }

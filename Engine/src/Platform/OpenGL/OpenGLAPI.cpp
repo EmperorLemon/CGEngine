@@ -1,30 +1,36 @@
 #include "OpenGLAPI.h"
-#include "Renderer/RenderAPI.h"
+
+#include "OpenGLBuffer.h"
+#include "Core/Logger.hpp"
 
 #include "OpenGLTypes.hpp"
 
-#include "OpenGLBuffer.h"
-#include "OpenGLDrawObject.h"
-#include "Core/Logger.hpp"
-
 namespace CGEngine::OpenGL
 {
-	void OpenGLAPI::Draw(void* ptr) const
+	void OpenGLAPI::Draw(const VertexArray* vertexArrayPtr) const
 	{
-		if (ptr != nullptr)
+		if (vertexArrayPtr != nullptr)
 		{
-			const auto& drawable_object = static_cast<GLDrawObject*>(ptr);
+			const auto& vertexArray = dynamic_cast<const GLVertexArray*>(vertexArrayPtr);
 
-			for (const auto& vertexArray : drawable_object->GetVertexArrays())
+			vertexArray->Bind();
+			switch (vertexArray->GetDrawType())
 			{
-				const auto& indices = vertexArray.GetIndices();
-
-				vertexArray.Bind();
-				glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
-				vertexArray.Unbind();
+			case DrawType::DRAW_ARRAYS:
+				{
+					const auto& vertices = vertexArray->GetVertices();
+					glDrawArrays(GL_TRIANGLES, static_cast<GLint>(vertices.offset), static_cast<GLsizei>(vertices.count));
+					break;
+				}
+			case DrawType::DRAW_ELEMENTS:
+				{
+					const auto& indices  = vertexArray->GetIndices();
+					glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
+					break;
+				}
 			}
+			vertexArray->Unbind();
 		}
-
 	}
 
 	void OpenGLAPI::Enable(const APICapability capability) const
