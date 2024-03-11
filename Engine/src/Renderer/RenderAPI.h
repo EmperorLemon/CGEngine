@@ -28,7 +28,7 @@ namespace CGEngine
 		virtual void Enable(APICapability capability)  const = 0;
 		virtual void Disable(APICapability capability) const = 0;
 
-		virtual void Clear(ClearMask mask) = 0;
+		virtual void Clear(BufferMask mask) = 0;
 		virtual void ClearColor(const float* rgba) = 0;
 
 		virtual void ResizeViewport(int32_t x, int32_t y, int32_t width, int32_t height) = 0;

@@ -5,15 +5,14 @@
 
 namespace CGEngine::OpenGL
 {
-	constexpr GLenum Convert(const ClearMask mask)
+	constexpr GLbitfield Convert(const BufferMask mask)
 	{
 		switch (mask)
 		{
-		case ClearMask::NULL_BUFFER_BIT:		break;
-		case ClearMask::COLOR_BUFFER_BIT:	    return GL_COLOR_BUFFER_BIT;
-		case ClearMask::DEPTH_BUFFER_BIT:       return GL_DEPTH_BUFFER_BIT;
-		case ClearMask::COLOR_DEPTH_BUFFER_BIT: return GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
-		case ClearMask::STENCIL_BUFFER_BIT:	    return GL_STENCIL_BUFFER_BIT;
+		case BufferMask::COLOR_BUFFER_BIT:	     return GL_COLOR_BUFFER_BIT;
+		case BufferMask::DEPTH_BUFFER_BIT:       return GL_DEPTH_BUFFER_BIT;
+		case BufferMask::COLOR_DEPTH_BUFFER_BIT: return GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+		case BufferMask::STENCIL_BUFFER_BIT:	 return GL_STENCIL_BUFFER_BIT;
 		}
 
 		return 0;
@@ -56,6 +55,17 @@ namespace CGEngine::OpenGL
 		case TextureFormat::RGBA:  return GL_RGBA;
 		case TextureFormat::SRGB:  return GL_SRGB;
 		case TextureFormat::SRGBA: return GL_SRGB_ALPHA;
+		}
+
+		return 0;
+	}
+
+	constexpr GLenum Convert(const TextureFilter filter)
+	{
+		switch (filter)
+		{
+		case TextureFilter::LINEAR:  return GL_LINEAR;
+		case TextureFilter::NEAREST: return GL_NEAREST;
 		}
 
 		return 0;
@@ -118,9 +128,10 @@ namespace CGEngine::OpenGL
 	{
 		switch (type)
 		{
-		case BufferType::COLOR:   return GL_COLOR;
-		case BufferType::DEPTH:   return GL_DEPTH;
-		case BufferType::STENCIL: return GL_STENCIL;
+		case BufferType::COLOR:			return GL_COLOR;
+		case BufferType::DEPTH:			return GL_DEPTH;
+		case BufferType::STENCIL:		return GL_STENCIL;
+		case BufferType::DEPTH_STENCIL: return GL_DEPTH_STENCIL;
 		}
 
 		return 0;
@@ -146,7 +157,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (target)
 		{
-		case FramebufferTarget::FRAMEBUFFER:	    return GL_FRAMEBUFFER;
+		case FramebufferTarget::FRAMEBUFFER:	  return GL_FRAMEBUFFER;
 		case FramebufferTarget::READ_FRAMEBUFFER: return GL_READ_FRAMEBUFFER;
 		case FramebufferTarget::DRAW_FRAMEBUFFER: return GL_DRAW_FRAMEBUFFER;
 		}

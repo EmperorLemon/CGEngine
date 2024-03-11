@@ -4,9 +4,8 @@
 
 namespace CGEngine
 {
-	enum class ClearMask : uint8_t
+	enum class BufferMask : uint8_t
 	{
-		NULL_BUFFER_BIT,
 		COLOR_BUFFER_BIT,
 		DEPTH_BUFFER_BIT,
 		COLOR_DEPTH_BUFFER_BIT,
@@ -54,7 +53,8 @@ namespace CGEngine
 	{
 		COLOR,
 		DEPTH,
-		STENCIL
+		STENCIL,
+		DEPTH_STENCIL
 	};
 
 	enum class BufferTarget : uint8_t
@@ -102,6 +102,12 @@ namespace CGEngine
 		RGBA,
 		SRGB,
 		SRGBA
+	};
+
+	enum class TextureFilter : uint8_t
+	{
+		NEAREST,
+		LINEAR
 	};
 
 	enum class PixelFormat : uint8_t

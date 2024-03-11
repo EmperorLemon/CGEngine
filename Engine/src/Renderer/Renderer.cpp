@@ -116,7 +116,7 @@ namespace CGEngine
 		m_backend->Enable(APICapability::FRAMEBUFFER_SRGB);
 
 		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
-		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
+		uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
 		uniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Assets::Light), &light);
 		uniformBuffer->SetSubData(2 * sizeof(Math::Mat4) + sizeof(Assets::Light), sizeof(Math::Vector3), &camera.position);
 
@@ -145,12 +145,15 @@ namespace CGEngine
 
 	void Renderer::Render(const Time& time)
 	{
-		constexpr float RGBA[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
+		frameBuffer->Bind();
 
-		m_backend->ClearColor(RGBA);
-		m_backend->Clear(ClearMask::COLOR_DEPTH_BUFFER_BIT);
+		constexpr float clearColor[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
+		constexpr float clearDepth    = 1.0f;
+		frameBuffer->Clear(BufferType::COLOR, 0, clearColor);
+		frameBuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
 
 		shader->Use();
+
 		for (const auto& object : objects)
 		{
 			auto model = Math::Mat4(1.0f);
@@ -183,12 +186,16 @@ namespace CGEngine
 			m_backend->Draw(object.get());
 		}
 
+		frameBuffer->Unbind();
+		frameBuffer->Blit(Math::IVector4(0, 0, 800, 800), Math::IVector4(0, 0, 800, 800), BufferMask::COLOR_BUFFER_BIT, TextureFilter::NEAREST);
+
 		SwapBuffers(m_window);
 	}
 
 	void Renderer::PostRender()
 	{
 		shader->Disable();
+		screenShader->Disable();
 	}
 
 	GraphicsAPI Renderer::GetAPI()

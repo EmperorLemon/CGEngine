@@ -39,7 +39,7 @@ namespace CGEngine::OpenGL
 		glDisable(Convert(capability));
 	}
 
-	void OpenGLAPI::Clear(const ClearMask mask)
+	void OpenGLAPI::Clear(const BufferMask mask)
 	{
 		glClear(Convert(mask));
 	}
