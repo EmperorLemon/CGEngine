@@ -17,7 +17,18 @@ namespace CGEngine::OpenGL
 		~GLFramebuffer() override;
 
 		[[nodiscard]] bool CheckStatus() const;
-	private:
+	};
 
+	class GLRenderbuffer final : public Renderbuffer
+	{
+	public:
+		explicit GLRenderbuffer(BufferTarget target, FramebufferTextureAttachmentFormat format, int32_t width, int32_t height);
+
+		GLRenderbuffer(GLRenderbuffer&&) noexcept = default;
+		GLRenderbuffer(const GLRenderbuffer&) noexcept = delete;
+		GLRenderbuffer& operator=(GLRenderbuffer&&) noexcept = delete;
+		GLRenderbuffer& operator=(const GLRenderbuffer&) noexcept = delete;
+
+		~GLRenderbuffer() override;
 	};
 }

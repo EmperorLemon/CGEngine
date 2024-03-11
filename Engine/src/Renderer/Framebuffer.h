@@ -21,4 +21,21 @@ namespace CGEngine
 		uint32_t p_id = 0;
 		BufferTarget p_target = BufferTarget::NONE;
 	};
+
+	class Renderbuffer
+	{
+	public:
+		explicit Renderbuffer(const BufferTarget target) : p_target(target) {}
+
+		Renderbuffer(Renderbuffer&&) noexcept = default;
+		Renderbuffer(const Renderbuffer&) noexcept = delete;
+		Renderbuffer& operator=(Renderbuffer&&) noexcept = delete;
+		Renderbuffer& operator=(const Renderbuffer&) noexcept = delete;
+
+		virtual ~Renderbuffer() = default;
+
+	protected:
+		uint32_t p_id = 0;
+		BufferTarget p_target = BufferTarget::NONE;
+	};
 }

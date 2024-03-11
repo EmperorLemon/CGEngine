@@ -25,5 +25,17 @@ namespace CGEngine::OpenGL
 		return glCheckNamedFramebufferStatus(p_id, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 	}
 
+	GLRenderbuffer::GLRenderbuffer(const BufferTarget target, const FramebufferTextureAttachmentFormat format, const int32_t width, const int32_t height) : Renderbuffer(target)
+	{
+		glCreateRenderbuffers(1, &p_id);
+		glNamedRenderbufferStorage(p_id, Convert(format), width, height);
+	}
+
+	GLRenderbuffer::~GLRenderbuffer()
+	{
+		CG_TRACE("Deleted GLRenderbuffer {0}", p_id);
+
+		glDeleteRenderbuffers(1, &p_id);
+	}
 
 }

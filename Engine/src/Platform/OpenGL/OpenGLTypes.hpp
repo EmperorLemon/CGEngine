@@ -29,6 +29,29 @@ namespace CGEngine::OpenGL
 		return GL_RGBA;
 	}
 
+	constexpr GLenum Convert(const FramebufferTextureAttachmentFormat format)
+	{
+		switch (format)
+		{
+		case FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8: return GL_DEPTH24_STENCIL8;
+		}
+
+		return GL_DEPTH24_STENCIL8;
+	}
+
+	constexpr GLenum Convert(const FramebufferTextureAttachment attachment)
+	{
+		switch (attachment)
+		{
+		case FramebufferTextureAttachment::COLOR_ATTACHMENT:		 return GL_COLOR_ATTACHMENT0;
+		case FramebufferTextureAttachment::DEPTH_ATTACHMENT:		 return GL_DEPTH_ATTACHMENT;
+		case FramebufferTextureAttachment::STENCIL_ATTACHMENT:		 return GL_STENCIL_ATTACHMENT;
+		case FramebufferTextureAttachment::DEPTH_STENCIL_ATTACHMENT: return GL_DEPTH_STENCIL_ATTACHMENT;
+		}
+
+		return GL_COLOR_ATTACHMENT0;
+	}
+
 	constexpr GLenum Convert(const PixelFormat format)
 	{
 		switch (format)
@@ -67,6 +90,7 @@ namespace CGEngine::OpenGL
 		case BufferTarget::UNIFORM_BUFFER:		  return GL_UNIFORM_BUFFER;
 		case BufferTarget::SHADER_STORAGE_BUFFER: return GL_SHADER_STORAGE_BUFFER;
 		case BufferTarget::FRAMEBUFFER:			  return GL_FRAMEBUFFER;
+		case BufferTarget::RENDERBUFFER:		  return GL_RENDERBUFFER;
 		}
 
 		return GL_UNIFORM_BUFFER;

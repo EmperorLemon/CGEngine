@@ -72,6 +72,7 @@ namespace CGEngine
 	void Renderer::PreRender(const Camera& camera)
 	{
 		m_backend->Enable(static_cast<uint32_t>(APICapability::CG_DEPTH_TEST));
+		m_backend->Enable(static_cast<uint32_t>(APICapability::CG_FRAMEBUFFER_SRGB));
 
 		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
 		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));

@@ -37,10 +37,15 @@ namespace CGEngine
 
 	enum class FramebufferTextureAttachment : uint8_t
 	{
-		COLOR_ATTACHMENT0,
-		COLOR_ATTACHMENT1,
+		COLOR_ATTACHMENT,
 		DEPTH_ATTACHMENT,
-		STENCIL_ATTACHMENT
+		STENCIL_ATTACHMENT,
+		DEPTH_STENCIL_ATTACHMENT
+	};
+
+	enum class FramebufferTextureAttachmentFormat : uint8_t
+	{
+		DEPTH24_STENCIL8
 	};
 
 	enum class BufferTarget : uint8_t
@@ -50,7 +55,8 @@ namespace CGEngine
 		INDEX_BUFFER,
 		UNIFORM_BUFFER,
 		SHADER_STORAGE_BUFFER,
-		FRAMEBUFFER
+		FRAMEBUFFER,
+		RENDERBUFFER
 	};
 
 	enum class TextureFormat : uint8_t

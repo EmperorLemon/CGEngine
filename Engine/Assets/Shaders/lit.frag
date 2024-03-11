@@ -53,20 +53,20 @@ uniform Material material;
 vec3 Lighting(in vec3 normal, in vec3 albedo)
 {
     vec3  lightPos        = vec3(2.0, 1.0, 10.0);
+
     vec3  lightDir        = normalize(lightPos.xyz - fs_in.FragPos);
-
-    float ambientFactor   = 0.1;
-    vec3  ambient         = ambientFactor * vec3(1.0);                   // change light color
-
-    float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
-    vec3  diffuse         = diffuseFactor * vec3(1.0);                   // change light color
-
     vec3  viewDir         = normalize(VIEW_POSITION - fs_in.FragPos);
     vec3  reflectDir      = reflect(-lightDir, normal);
+    vec3  halfwayDir      = normalize(lightDir + viewDir);
 
-    float specularStength = 0.5;
-    float specularFactor  = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    vec3  specular        = specularStength * specularFactor * vec3(1.0); // change light color
+    float ambientFactor   = 0.1;
+    vec3  ambient         = ambientFactor * vec3(0.4);                   
+
+    float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
+    vec3  diffuse         = diffuseFactor * vec3(1.0);                  
+
+    float specularFactor  = pow(max(dot(normal, halfwayDir), 0.0), 32);
+    vec3  specular        = specularFactor * vec3(0.2);
 
     if (light.type == SPOT_LIGHT)
     {
@@ -103,7 +103,7 @@ void main()
     float metallic  = material.metallicFactor;
     float roughness = material.roughnessFactor;
 
-    albedo = albedo * baseColorTexture;
+    albedo = baseColorTexture;
 
     vec3 lighting = Lighting(normal, albedo.rgb);
 
