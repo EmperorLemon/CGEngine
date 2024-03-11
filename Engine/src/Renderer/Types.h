@@ -117,6 +117,12 @@ namespace CGEngine
 		RGBA8
 	};
 
+	enum class PolygonMode : uint8_t
+	{
+		WIREFRAME,
+		SOLID
+	};
+
 	enum class DrawType : uint8_t
 	{
 		DRAW_ARRAYS,

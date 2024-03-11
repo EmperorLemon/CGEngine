@@ -21,5 +21,7 @@ namespace CGEngine::OpenGL
 		void ClearColor(const float* rgba) override;
 
 		void ResizeViewport(int32_t x, int32_t y, int32_t width, int32_t height) override;
+
+		void SetDrawMode(PolygonMode mode) const override;
 	};
 }

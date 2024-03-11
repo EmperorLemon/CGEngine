@@ -30,8 +30,8 @@ namespace CGEngine
 	std::shared_ptr<OpenGL::GLBuffer>      screenQuadVertexBuffer = nullptr;
 	std::shared_ptr<OpenGL::GLVertexArray> screenQuadVertexArray  = nullptr;
 
-	std::shared_ptr<OpenGL::GLShader>   screenShader = nullptr;
-	std::shared_ptr<OpenGL::GLTexture> screenTexture = nullptr;
+	std::shared_ptr<OpenGL::GLShader>		screenShader  = nullptr;
+	std::shared_ptr<OpenGL::GLTexture>		screenTexture = nullptr;
 
 	std::shared_ptr<OpenGL::GLBuffer>       uniformBuffer = nullptr;
 	std::shared_ptr<OpenGL::GLFramebuffer>  frameBuffer   = nullptr;
@@ -123,16 +123,15 @@ namespace CGEngine
 		renderBuffer = std::make_shared<OpenGL::GLRenderbuffer>(BufferTarget::RENDERBUFFER, FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8, width, height);
 		frameBuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_STENCIL_ATTACHMENT, renderBuffer->GetID());
 
-		if (!frameBuffer->CheckStatus())
-		{
-			CG_ERROR("Error: Framebuffer is incomplete!");
-		}
+		if (!frameBuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
 	}
 
 	void Renderer::PreRender(const Camera& camera)
 	{
 		m_backend->Enable(APICapability::DEPTH_TEST);
 		m_backend->Enable(APICapability::FRAMEBUFFER_SRGB);
+
+		//m_backend->SetDrawMode(PolygonMode::WIREFRAME);
 
 		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
 		uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
@@ -171,6 +170,7 @@ namespace CGEngine
 		constexpr float clearDepth    = 1.0f;
 		frameBuffer->Clear(BufferType::COLOR, 0, clearColor);
 		frameBuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
+
 		m_backend->Enable(APICapability::DEPTH_TEST);
 
 		shader->Use();
@@ -212,13 +212,16 @@ namespace CGEngine
 
 		// Second pass
 		frameBuffer->Unbind();
-		frameBuffer->Blit(Math::IVector4(0, 0, 800, 800), Math::IVector4(0, 0, 800, 800), BufferMask::COLOR_BUFFER_BIT, TextureFilter::NEAREST);
+
+		m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
+		m_backend->Disable(APICapability::DEPTH_TEST);
 
 		screenShader->Use();
-
-		m_backend->Disable(APICapability::DEPTH_TEST);
-		screenTexture->Bind(0);
-		m_backend->Draw(screenQuadVertexArray.get());
+		{
+			screenTexture->Bind(0);
+			m_backend->Draw(screenQuadVertexArray.get());
+			
+		}
 
 		SwapBuffers(m_window);
 	}

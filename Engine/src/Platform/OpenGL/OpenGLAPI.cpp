@@ -59,4 +59,10 @@ namespace CGEngine::OpenGL
 	{
 		glViewport(x, y, width, height);
 	}
+
+	void OpenGLAPI::SetDrawMode(const PolygonMode mode) const
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, Convert(mode));
+	}
+
 }

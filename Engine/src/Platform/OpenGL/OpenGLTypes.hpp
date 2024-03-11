@@ -34,6 +34,17 @@ namespace CGEngine::OpenGL
 		return 0;
 	}
 
+	constexpr GLenum Convert(const PolygonMode mode)
+	{
+		switch (mode)
+		{
+		case PolygonMode::WIREFRAME: return GL_LINE;
+		case PolygonMode::SOLID:	 return GL_FILL;
+		}
+
+		return 0;
+	}
+
 	constexpr GLenum Convert(const TextureTarget target)
 	{
 		switch (target)
