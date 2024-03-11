@@ -12,6 +12,13 @@ namespace CGEngine
 		STENCIL_BUFFER_BIT
 	};
 
+	enum class DepthFunc : uint8_t
+	{
+		LESS,
+		LEQUAL,
+		EQUAL
+	};
+
 	enum class APICapability : uint8_t
 	{
 		BLEND,
@@ -91,7 +98,8 @@ namespace CGEngine
 	enum class TextureTarget : uint8_t
 	{
 		TEXTURE_2D,
-		TEXTURE_3D
+		TEXTURE_3D,
+		TEXTURE_CUBE_MAP
 	};
 
 	enum class TextureFormat : uint8_t

@@ -30,6 +30,26 @@ namespace CGEngine::OpenGL
 		glTextureStorage2D(p_id, 1, Convert(format), width, height);
 	}
 
+	GLTexture::GLTexture(const TextureTarget target, const TextureFormat format, const PixelFormat internalFormat, std::vector<Image>&& bitmaps) : Texture(0, 0)
+	{
+		glCreateTextures(Convert(target), 1, &p_id);
+
+		glTextureParameteri(p_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(p_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(p_id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(p_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(p_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTextureStorage2D(p_id, 1, Convert(internalFormat), bitmaps.at(0).width, bitmaps.at(0).height);
+
+		int face = 0;
+		for (const auto& bitmap : bitmaps)
+		{
+			glTextureSubImage3D(p_id, 0, 0, 0, face, bitmap.width, bitmap.height, 1, Convert(format), GL_UNSIGNED_BYTE, bitmap.pixels.data());
+			face++;
+		}
+	}
+
 	GLTexture::~GLTexture()
 	{
 		CG_TRACE("Deleted GLTexture {0}", p_id);

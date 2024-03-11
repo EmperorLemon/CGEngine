@@ -9,6 +9,7 @@ namespace CGEngine::OpenGL
 	public:
 		GLTexture(TextureTarget target, PixelFormat format, int32_t width, int32_t height, const void* pixels);
 		GLTexture(TextureTarget target, PixelFormat format, int32_t width, int32_t height);
+		GLTexture(TextureTarget target, TextureFormat format, PixelFormat internalFormat, std::vector<Image>&& bitmaps);
 
 		GLTexture(GLTexture&&) noexcept = default;
 		GLTexture(const GLTexture&) noexcept = delete;

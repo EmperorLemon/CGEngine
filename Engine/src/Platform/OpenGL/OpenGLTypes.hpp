@@ -17,6 +17,19 @@ namespace CGEngine::OpenGL
 
 		return 0;
 	}
+
+	constexpr GLenum Convert(const DepthFunc func)
+	{
+		switch (func)
+		{
+		case DepthFunc::LESS:   return GL_LESS;
+		case DepthFunc::LEQUAL: return GL_LEQUAL;
+		case DepthFunc::EQUAL:  return GL_EQUAL;
+		}
+
+		return 0;
+	}
+
 	constexpr GLenum Convert(const APICapability capability)
 	{
 		switch (capability)
@@ -49,8 +62,9 @@ namespace CGEngine::OpenGL
 	{
 		switch (target)
 		{
-		case TextureTarget::TEXTURE_2D: return GL_TEXTURE_2D;
-		case TextureTarget::TEXTURE_3D: return GL_TEXTURE_3D;
+		case TextureTarget::TEXTURE_2D:		  return GL_TEXTURE_2D;
+		case TextureTarget::TEXTURE_3D:		  return GL_TEXTURE_3D;
+		case TextureTarget::TEXTURE_CUBE_MAP: return GL_TEXTURE_CUBE_MAP;
 		}
 
 		return 0;

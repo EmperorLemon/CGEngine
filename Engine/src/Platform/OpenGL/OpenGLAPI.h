@@ -22,6 +22,7 @@ namespace CGEngine::OpenGL
 
 		void ResizeViewport(int32_t x, int32_t y, int32_t width, int32_t height) override;
 
+		void SetDepthFunc(DepthFunc func) const override;
 		void SetDrawMode(PolygonMode mode) const override;
 	};
 }
