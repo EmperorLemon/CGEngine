@@ -17,6 +17,8 @@ namespace CGEngine
 		Framebuffer& operator=(const Framebuffer&) noexcept = delete;
 
 		virtual ~Framebuffer() = default;
+
+		virtual void AttachTexture(FramebufferTextureAttachment attachment, uint32_t texture) const = 0;
 	protected:
 		uint32_t p_id = 0;
 		BufferTarget p_target = BufferTarget::NONE;

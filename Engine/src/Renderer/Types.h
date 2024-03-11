@@ -64,11 +64,15 @@ namespace CGEngine
 		RED,
 		RG,
 		RGB,
-		RGBA
+		RGBA,
+		SRGB,
+		SRGBA
 	};
 
 	enum class PixelFormat : uint8_t
 	{
+		RGB,
+		RGB8,
 		RGBA8
 	};
 }

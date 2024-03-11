@@ -21,5 +21,7 @@ namespace CGEngine::OpenGL
 
 		void Bind(uint32_t unit) const override;
 		void Unbind(uint32_t unit) const override;
+
+		[[nodiscard]] uint32_t GetID() const override { return p_id; }
 	};
 }

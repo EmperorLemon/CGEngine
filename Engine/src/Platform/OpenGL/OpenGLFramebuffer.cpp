@@ -20,6 +20,11 @@ namespace CGEngine::OpenGL
 		glDeleteFramebuffers(1, &p_id);
 	}
 
+	void GLFramebuffer::AttachTexture(const FramebufferTextureAttachment attachment, const uint32_t texture) const
+	{
+		glNamedFramebufferTexture(p_id, Convert(attachment), texture, 0);
+	}
+
 	bool GLFramebuffer::CheckStatus() const
 	{
 		return glCheckNamedFramebufferStatus(p_id, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;

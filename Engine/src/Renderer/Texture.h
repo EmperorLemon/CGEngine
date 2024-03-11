@@ -31,6 +31,8 @@ namespace CGEngine
 
 		virtual void Bind(uint32_t unit)   const = 0;
 		virtual void Unbind(uint32_t unit) const = 0;
+
+		[[nodiscard]] virtual uint32_t GetID() const = 0;
 	protected:
 		uint32_t p_id = 0;
 

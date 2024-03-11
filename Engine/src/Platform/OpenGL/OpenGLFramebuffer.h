@@ -16,6 +16,8 @@ namespace CGEngine::OpenGL
 
 		~GLFramebuffer() override;
 
+		void AttachTexture(FramebufferTextureAttachment attachment, uint32_t texture) const override;
+
 		[[nodiscard]] bool CheckStatus() const;
 	};
 

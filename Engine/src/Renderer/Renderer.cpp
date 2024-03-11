@@ -21,11 +21,13 @@
 
 namespace CGEngine
 {
-	void SetupRenderScene();
+	void SetupRenderScene(int32_t width, int32_t height);
 
 	std::vector<std::shared_ptr<OpenGL::GLDrawObject>> objects;
-
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
+
+	std::shared_ptr<OpenGL::GLTexture> screenTexture = nullptr;
+
 	std::shared_ptr<OpenGL::GLBuffer> uniformBuffer = nullptr;
 	std::shared_ptr<OpenGL::GLFramebuffer> frameBuffer = nullptr;
 
@@ -41,10 +43,10 @@ namespace CGEngine
 		CreateContext(context);
 		m_backend = std::make_shared<OpenGL::OpenGLAPI>();
 
-		SetupRenderScene();
+		SetupRenderScene(m_window.width, m_window.height);
 	}
 
-	void SetupRenderScene()
+	void SetupRenderScene(const uint32_t width, const uint32_t height)
 	{
 		Assets::Model model;
 		IO::LoadModelFile("Assets/Models/Cube/cube.gltf", model);
@@ -57,22 +59,29 @@ namespace CGEngine
 		light.cutOff = Math::Cos(Math::DegToRad(light.cutOff));
 		light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
 
-		std::string vert_src, frag_src;
-		IO::ReadFile("Assets/Shaders/lit.vert", vert_src);
-		IO::ReadFile("Assets/Shaders/lit.frag", frag_src);
+		{
+			std::string vert_src, frag_src;
+			IO::ReadFile("Assets/Shaders/lit.vert", vert_src);
+			IO::ReadFile("Assets/Shaders/lit.frag", frag_src);
 
-		ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
-		shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
+			ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
+			shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
+		}
 
 		uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light), nullptr);
 		uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4));
 		uniformBuffer->BindBufferRange(1, 2 * sizeof(Math::Mat4), sizeof(Assets::Light));
+
+		screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, PixelFormat::RGB, width, height);
+
+		frameBuffer = std::make_shared<OpenGL::GLFramebuffer>(BufferTarget::FRAMEBUFFER);
+		frameBuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, )
 	}
 
 	void Renderer::PreRender(const Camera& camera)
 	{
-		m_backend->Enable(static_cast<uint32_t>(APICapability::CG_DEPTH_TEST));
-		m_backend->Enable(static_cast<uint32_t>(APICapability::CG_FRAMEBUFFER_SRGB));
+		m_backend->Enable(static_cast<uint32_t>(APICapability::DEPTH_TEST));
+		m_backend->Enable(static_cast<uint32_t>(APICapability::FRAMEBUFFER_SRGB));
 
 		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
 		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
@@ -95,7 +104,7 @@ namespace CGEngine
 	{
 		float RGBA[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
 
-		m_backend->Clear(static_cast<uint32_t>(ClearMask::CG_COLOR_DEPTH_BUFFER_BIT));
+		m_backend->Clear(static_cast<uint32_t>(ClearMask::COLOR_DEPTH_BUFFER_BIT));
 		m_backend->ClearColor(RGBA);
 
 		shader->Use();

@@ -24,6 +24,8 @@ namespace CGEngine::OpenGL
 		case TextureFormat::RG:   return GL_RG;
 		case TextureFormat::RGB:  return GL_RGB;
 		case TextureFormat::RGBA: return GL_RGBA;
+		case TextureFormat::SRGB: return GL_SRGB;
+		case TextureFormat::SRGBA: return GL_SRGB_ALPHA;
 		}
 
 		return GL_RGBA;
@@ -56,6 +58,8 @@ namespace CGEngine::OpenGL
 	{
 		switch (format)
 		{
+		case PixelFormat::RGB:	 return GL_RGB;
+		case PixelFormat::RGB8:  return GL_RGB8;
 		case PixelFormat::RGBA8: return GL_RGBA8;
 		}
 
