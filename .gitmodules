@@ -19,3 +19,6 @@
 [submodule "Engine/ThirdParty/assimp"]
 	path = Engine/ThirdParty/assimp
 	url = https://github.com/assimp/assimp
+[submodule "Engine/ThirdParty/imgui/imgui"]
+	path = Engine/ThirdParty/imgui/imgui
+	url = https://github.com/ocornut/imgui

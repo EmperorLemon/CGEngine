@@ -27,19 +27,19 @@ namespace CGEngine
 	std::vector<std::shared_ptr<OpenGL::GLDrawObject>> objects;
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
 
-	std::shared_ptr<OpenGL::GLShader>	   screenShader  = nullptr;
+	std::shared_ptr<OpenGL::GLShader>	   screenShader = nullptr;
 	std::shared_ptr<OpenGL::GLTexture>	   screenTexture = nullptr;
 	std::shared_ptr<OpenGL::GLBuffer>      screenQuadVertexBuffer = nullptr;
-	std::shared_ptr<OpenGL::GLVertexArray> screenQuadVertexArray  = nullptr;
+	std::shared_ptr<OpenGL::GLVertexArray> screenQuadVertexArray = nullptr;
 
-	std::shared_ptr<OpenGL::GLShader>      skyboxShader  = nullptr;
+	std::shared_ptr<OpenGL::GLShader>      skyboxShader = nullptr;
 	std::shared_ptr<OpenGL::GLTexture>	   skyboxTexture = nullptr;
 	std::shared_ptr<OpenGL::GLBuffer>	   skyboxVertexBuffer = nullptr;
 	std::shared_ptr<OpenGL::GLVertexArray> skyboxVertexArray = nullptr;
 
 	std::shared_ptr<OpenGL::GLBuffer>       uniformBuffer = nullptr;
-	std::shared_ptr<OpenGL::GLFramebuffer>  frameBuffer   = nullptr;
-	std::shared_ptr<OpenGL::GLRenderbuffer> renderBuffer  = nullptr;
+	std::shared_ptr<OpenGL::GLFramebuffer>  frameBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLRenderbuffer> renderBuffer = nullptr;
 
 	Assets::Light light;
 
@@ -173,14 +173,14 @@ namespace CGEngine
 			mesh.vertices.swap(QUAD_VERTICES);
 
 			mesh.layout.add(0, 2, DataType::FLOAT, 0)
-			           .add(1, 2, DataType::FLOAT, 2 * sizeof(float));
+				.add(1, 2, DataType::FLOAT, 2 * sizeof(float));
 
 			mesh.layout.SetStride(4 * sizeof(float));
 
-			const BufferInfo vertexBuffer = {mesh.vertices.size() * sizeof(float), mesh.vertices.size(), 0};
+			const BufferInfo vertexBuffer = { mesh.vertices.size() * sizeof(float), mesh.vertices.size(), 0 };
 
 			screenQuadVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
-			screenQuadVertexArray  = std::make_shared<OpenGL::GLVertexArray>(screenQuadVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
+			screenQuadVertexArray = std::make_shared<OpenGL::GLVertexArray>(screenQuadVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
 		}
 
 		{
@@ -195,7 +195,7 @@ namespace CGEngine
 			const BufferInfo vertexBuffer = { mesh.vertices.size() * sizeof(float), mesh.vertices.size(), 0 };
 
 			skyboxVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
-			skyboxVertexArray  = std::make_shared<OpenGL::GLVertexArray>(skyboxVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
+			skyboxVertexArray = std::make_shared<OpenGL::GLVertexArray>(skyboxVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
 		}
 
 		uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light) + sizeof(Math::Vector3), nullptr);
@@ -261,7 +261,7 @@ namespace CGEngine
 		frameBuffer->Bind();
 
 		constexpr float clearColor[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
-		constexpr float clearDepth    = 1.0f;
+		constexpr float clearDepth = 1.0f;
 		frameBuffer->Clear(BufferType::COLOR, 0, clearColor);
 		frameBuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
 

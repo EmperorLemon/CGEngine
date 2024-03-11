@@ -27,8 +27,11 @@ add_subdirectory(entt INTERFACE)
 add_subdirectory(glad)
 add_subdirectory(glfw)
 add_subdirectory(glm)
+add_subdirectory(imgui)
 add_subdirectory(spdlog)
 add_subdirectory(tinygltf)
+
+target_include_directories(imgui PUBLIC glfw/include)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
     assimp/include

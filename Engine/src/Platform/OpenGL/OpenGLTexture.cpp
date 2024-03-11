@@ -40,13 +40,16 @@ namespace CGEngine::OpenGL
 		glTextureParameteri(p_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(p_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTextureStorage2D(p_id, 1, Convert(internalFormat), bitmaps.at(0).width, bitmaps.at(0).height);
-
-		int face = 0;
-		for (const auto& bitmap : bitmaps)
+		if (!bitmaps.empty())
 		{
-			glTextureSubImage3D(p_id, 0, 0, 0, face, bitmap.width, bitmap.height, 1, Convert(format), GL_UNSIGNED_BYTE, bitmap.pixels.data());
-			face++;
+			glTextureStorage2D(p_id, 1, Convert(internalFormat), bitmaps.at(0).width, bitmaps.at(0).height);
+
+			int face = 0;
+			for (const auto& bitmap : bitmaps)
+			{
+				glTextureSubImage3D(p_id, 0, 0, 0, face, bitmap.width, bitmap.height, 1, Convert(format), GL_UNSIGNED_BYTE, bitmap.pixels.data());
+				face++;
+			}
 		}
 	}
 

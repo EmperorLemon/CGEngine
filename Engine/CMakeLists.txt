@@ -28,6 +28,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     glad
 	glfw
     glm
+    imgui
     spdlog
     tinygltf
 )
