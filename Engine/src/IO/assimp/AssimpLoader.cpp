@@ -142,7 +142,7 @@ namespace CGEngine::IO
 
 			if (material->GetTexture(type, i, &importedPath) == AI_SUCCESS)
 			{
-				const std::string path(std::string("Assets/Models/Cube/") + importedPath.C_Str());
+				const std::string path(std::string("Assets/Models/Avocado/") + importedPath.C_Str());
 
 				Image image = {};
 				LoadImageFile(path.c_str(), image.width, image.height, image.channels, image.pixels);

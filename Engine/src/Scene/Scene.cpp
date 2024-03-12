@@ -2,6 +2,7 @@
 
 #include "ECS/Entity/Entity.hpp"
 
+#include "ECS/Component/Transform.h"
 #include "ECS/Component/DrawObject.h"
 
 #include "Renderer/Assets/Model.h"
@@ -18,9 +19,11 @@ namespace CGEngine
 	void Scene::SetupScene() 
 	{
 		Assets::Model model;
-		IO::LoadModelFile("Assets/Models/Cube/cube.gltf", model);
+		IO::LoadModelFile("Assets/Models/Avocado/Avocado.gltf", model);
 
 		auto& ent = m_entityList->CreateEntity();
 		ent.AddComponent<Component::DrawObject>(std::move(model));
+
+		ent.GetComponent<Component::Transform>().scale = Math::Vector3(10.0f, 10.0f, 10.0f);
 	}
 }
