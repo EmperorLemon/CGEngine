@@ -28,8 +28,10 @@ namespace CGEngine
 
 		~Scene() = default;
 
-		[[nodiscard]]  const std::string& GetName() const;
-		[[nodiscard]] const Camera& GetMainCamera() const;
+		[[nodiscard]] const std::string& GetName() const  { return m_name; }
+		[[nodiscard]] const Camera& GetMainCamera() const { return m_camera; }
+
+		[[nodiscard]] const EntityList& GetEntities() const { return m_entityList; }
 	private:
 		std::string& m_name;
 		Camera m_camera;

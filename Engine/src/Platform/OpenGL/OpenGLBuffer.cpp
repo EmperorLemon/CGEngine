@@ -8,8 +8,10 @@
 
 namespace CGEngine::OpenGL
 {
-	GLBuffer::GLBuffer(const BufferTarget target, const size_t size, const void* data) : Buffer(target)
+	GLBuffer::GLBuffer(const BufferTarget target, const size_t size, const void* data) : Buffer(0)
 	{
+		m_target = target;
+
 		glCreateBuffers(1, &p_id);
 		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(size), data, GL_DYNAMIC_STORAGE_BIT);
 	}
@@ -32,7 +34,7 @@ namespace CGEngine::OpenGL
 
 	void GLBuffer::BindBufferBase(const uint32_t binding) const
 	{
-		glBindBufferBase(Convert(p_target), binding, p_id);
+		glBindBufferBase(Convert(m_target), binding, p_id);
 	}
 
 	void GLBuffer::BindBufferRange(const uint32_t binding, const size_t offset, const size_t size) const
@@ -42,10 +44,10 @@ namespace CGEngine::OpenGL
 
 		const GLintptr alignedOffset = static_cast<GLintptr>(offset) / alignment * alignment;
 
-		glBindBufferRange(Convert(p_target), binding, p_id, alignedOffset, static_cast<GLsizeiptr>(size));
+		glBindBufferRange(Convert(m_target), binding, p_id, alignedOffset, static_cast<GLsizeiptr>(size));
 	}
 
-	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const VertexLayout& layout) : VertexArray(vertexBuffer)
+	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const VertexLayout& layout) : VertexArray(0)
 	{
 		glCreateVertexArrays(1, &p_id);
 
@@ -63,8 +65,8 @@ namespace CGEngine::OpenGL
 		for (const auto& attribute : attributes)
 			glVertexArrayAttribBinding(p_id, attribute.index, 0);
 
-		if (indexBuffer != nullptr)
-			p_indexBuffer = BufferInfo(indexBuffer->size, indexBuffer->count, indexBuffer->offset);
+		m_vertexBuffer = vertexBuffer;
+		if (indexBuffer != nullptr) m_indexBuffer = *indexBuffer;
 	}
 
 	GLVertexArray::~GLVertexArray()

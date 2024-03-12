@@ -6,7 +6,8 @@
 #include "Context.h"
 #include "Camera.h"
 
-#include "Renderer/Assets/Model.h"
+#include "Renderer/Assets/Mesh.h"
+#include "Renderer/Assets/Light.h"
 #include "IO/FileSystem.h"
 
 #include "Math/Math.h"
@@ -15,7 +16,6 @@
 
 #include "Platform/OpenGL/OpenGLAPI.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
-#include "Platform/OpenGL/OpenGLDrawObject.h"
 #include "Platform/OpenGL/OpenGLFramebuffer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/OpenGL/OpenGLTexture.h"
@@ -24,7 +24,6 @@ namespace CGEngine
 {
 	void SetupRenderScene(int32_t width, int32_t height);
 
-	std::vector<std::shared_ptr<OpenGL::GLDrawObject>> objects;
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
 
 	std::shared_ptr<OpenGL::GLShader>	   screenShader = nullptr;
@@ -114,11 +113,6 @@ namespace CGEngine
 
 	void SetupRenderScene(const int32_t width, const int32_t height)
 	{
-		Assets::Model model;
-		IO::LoadModelFile("Assets/Models/Cube/cube.gltf", model);
-
-		objects.emplace_back(std::make_shared<OpenGL::GLDrawObject>(std::move(model)));
-
 		// Light setup
 		{
 			light.direction = Math::Vector4(0.0f);
@@ -236,17 +230,24 @@ namespace CGEngine
 
 	void Renderer::PreRender(const Camera& camera)
 	{
-		m_backend->Enable(APICapability::DEPTH_TEST);
-		m_backend->Enable(APICapability::FRAMEBUFFER_SRGB);
+		// Various capabilities being enabled
+		{
+			m_backend->Enable(APICapability::DEPTH_TEST);
+			m_backend->Enable(APICapability::FRAMEBUFFER_SRGB);
+		}
 
 		const auto& PROJECTION_MATRIX = Math::Perspective(camera.fov, GetAspectRatio(m_window.width, m_window.height), camera.near, camera.far);
 		const auto& VIEW_MATRIX       = Math::View(camera.position, camera.direction, camera.up);
 
-		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(PROJECTION_MATRIX));
-		uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(VIEW_MATRIX));
-		uniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Assets::Light), &light);
-		uniformBuffer->SetSubData(2 * sizeof(Math::Mat4) + sizeof(Assets::Light), sizeof(Math::Vector3), &camera.position);
+		// Uniform buffer setup
+		{
+			uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(PROJECTION_MATRIX));
+			uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(VIEW_MATRIX));
+			uniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Assets::Light), &light);
+			uniformBuffer->SetSubData(2 * sizeof(Math::Mat4) + sizeof(Assets::Light), sizeof(Math::Vector3), &camera.position);
+		}
 
+		// Default lit shader setup
 		{
 			shader->Use();
 
@@ -260,6 +261,7 @@ namespace CGEngine
 			shader->Disable();
 		}
 
+		// Screen quad shader setup
 		{
 			screenShader->Use();
 
@@ -269,6 +271,7 @@ namespace CGEngine
 			screenShader->Disable();
 		}
 
+		// Skybox shader setup
 		{
 			skyboxShader->Use();
 
@@ -290,6 +293,11 @@ namespace CGEngine
 		frameBuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
 
 		m_backend->Enable(APICapability::DEPTH_TEST);
+	}
+
+	void Renderer::Render(const Time& time)
+	{
+
 	}
 
 	void Renderer::SecondPass() const
@@ -316,50 +324,6 @@ namespace CGEngine
 			{
 				screenTexture->Bind(0);
 				m_backend->Draw(screenQuadVertexArray.get());
-			}
-		}
-	}
-
-
-	void Renderer::Render(const Time& time)
-	{
-		// First pass
-		{
-			shader->Use();
-
-			for (const auto& object : objects)
-			{
-				auto model = Math::Mat4(1.0f);
-
-				model = Math::Translate(model, Math::Vector3(0.0f, 0.0f, 4.0f));
-
-				model = Math::Rotate(model, 0.0f, Math::X_AXIS);
-				model = Math::Rotate(model, -static_cast<float>(time.currTime), Math::Y_AXIS);
-				model = Math::Rotate(model, 0.0f, Math::Z_AXIS);
-
-				shader->BindUniform("MODEL_MATRIX",  OpenGL::UniformType::MAT4, Math::value_ptr(model));
-				shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::value_ptr(Math::Mat3(Math::Transpose(Math::Inverse(model)))));
-
-				int unit = 0;
-
-				for (const auto& texture : object->textures)
-				{
-					texture.Bind(unit);
-					unit++;
-				}
-
-				//for (const auto& material : object->GetMaterials())
-				//{
-				//	//shader->BindUniform("material.albedo", OpenGL::UniformType::VEC4, Math::value_ptr(material.albedo));
-
-				//	//shader->BindUniform("material.metallicFactor", OpenGL::UniformType::FLOAT, &material.metallicFactor);
-				//	//shader->BindUniform("material.roughnessFactor", OpenGL::UniformType::FLOAT, &material.roughnessFactor);
-				//}
-
-				for (const auto& vertexArray : object->vertexArrays)
-				{
-					m_backend->Draw(&vertexArray);
-				}
 			}
 		}
 	}

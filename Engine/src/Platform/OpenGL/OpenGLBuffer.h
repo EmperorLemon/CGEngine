@@ -27,6 +27,8 @@ namespace CGEngine::OpenGL
 		void BindBufferRange(uint32_t binding, size_t offset, size_t size) const override;
 
 		[[nodiscard]] uint32_t GetID() const override { return p_id; }
+	private:
+		BufferTarget m_target = BufferTarget::NONE;
 	};
 
 	class GLVertexArray final : public VertexArray
@@ -49,10 +51,13 @@ namespace CGEngine::OpenGL
 		void SetDrawType(const DrawType type) { m_drawType = type; }
 		[[nodiscard]] DrawType GetDrawType() const { return m_drawType; }
 
-		[[nodiscard]] const BufferInfo& GetVertices() const override { return p_vertexBuffer; }
-		[[nodiscard]] const BufferInfo& GetIndices()  const override { return p_indexBuffer; }
+		[[nodiscard]] const BufferInfo& GetVertices() const override { return m_vertexBuffer; }
+		[[nodiscard]] const BufferInfo& GetIndices()  const override { return m_indexBuffer; }
 
 	private:
 		DrawType m_drawType = DrawType::DRAW_ARRAYS;
+
+		BufferInfo m_vertexBuffer;
+		BufferInfo  m_indexBuffer;
 	};
 }

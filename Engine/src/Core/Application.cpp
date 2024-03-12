@@ -23,7 +23,9 @@ namespace CGEngine
 	{
 		m_time.Start();
 
-		m_renderer->PreRender(m_sceneManager.DefaultScene().GetMainCamera());
+		const auto& defaultScene = m_sceneManager.DefaultScene();
+
+		m_renderer->PreRender(defaultScene.GetMainCamera());
 
 		while (!WindowClosed(m_window))
 		{
