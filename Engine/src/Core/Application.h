@@ -38,7 +38,7 @@ namespace CGEngine
 		void Quit() const;
 	private:
 		void OnEvent(Event& event);
-		[[nodiscard]] bool OnWindowResized(const WindowResizeEvent& event) const;
+		[[nodiscard]] bool OnWindowResized(const WindowResizeEvent& event);
 	private:
 		Logger m_logger;
 		SceneManager m_sceneManager;

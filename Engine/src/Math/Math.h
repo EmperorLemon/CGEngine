@@ -26,11 +26,11 @@ namespace CGEngine::Math
 	// out: radians
 	Vector3 DegToRad(const Vector3& degrees);
 
-	const void* value_ptr(const Vector2& vector);
-	const void* value_ptr(const Vector3& vector);
-	const void* value_ptr(const Vector4& vector);
-	const void* value_ptr(const Mat3& matrix);
-	const void* value_ptr(const Mat4& matrix);
+	const float* value_ptr(const Vector2& vector);
+	const float* value_ptr(const Vector3& vector);
+	const float* value_ptr(const Vector4& vector);
+	const float* value_ptr(const Mat3& matrix);
+	const float* value_ptr(const Mat4& matrix);
 
 	Vector2 make_vec2(const float* data);
 	Vector3 make_vec3(const float* data);

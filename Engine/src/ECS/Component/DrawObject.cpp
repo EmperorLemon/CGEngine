@@ -1,6 +1,6 @@
 #include "DrawObject.h"
 
-#include "Renderer/Buffer.h"
+#include "Platform/OpenGL/OpenGLTexture.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
 #include "Renderer/Assets/Model.h"
@@ -20,35 +20,35 @@ namespace CGEngine::Component
 			const BufferInfo vBufferInfo = { vBufferSize, mesh.vertices.size(), 0 };
 			const BufferInfo iBufferInfo = { iBufferSize, mesh.indices.size(),  vBufferInfo.size };
 
-			OpenGL::GLBuffer vertexBuffer(BufferTarget::VERTEX_BUFFER, bufferSize, nullptr);
-			vertexBuffers.emplace_back(&vertexBuffer);
+			vertexBuffers.emplace_back(std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, bufferSize, nullptr));
 			vertexBuffers.at(index)->SetSubData(vBufferInfo.offset, vBufferInfo.size, mesh.vertices.data());
 			vertexBuffers.at(index)->SetSubData(iBufferInfo.offset, iBufferInfo.size, mesh.indices.data());
 
-			//vertexArrays.emplace_back(OpenGL::GLVertexArray(vertexBuffers.at(index).GetID(), vBufferInfo, &iBufferInfo, mesh.layout));
-			//vertexArrays.at(index).SetDrawType(DrawType::DRAW_ELEMENTS);
+			vertexArrays.emplace_back(std::make_shared<OpenGL::GLVertexArray>(vertexBuffers.at(index)->GetID(), vBufferInfo, &iBufferInfo, mesh.layout));
+			vertexArrays.at(index)->SetDrawType(DrawType::DRAW_ELEMENTS);
+
 			index++;
 		}
 
-		//for (auto& texture : model.textures)
-		//{
-		//	TextureLayout layout;
+		for (auto& texture : model.textures)
+		{
+			TextureLayout layout;
 
-		//	layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
-		//	layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
-		//	textures.emplace_back(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA8, texture.width, texture.height, layout, texture.pixels.data());
+			textures.emplace_back(std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA8, texture.width, texture.height, layout, texture.pixels.data()));
 
-		//	std::vector<unsigned char> emptyPixels;
-		//	texture.pixels.swap(emptyPixels);
-		//}
+			std::vector<unsigned char> emptyPixels;
+			texture.pixels.swap(emptyPixels);
+		}
 
-		//materials.swap(model.materials);
+		materials.swap(model.materials);
 
-		//std::vector<Assets::Mesh> emptyMeshes;
-		//std::vector<Image>		  emptyTextures;
+		std::vector<Assets::Mesh> emptyMeshes;
+		std::vector<Image>		  emptyTextures;
 
-		//model.meshes.swap(emptyMeshes);
-		//model.textures.swap(emptyTextures);
+		model.meshes.swap(emptyMeshes);
+		model.textures.swap(emptyTextures);
 	}
 }

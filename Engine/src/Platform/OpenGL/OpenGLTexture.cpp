@@ -7,6 +7,9 @@ namespace CGEngine::OpenGL
 {
 	GLTexture::GLTexture(const TextureTarget target, const int32_t levels, const PixelFormat format, const int32_t width, const int32_t height, const TextureLayout& layout, const void* pixels) : Texture(width, height)
 	{
+		m_levels = levels;
+		m_format = format;
+
 		glCreateTextures(Convert(target), 1, &p_id);
 
 		for (const auto& parameter : layout.GetParameters()) 
@@ -18,6 +21,9 @@ namespace CGEngine::OpenGL
 
 	GLTexture::GLTexture(const TextureTarget target, const int32_t levels, const PixelFormat format, const int32_t width, const int32_t height, const TextureLayout& layout) : Texture(width, height)
 	{
+		m_levels = levels;
+		m_format = format;
+
 		glCreateTextures(Convert(target), 1, &p_id);
 
 		for (const auto& parameter : layout.GetParameters())
@@ -28,6 +34,9 @@ namespace CGEngine::OpenGL
 
 	GLTexture::GLTexture(const TextureTarget target, const int32_t levels, const TextureFormat format, const PixelFormat internalFormat, const TextureLayout& layout, std::vector<Image>&& bitmaps) : Texture(0, 0)
 	{
+		m_levels = levels;
+		m_format = internalFormat;
+
 		glCreateTextures(Convert(target), 1, &p_id);
 
 		for (const auto& parameter : layout.GetParameters())
@@ -48,13 +57,17 @@ namespace CGEngine::OpenGL
 
 	GLTexture::~GLTexture()
 	{
-		CG_TRACE("Deleted GLTexture {0}", p_id);
 		glDeleteTextures(1, &p_id);
 	}
 
 	void GLTexture::SetSubImage(const TextureFormat format, const DataType type, const void* pixels) const
 	{
 		glTextureSubImage2D(p_id, 0, 0, 0, p_width, p_height, Convert(format), Convert(type), pixels);
+	}
+
+	void GLTexture::ResizeImage(const int32_t width, const int32_t height) const
+	{
+		glTextureStorage2D(p_id, m_levels, Convert(m_format), width, height);
 	}
 
 	void GLTexture::Bind(const uint32_t unit) const

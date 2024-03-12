@@ -9,7 +9,7 @@ namespace CGEngine
 	class Framebuffer
 	{
 	public:
-		explicit Framebuffer(const BufferTarget target) : p_target(target) {}
+		explicit Framebuffer(const uint32_t id) : p_id(id) {}
 
 		Framebuffer(Framebuffer&&) noexcept = default;
 		Framebuffer(const Framebuffer&) noexcept = delete;
@@ -27,13 +27,12 @@ namespace CGEngine
 		virtual void Clear(BufferType type, int32_t index, const float* value) const = 0;
 	protected:
 		uint32_t p_id = 0;
-		BufferTarget p_target = BufferTarget::NONE;
 	};
 
 	class Renderbuffer
 	{
 	public:
-		explicit Renderbuffer(const BufferTarget target) : p_target(target) {}
+		explicit Renderbuffer(const uint32_t id) : p_id(id) {}
 
 		Renderbuffer(Renderbuffer&&) noexcept = default;
 		Renderbuffer(const Renderbuffer&) noexcept = delete;
@@ -45,6 +44,5 @@ namespace CGEngine
 		[[nodiscard]] virtual uint32_t GetID() const = 0;
 	protected:
 		uint32_t p_id = 0;
-		BufferTarget p_target = BufferTarget::NONE;
 	};
 }

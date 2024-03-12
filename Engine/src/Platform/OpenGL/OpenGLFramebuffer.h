@@ -29,6 +29,9 @@ namespace CGEngine::OpenGL
 		void Clear(BufferType type, int32_t index, const float* value) const override;
 
 		[[nodiscard]] bool CheckStatus() const;
+
+	private:
+		BufferTarget m_target = BufferTarget::NONE;
 	};
 
 	class GLRenderbuffer final : public Renderbuffer
@@ -43,6 +46,12 @@ namespace CGEngine::OpenGL
 
 		~GLRenderbuffer() override;
 
+		void ResizeBuffer(int32_t width, int32_t height) const;
+
 		[[nodiscard]] uint32_t GetID() const override { return p_id; }
+
+	private:
+		BufferTarget m_target = BufferTarget::NONE;
+		FramebufferTextureAttachmentFormat m_format = FramebufferTextureAttachmentFormat::NONE;
 	};
 }

@@ -2,14 +2,13 @@
 
 namespace CGEngine
 {
-	void SceneManager::AddScene(const Scene& scene)
+	void SceneManager::AddScene(Scene&& scene)
 	{
-		if (const auto& sceneName = scene.GetName(); !m_scenes.contains(sceneName))
-			m_scenes.insert(std::make_pair(sceneName, scene));
+		m_scenes.emplace_back(std::move(scene));
 	}
 
-	const Scene& SceneManager::DefaultScene() const
+	Scene& SceneManager::DefaultScene()
 	{
-		return m_scenes.at("Default Scene");
+		return m_scenes.at(0);
 	}
 }

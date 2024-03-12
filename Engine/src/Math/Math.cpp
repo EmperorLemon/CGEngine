@@ -41,27 +41,27 @@ namespace CGEngine::Math
 		return glm::tan(angle);
 	}
 
-	const void* value_ptr(const Vector2& vector)
+	const float* value_ptr(const Vector2& vector)
 	{
 		return glm::value_ptr(vector);
 	}
 
-	const void* value_ptr(const Vector3& vector)
+	const float* value_ptr(const Vector3& vector)
 	{
 		return glm::value_ptr(vector);
 	}
 
-	const void* value_ptr(const Vector4& vector)
+	const float* value_ptr(const Vector4& vector)
 	{
 		return glm::value_ptr(vector);
 	}
 
-	const void* value_ptr(const Mat3& matrix)
+	const float* value_ptr(const Mat3& matrix)
 	{
 		return glm::value_ptr(matrix);
 	}
 
-	const void* value_ptr(const Mat4& matrix)
+	const float* value_ptr(const Mat4& matrix)
 	{
 		return glm::value_ptr(matrix);
 	}

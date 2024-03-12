@@ -6,8 +6,10 @@
 
 namespace CGEngine::OpenGL
 {
-	GLFramebuffer::GLFramebuffer(const BufferTarget target) : Framebuffer(target)
+	GLFramebuffer::GLFramebuffer(const BufferTarget target) : Framebuffer(0)
 	{
+		m_target = target;
+
 		glCreateFramebuffers(1, &p_id);
 	}
 
@@ -53,8 +55,11 @@ namespace CGEngine::OpenGL
 		return glCheckNamedFramebufferStatus(p_id, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 	}
 
-	GLRenderbuffer::GLRenderbuffer(const BufferTarget target, const FramebufferTextureAttachmentFormat format, const int32_t width, const int32_t height) : Renderbuffer(target)
+	GLRenderbuffer::GLRenderbuffer(const BufferTarget target, const FramebufferTextureAttachmentFormat format, const int32_t width, const int32_t height) : Renderbuffer(0)
 	{
+		m_target = target;
+		m_format = format;
+
 		glCreateRenderbuffers(1, &p_id);
 		glNamedRenderbufferStorage(p_id, Convert(format), width, height);
 	}
@@ -65,5 +70,11 @@ namespace CGEngine::OpenGL
 
 		glDeleteRenderbuffers(1, &p_id);
 	}
+
+	void GLRenderbuffer::ResizeBuffer(const int32_t width, const int32_t height) const
+	{
+		glNamedRenderbufferStorage(p_id, Convert(m_format), width, height);
+	}
+
 
 }

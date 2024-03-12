@@ -10,32 +10,21 @@ namespace CGEngine
 {
 	class Renderer;
 
-	struct SceneCreateInfo
-	{
-		std::string name;
-		EntityList list;
-	};
-
 	class Scene
 	{
 	public:
-		explicit Scene(const SceneCreateInfo& sceneInfo);
+		explicit Scene(const std::string& name);
 
-		Scene(Scene&&) noexcept = default;
-		Scene(const Scene&) noexcept = default;
-		Scene& operator=(Scene&&) noexcept = delete;
-		Scene& operator=(const Scene&) noexcept = delete;
-
-		~Scene() = default;
+		void SetupScene();
 
 		[[nodiscard]] const std::string& GetName() const  { return m_name; }
-		[[nodiscard]] const Camera& GetMainCamera() const { return m_camera; }
 
-		[[nodiscard]] const EntityList& GetEntities() const { return m_entityList; }
+		[[nodiscard]] Camera& GetMainCamera() { return m_camera; }
+		[[nodiscard]] EntityList& GetEntities() const { return *m_entityList; }
 	private:
 		std::string& m_name;
 		Camera m_camera;
 
-		EntityList& m_entityList;
+		std::unique_ptr<EntityList> m_entityList = nullptr;
 	};
 }

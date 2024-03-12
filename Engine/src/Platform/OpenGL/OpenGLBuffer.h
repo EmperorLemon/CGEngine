@@ -48,7 +48,7 @@ namespace CGEngine::OpenGL
 
 		[[nodiscard]] uint32_t GetID() const override { return p_id; }
 
-		void SetDrawType(const DrawType type) { m_drawType = type; }
+		void SetDrawType(const DrawType type) override { m_drawType = type; }
 		[[nodiscard]] DrawType GetDrawType() const { return m_drawType; }
 
 		[[nodiscard]] const BufferInfo& GetVertices() const override { return m_vertexBuffer; }

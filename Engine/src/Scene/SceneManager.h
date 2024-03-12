@@ -1,7 +1,6 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
+#include <vector>
 
 #include "Scene.h"
 
@@ -17,10 +16,10 @@ namespace CGEngine
 	public:
 		SceneManager() = default;
 
-		void AddScene(const Scene& scene);
+		void AddScene(Scene&& scene);
 
-		[[nodiscard]] const Scene& DefaultScene() const;
+		[[nodiscard]] Scene& DefaultScene();
 	private:
-		std::unordered_map<std::string, Scene> m_scenes;
+		std::vector<Scene> m_scenes;
 	};
 }

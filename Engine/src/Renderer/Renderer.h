@@ -4,6 +4,12 @@
 
 #include <memory>
 
+namespace CGEngine::Component
+{
+	struct Transform;
+	struct DrawObject;
+}
+
 namespace CGEngine
 {
 	struct Time;
@@ -33,6 +39,7 @@ namespace CGEngine
 
 		void PreRender(const Camera& camera);
 		void Render(const Time& time);
+		void RenderPrimitive(const Component::Transform& transform, const Component::DrawObject& primitive);
 		void PostRender();
 
 		void FirstPass()  const;
@@ -40,6 +47,7 @@ namespace CGEngine
 
 		void ResizeProjection(const Camera& camera) const;
 		void ResizeViewport(int32_t width, int32_t height) const;
+		void ResizeFramebuffer(int32_t width, int32_t height) const;
 
 		static GraphicsAPI GetAPI();
 	private:

@@ -38,54 +38,63 @@ struct Light
 	float outerCutOff;
 };
 
-layout (std140, binding = 1) uniform LightBuffer
-{   
-    Light light;
-};
-
-layout (std140, binding = 2) uniform CameraBuffer
+layout (std140, binding = 1) uniform CameraBuffer
 {
     vec3 VIEW_POSITION;
+};
+
+layout (std430, binding = 2) buffer  LightBuffer
+{
+    uint  NUM_LIGHTS;
+    Light LIGHTS[8];
 };
 
 uniform Material material;
 
 vec3 Lighting(in vec3 normal, in vec3 albedo)
 {
-    vec3  lightPos        = vec3(2.0, 1.0, 10.0);
+    vec3 ambient  = vec3(0.0);
+    vec3 diffuse  = vec3(0.0);
+    vec3 specular = vec3(0.0);
 
-    vec3  lightDir        = normalize(lightPos.xyz - fs_in.FragPos);
-    vec3  viewDir         = normalize(VIEW_POSITION - fs_in.FragPos);
-    vec3  reflectDir      = reflect(-lightDir, normal);
-    vec3  halfwayDir      = normalize(lightDir + viewDir);
-
-    float ambientFactor   = 0.1;
-    vec3  ambient         = ambientFactor * albedo;                   
-
-    float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
-    vec3  diffuse         = diffuseFactor * albedo;                  
-
-    float specularFactor  = pow(max(dot(normal, halfwayDir), 0.0), 32);
-    vec3  specular        = specularFactor * vec3(0.2);
-
-    if (light.type == SPOT_LIGHT)
+    for (int i = 0; i < NUM_LIGHTS; ++i)
     {
-        float theta       = dot(lightDir, normalize(-light.direction.xyz));
-        float epsilon     = light.cutOff - light.outerCutOff;
-        float intensity   = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+        Light light           = LIGHTS[i];
+        vec3  lightPos        = vec3(2.0, 1.0, 10.0);
 
-        diffuse  *= intensity;
-        specular *= intensity;
-    }
+        vec3  lightDir        = normalize(lightPos.xyz - fs_in.FragPos);
+        vec3  viewDir         = normalize(VIEW_POSITION - fs_in.FragPos);
+        vec3  reflectDir      = reflect(-lightDir, normal);
+        vec3  halfwayDir      = normalize(lightDir + viewDir);
 
-    if (light.type == POINT_LIGHT || light.type == SPOT_LIGHT)
-    {
-        float distance        = length(lightPos.xyz - fs_in.FragPos);
-        float attenuation     = 1.0 / (1.0 + light.linear * distance + light.quadratic * (distance * distance));
+        float ambientFactor   = 0.1;
+        ambient               = ambientFactor * albedo;                   
 
-        ambient  *= attenuation;
-        diffuse  *= attenuation;
-        specular *= attenuation;
+        float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
+        diffuse               = diffuseFactor * albedo;                  
+
+        float specularFactor  = pow(max(dot(normal, halfwayDir), 0.0), 32);
+        specular              = specularFactor * vec3(0.2);
+
+        if (light.type == SPOT_LIGHT)
+        {
+            float theta       = dot(lightDir, normalize(-light.direction.xyz));
+            float epsilon     = light.cutOff - light.outerCutOff;
+            float intensity   = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+            diffuse  *= intensity;
+            specular *= intensity;
+        }
+
+        if (light.type == POINT_LIGHT || light.type == SPOT_LIGHT)
+        {
+            float distance        = length(lightPos.xyz - fs_in.FragPos);
+            float attenuation     = 1.0 / (1.0 + light.linear * distance + light.quadratic * (distance * distance));
+
+            ambient  *= attenuation;
+            diffuse  *= attenuation;
+            specular *= attenuation;
+        }
     }
 
     return (ambient + diffuse + specular) * albedo;

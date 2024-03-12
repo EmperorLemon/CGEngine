@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <crossguid/guid.hpp>
 
 namespace CGEngine::Utils
@@ -12,6 +13,7 @@ namespace CGEngine::Utils
 		void reset();
 
 		[[nodiscard]] bool valid() const;
+		[[nodiscard]] std::string str() const;
 
 		bool operator==(const GUID& other) const;
 		bool operator!=(const GUID& other) const;

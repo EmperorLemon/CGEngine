@@ -2,13 +2,16 @@
 
 #include "GUI/GUIContext.h"
 
+#include "ECS/Component/Transform.h"
+#include "ECS/Component/DrawObject.h"
+
 namespace CGEngine
 {
 #define BIND_EVENT_FN(x) [this](auto&&... args) -> decltype(auto) { return this->x(std::forward<decltype(args)>(args)...); }
 
-	Application::Application(const ApplicationCreateInfo& appInfo [[maybe_unused]] ) : m_logger(Logger("APP"))
+	Application::Application(const ApplicationCreateInfo& appInfo [[maybe_unused]]) : m_logger(Logger("APP"))
 	{
-		m_sceneManager.AddScene(Scene({ "Default Scene", {}}));
+		m_sceneManager.AddScene(Scene("Default Scene"));
 
 		CreateWindow({ 800, 800,"Default Window" }, m_window);
 
@@ -23,7 +26,10 @@ namespace CGEngine
 	{
 		m_time.Start();
 
-		const auto& defaultScene = m_sceneManager.DefaultScene();
+		auto& defaultScene = m_sceneManager.DefaultScene();
+		defaultScene.SetupScene();
+
+		auto& entities = defaultScene.GetEntities();
 
 		m_renderer->PreRender(defaultScene.GetMainCamera());
 
@@ -35,13 +41,17 @@ namespace CGEngine
 
 			BeginGUIFrame();
 
-			CreateGUIWindow();
+			CreateEditorWindow(defaultScene);
 
 			EndGUIFrame();
 
 			m_renderer->FirstPass();
 
 			m_renderer->Render(m_time);
+			entities.Iterate<Component::Transform, Component::DrawObject>([&](const Component::Transform& transform, const Component::DrawObject& object)
+			{
+				m_renderer->RenderPrimitive(transform, object);
+			});
 
 			m_renderer->SecondPass();
 
@@ -60,7 +70,7 @@ namespace CGEngine
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResized));
 	}
 
-	bool Application::OnWindowResized(const WindowResizeEvent& event) const
+	bool Application::OnWindowResized(const WindowResizeEvent& event)
 	{
 		m_renderer->ResizeProjection(m_sceneManager.DefaultScene().GetMainCamera());
 		m_renderer->ResizeViewport(event.GetWidth(), event.GetHeight());

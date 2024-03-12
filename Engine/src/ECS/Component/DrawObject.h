@@ -3,9 +3,10 @@
 #include <vector>
 #include <memory>
 
+#include "Renderer/Assets/Material.h"
+
 namespace CGEngine::Assets
 {
-	struct Material;
 	struct Model;
 }
 
@@ -25,7 +26,7 @@ namespace CGEngine::Component
 		std::vector<std::shared_ptr<Buffer>>	  vertexBuffers;
 		std::vector<std::shared_ptr<VertexArray>> vertexArrays;
 
-		std::vector<Assets::Material> materials;
+		std::vector<Assets::Material>			  materials;
 		std::vector<std::shared_ptr<Texture>>	  textures;
 	};
 }

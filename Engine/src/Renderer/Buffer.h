@@ -56,6 +56,8 @@ namespace CGEngine
 
 		[[nodiscard]] virtual const BufferInfo& GetVertices() const = 0;
 		[[nodiscard]] virtual const BufferInfo& GetIndices()  const = 0;
+
+		virtual void SetDrawType(DrawType type) = 0;
 	protected:
 		uint32_t p_id = 0;
 	};

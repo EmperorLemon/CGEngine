@@ -19,10 +19,14 @@ namespace CGEngine::OpenGL
 		~GLTexture() override;
 
 		void SetSubImage(TextureFormat format, DataType type, const void* pixels) const override;
+		void ResizeImage(int32_t width, int32_t height) const;
 
 		void Bind(uint32_t unit) const override;
 		void Unbind(uint32_t unit) const override;
 
 		[[nodiscard]] uint32_t GetID() const override { return p_id; }
+	private:
+		int32_t m_levels = 1;
+		PixelFormat m_format = PixelFormat::NONE;
 	};
 }

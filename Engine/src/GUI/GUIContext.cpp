@@ -5,6 +5,14 @@
 #include <imgui_impl_opengl3.h>
 
 #include "Core/Window.h"
+#include "Scene/Scene.h"
+
+#include "Utils/GUID.h"
+
+#include "ECS/Component/Transform.h"
+#include "ECS/Component/DrawObject.h"
+
+#include "Math/Math.h"
 
 namespace CGEngine
 {
@@ -26,6 +34,42 @@ namespace CGEngine
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+	}
+
+	void CreateEditorWindow(Scene& scene)
+	{
+		auto& entities = scene.GetEntities();
+		auto& camera = scene.GetMainCamera();
+
+		if (ImGui::Begin("Editor Window"))
+		{
+
+			if (ImGui::CollapsingHeader("Scene Hierarchy"))
+			{
+				ImGui::BeginChild("Entities");
+				if (ImGui::CollapsingHeader("Main Camera"))
+				{
+					ImGui::DragFloat3(std::string("Position##" + std::string("Camera")).c_str(), &camera.position.x, 0.1f);
+				}
+
+				ImGui::Spacing();
+
+				entities.Iterate<Utils::GUID, Component::Transform, Component::DrawObject>([&](const Utils::GUID& GUID, Component::Transform& transform, const Component::DrawObject& object)
+				{
+					if (ImGui::CollapsingHeader(std::string("Object##" + GUID.str()).c_str()))
+					{
+						ImGui::Text("Transform");
+						ImGui::DragFloat3("Position", &transform.position.x, 0.1f, 0, 0, "%.2f");
+						ImGui::DragFloat3("Rotation", &transform.rotation.x, 0.1f, -360.0f, 360.0f, "%.2f");
+						ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f, 0, 0, "%.2f");
+					}
+				});
+
+				ImGui::EndChild();
+			}
+
+			ImGui::End();
+		}
 	}
 
 	void CreateGUIWindow(const char* name)
