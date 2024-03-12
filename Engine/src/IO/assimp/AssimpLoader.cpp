@@ -145,7 +145,7 @@ namespace CGEngine::IO
 				const std::string path(std::string("Assets/Models/Avocado/") + importedPath.C_Str());
 
 				Image image = {};
-				LoadImageFile(path.c_str(), image.width, image.height, image.channels, image.pixels);
+				LoadImageFile(path.c_str(), image.width, image.height, image.channels, image.pixels, true);
 				model.textures.emplace_back(std::move(image));
 			}
 		}

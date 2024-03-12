@@ -34,6 +34,9 @@ namespace CGEngine::Component
 		{
 			TextureLayout layout;
 
+			//layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
+			//layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
+
 			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 

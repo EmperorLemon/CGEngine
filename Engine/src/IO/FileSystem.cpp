@@ -15,10 +15,12 @@
 
 namespace CGEngine::IO
 {
-	void LoadImageFile(const std::string_view filepath, int& width, int& height, int& channels, std::vector<unsigned char>& data)
+	void LoadImageFile(const std::string_view filepath, int& width, int& height, int& channels, std::vector<unsigned char>& data, const bool flip)
 	{
 		if (!FileExists(filepath))
 			CG_ERROR("File {0} does not exist!", filepath.data());
+
+		stbi_set_flip_vertically_on_load(flip);
 
 		const auto pixels = stbi_load(filepath.data(), &width, &height, &channels, STBI_rgb_alpha);
 
@@ -41,8 +43,8 @@ namespace CGEngine::IO
 		if (!FileExists(filepath))
 			CG_ERROR("File {0} does not exist!", filepath.data());
 
-		//LoadglTFModel(filepath, model);
-		AssimpLoadModel(filepath, model);
+		LoadglTFModel(filepath, model);
+		//AssimpLoadModel(filepath, model);
 	}
 
 	void ReadFile(const std::string_view filepath, std::vector<unsigned char>& data)
