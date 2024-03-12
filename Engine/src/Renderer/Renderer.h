@@ -35,6 +35,12 @@ namespace CGEngine
 		void Render(const Time& time);
 		void PostRender();
 
+		void FirstPass()  const;
+		void SecondPass() const;
+
+		void ResizeProjection(const Camera& camera) const;
+		void ResizeViewport(int32_t width, int32_t height) const;
+
 		static GraphicsAPI GetAPI();
 	private:
 		static GraphicsAPI m_API;

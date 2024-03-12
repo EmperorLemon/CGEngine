@@ -118,13 +118,16 @@ namespace CGEngine
 		IO::LoadModelFile("Assets/Models/Cube/cube.gltf", model);
 
 		objects.emplace_back(std::make_shared<OpenGL::GLDrawObject>(std::move(model)));
-		objects.at(0)->position = Math::Vector3(0.0f, 0.0f, 4.0f);
 
-		light.direction = Math::Vector4(0.0f);
-		light.type = Assets::LightType::DIRECTIONAL_LIGHT;
-		light.cutOff = Math::Cos(Math::DegToRad(light.cutOff));
-		light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
+		// Light setup
+		{
+			light.direction = Math::Vector4(0.0f);
+			light.type = Assets::LightType::DIRECTIONAL_LIGHT;
+			light.cutOff = Math::Cos(Math::DegToRad(light.cutOff));
+			light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
+		}
 
+		// Default lit shader setup
 		{
 			std::string vert_src, frag_src;
 			IO::ReadFile("Assets/Shaders/lit.vert", vert_src);
@@ -134,6 +137,7 @@ namespace CGEngine
 			shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 		}
 
+		// Screen quad setup
 		{
 			std::string vert_src, frag_src;
 			IO::ReadFile("Assets/Shaders/screen.vert", vert_src);
@@ -148,8 +152,23 @@ namespace CGEngine
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::NEAREST);
 
 			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB8, width, height, layout);
+
+			Assets::Mesh mesh;
+
+			mesh.vertices.swap(QUAD_VERTICES);
+
+			mesh.layout.add(0, 2, DataType::FLOAT, 0)
+				.add(1, 2, DataType::FLOAT, 2 * sizeof(float));
+
+			mesh.layout.SetStride(4 * sizeof(float));
+
+			const BufferInfo vertexBuffer = { mesh.vertices.size() * sizeof(float), mesh.vertices.size(), 0 };
+
+			screenQuadVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
+			screenQuadVertexArray = std::make_shared<OpenGL::GLVertexArray>(screenQuadVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
 		}
 
+		// Skybox setup
 		{
 			std::string vert_src, frag_src;
 			IO::ReadFile("Assets/Shaders/skybox.vert", vert_src);
@@ -180,25 +199,7 @@ namespace CGEngine
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
 			skyboxTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_CUBE_MAP, 1, TextureFormat::RGBA, PixelFormat::RGBA8, layout, std::move(bitmaps));
-		}
 
-		{
-			Assets::Mesh mesh;
-
-			mesh.vertices.swap(QUAD_VERTICES);
-
-			mesh.layout.add(0, 2, DataType::FLOAT, 0)
-				.add(1, 2, DataType::FLOAT, 2 * sizeof(float));
-
-			mesh.layout.SetStride(4 * sizeof(float));
-
-			const BufferInfo vertexBuffer = { mesh.vertices.size() * sizeof(float), mesh.vertices.size(), 0 };
-
-			screenQuadVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
-			screenQuadVertexArray = std::make_shared<OpenGL::GLVertexArray>(screenQuadVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
-		}
-
-		{
 			Assets::Mesh mesh;
 
 			mesh.vertices.swap(SKYBOX_VERTICES);
@@ -213,18 +214,24 @@ namespace CGEngine
 			skyboxVertexArray = std::make_shared<OpenGL::GLVertexArray>(skyboxVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
 		}
 
-		uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light) + sizeof(Math::Vector3), nullptr);
-		uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4));
-		uniformBuffer->BindBufferRange(1, 2 * sizeof(Math::Mat4), sizeof(Assets::Light));
-		uniformBuffer->BindBufferRange(2, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light), sizeof(Math::Vector3));
+		// Uniform buffer setup
+		{
+			uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light) + sizeof(Math::Vector3), nullptr);
+			uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4));
+			uniformBuffer->BindBufferRange(1, 2 * sizeof(Math::Mat4), sizeof(Assets::Light));
+			uniformBuffer->BindBufferRange(2, 2 * sizeof(Math::Mat4) + sizeof(Assets::Light), sizeof(Math::Vector3));
+		}
 
-		frameBuffer = std::make_shared<OpenGL::GLFramebuffer>(BufferTarget::FRAMEBUFFER);
-		frameBuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, screenTexture->GetID());
+		// Framebuffer setup
+		{
+			frameBuffer = std::make_shared<OpenGL::GLFramebuffer>(BufferTarget::FRAMEBUFFER);
+			frameBuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, screenTexture->GetID());
 
-		renderBuffer = std::make_shared<OpenGL::GLRenderbuffer>(BufferTarget::RENDERBUFFER, FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8, width, height);
-		frameBuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_STENCIL_ATTACHMENT, renderBuffer->GetID());
+			renderBuffer = std::make_shared<OpenGL::GLRenderbuffer>(BufferTarget::RENDERBUFFER, FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8, width, height);
+			frameBuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_STENCIL_ATTACHMENT, renderBuffer->GetID());
 
-		if (!frameBuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
+			if (!frameBuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
+		}
 	}
 
 	void Renderer::PreRender(const Camera& camera)
@@ -232,8 +239,11 @@ namespace CGEngine
 		m_backend->Enable(APICapability::DEPTH_TEST);
 		m_backend->Enable(APICapability::FRAMEBUFFER_SRGB);
 
-		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
-		uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
+		const auto& PROJECTION_MATRIX = Math::Perspective(camera.fov, GetAspectRatio(m_window.width, m_window.height), camera.near, camera.far);
+		const auto& VIEW_MATRIX       = Math::View(camera.position, camera.direction, camera.up);
+
+		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(PROJECTION_MATRIX));
+		uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(VIEW_MATRIX));
 		uniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Assets::Light), &light);
 		uniformBuffer->SetSubData(2 * sizeof(Math::Mat4) + sizeof(Assets::Light), sizeof(Math::Vector3), &camera.position);
 
@@ -264,15 +274,14 @@ namespace CGEngine
 
 			constexpr int skybox_texture_sampler = 0;
 			skyboxShader->BindUniform("skyboxSampler", OpenGL::UniformType::INT, &skybox_texture_sampler);
-			skyboxShader->BindUniform("SKYBOX_VIEW_MATRIX", OpenGL::UniformType::MAT4, Math::value_ptr(Math::Mat4(Math::Mat3(camera.view))));
+			skyboxShader->BindUniform("SKYBOX_VIEW_MATRIX", OpenGL::UniformType::MAT4, Math::value_ptr(Math::Mat4(Math::Mat3(VIEW_MATRIX))));
 
 			skyboxShader->Disable();
 		}
 	}
 
-	void Renderer::Render(const Time& time)
+	void Renderer::FirstPass() const
 	{
-		// First pass
 		frameBuffer->Bind();
 
 		constexpr float clearColor[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
@@ -281,68 +290,94 @@ namespace CGEngine
 		frameBuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
 
 		m_backend->Enable(APICapability::DEPTH_TEST);
+	}
 
-		shader->Use();
-
-		for (const auto& object : objects)
+	void Renderer::SecondPass() const
+	{
+		// Draw skybox after drawn objects, but before second pass.
 		{
-			auto model = Math::Mat4(1.0f);
-
-			model = Math::Translate(model, object->position);
-
-			model = Math::Rotate(model, 0.0f, Math::X_AXIS);
-			model = Math::Rotate(model, -static_cast<float>(time.currTime), Math::Y_AXIS);
-			model = Math::Rotate(model, 0.0f, Math::Z_AXIS);
-
-			shader->BindUniform("MODEL_MATRIX", OpenGL::UniformType::MAT4, Math::value_ptr(model));
-			shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::value_ptr(Math::Mat3(Math::Transpose(Math::Inverse(model)))));
-
-			int unit = 0;
-
-			for (const auto& texture : object->GetTextures())
+			m_backend->SetDepthFunc(DepthFunc::LEQUAL);
+			skyboxShader->Use();
 			{
-				texture.Bind(unit);
-				unit++;
+				skyboxTexture->Bind(0);
+				m_backend->Draw(skyboxVertexArray.get());
 			}
-
-			for (const auto& material : object->GetMaterials())
-			{
-				//shader->BindUniform("material.albedo", OpenGL::UniformType::VEC4, Math::value_ptr(material.albedo));
-
-				//shader->BindUniform("material.metallicFactor", OpenGL::UniformType::FLOAT, &material.metallicFactor);
-				//shader->BindUniform("material.roughnessFactor", OpenGL::UniformType::FLOAT, &material.roughnessFactor);
-			}
-
-			for (const auto& vertexArray : object->GetVertexArrays())
-			{
-				m_backend->Draw(&vertexArray);
-			}
+			m_backend->SetDepthFunc(DepthFunc::LESS);
 		}
-
-		m_backend->SetDepthFunc(DepthFunc::LEQUAL);
-		skyboxShader->Use();
-		{
-			skyboxTexture->Bind(0);
-			m_backend->Draw(skyboxVertexArray.get());
-		}
-		m_backend->SetDepthFunc(DepthFunc::LESS);
 
 		// Second pass
-		frameBuffer->Unbind();
-
-		m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
-		m_backend->Disable(APICapability::DEPTH_TEST);
-
-		screenShader->Use();
 		{
-			screenTexture->Bind(0);
-			m_backend->Draw(screenQuadVertexArray.get());
+			frameBuffer->Unbind();
+
+			m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
+			m_backend->Disable(APICapability::DEPTH_TEST);
+
+			screenShader->Use();
+			{
+				screenTexture->Bind(0);
+				m_backend->Draw(screenQuadVertexArray.get());
+			}
+		}
+	}
+
+
+	void Renderer::Render(const Time& time)
+	{
+		// First pass
+		{
+			shader->Use();
+
+			for (const auto& object : objects)
+			{
+				auto model = Math::Mat4(1.0f);
+
+				model = Math::Translate(model, Math::Vector3(0.0f, 0.0f, 4.0f));
+
+				model = Math::Rotate(model, 0.0f, Math::X_AXIS);
+				model = Math::Rotate(model, -static_cast<float>(time.currTime), Math::Y_AXIS);
+				model = Math::Rotate(model, 0.0f, Math::Z_AXIS);
+
+				shader->BindUniform("MODEL_MATRIX",  OpenGL::UniformType::MAT4, Math::value_ptr(model));
+				shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::value_ptr(Math::Mat3(Math::Transpose(Math::Inverse(model)))));
+
+				int unit = 0;
+
+				for (const auto& texture : object->textures)
+				{
+					texture.Bind(unit);
+					unit++;
+				}
+
+				//for (const auto& material : object->GetMaterials())
+				//{
+				//	//shader->BindUniform("material.albedo", OpenGL::UniformType::VEC4, Math::value_ptr(material.albedo));
+
+				//	//shader->BindUniform("material.metallicFactor", OpenGL::UniformType::FLOAT, &material.metallicFactor);
+				//	//shader->BindUniform("material.roughnessFactor", OpenGL::UniformType::FLOAT, &material.roughnessFactor);
+				//}
+
+				for (const auto& vertexArray : object->vertexArrays)
+				{
+					m_backend->Draw(&vertexArray);
+				}
+			}
 		}
 	}
 
 	void Renderer::PostRender()
 	{
 		SwapBuffers(m_window);
+	}
+
+	void Renderer::ResizeViewport(const int32_t width, const int32_t height) const
+	{
+		m_backend->ResizeViewport(0, 0, width, height);
+	}
+
+	void Renderer::ResizeProjection(const Camera& camera) const
+	{
+		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(Math::Perspective(camera.fov, GetAspectRatio(m_window.width, m_window.height), camera.near, camera.far)));
+		//uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(Math::View(camera.position, camera.direction, camera.up)));
 	}
 
 	GraphicsAPI Renderer::GetAPI()

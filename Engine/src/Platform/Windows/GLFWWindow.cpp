@@ -39,6 +39,9 @@ void CreateGLFWWindow(const CGEngine::WindowCreateInfo& windowInfo, CGEngine::Wi
 
 		winptr->width = width;
 		winptr->height = height;
+
+		CGEngine::WindowResizeEvent event(width, height);
+		winptr->eventCallback(event);
 	});
 
 	s_WindowCount++;
@@ -55,7 +58,7 @@ void DestroyGLFWWindow(const CGEngine::Window& window)
 
 	if (s_WindowCount == 0)
 	{
-		CG_TRACE("Terminated GLFW Context!");
+		CG_TRACE("Terminated GLFW context");
 		glfwTerminate();
 	}
 }

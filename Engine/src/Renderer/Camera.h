@@ -12,12 +12,8 @@ namespace CGEngine
 		Math::Vector3		 up = Math::Vector3(0.0f, 1.0f,   0.0f);
 
 		float fov	 = 0.0f;
-		float aspect = 1.0f;
 		float near   = 0.1f;
 		float far    = 1000.0f;
-
-		Math::Mat4 projection = Math::Mat4(1.0f);
-		Math::Mat4		 view = Math::Mat4(1.0f);
 	};
 
 	float GetFieldOfView(float degrees);

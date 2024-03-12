@@ -1,7 +1,5 @@
 #include "OpenGLDrawObject.h"
 
-#include "Core/Logger.hpp"
-
 #include "Platform/OpenGL/OpenGLBuffer.h"
 #include "Platform/OpenGL/OpenGLTexture.h"
 
@@ -22,12 +20,12 @@ namespace CGEngine::OpenGL
 			const BufferInfo vBufferInfo = { vBufferSize, mesh.vertices.size(), 0 };
 			const BufferInfo iBufferInfo = { iBufferSize, mesh.indices.size(),  vBufferInfo.size };
 
-			m_vertexBuffers.emplace_back(BufferTarget::VERTEX_BUFFER, bufferSize, nullptr);
-			m_vertexBuffers.at(index).SetSubData(vBufferInfo.offset, vBufferInfo.size, mesh.vertices.data());
-			m_vertexBuffers.at(index).SetSubData(iBufferInfo.offset, iBufferInfo.size, mesh.indices.data());
+			vertexBuffers.emplace_back(BufferTarget::VERTEX_BUFFER, bufferSize, nullptr);
+			vertexBuffers.at(index).SetSubData(vBufferInfo.offset, vBufferInfo.size, mesh.vertices.data());
+			vertexBuffers.at(index).SetSubData(iBufferInfo.offset, iBufferInfo.size, mesh.indices.data());
 
-			m_vertexArrays.emplace_back(m_vertexBuffers.at(index).GetID(), vBufferInfo, &iBufferInfo, mesh.layout);
-			m_vertexArrays.at(index).SetDrawType(DrawType::DRAW_ELEMENTS);
+			vertexArrays.emplace_back(vertexBuffers.at(index).GetID(), vBufferInfo, &iBufferInfo, mesh.layout);
+			vertexArrays.at(index).SetDrawType(DrawType::DRAW_ELEMENTS);
 			index++;
 		}
 
@@ -38,37 +36,18 @@ namespace CGEngine::OpenGL
 			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
-			m_textures.emplace_back(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA8, texture.width, texture.height, layout, texture.pixels.data());
+			textures.emplace_back(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA8, texture.width, texture.height, layout, texture.pixels.data());
 
-			std::vector<unsigned char> pixels;
-			texture.pixels.swap(pixels);
+			std::vector<unsigned char> emptyPixels;
+			texture.pixels.swap(emptyPixels);
 		}
 
-		m_materials.swap(model.materials);
+		materials.swap(model.materials);
 
-		std::vector<Assets::Mesh> meshes;
-		std::vector<Image>		  textures;
-		model.meshes.swap(meshes);
-		model.textures.swap(textures);
-	}
+		std::vector<Assets::Mesh> emptyMeshes;
+		std::vector<Image>		  emptyTextures;
 
-	const std::vector<GLVertexArray>& GLDrawObject::GetVertexArrays() const
-	{
-		return m_vertexArrays;
-	}
-
-	Assets::Material& GLDrawObject::GetMaterial(const size_t index)
-	{
-		return m_materials.at(index);
-	}
-
-	const std::vector<Assets::Material>& GLDrawObject::GetMaterials() const
-	{
-		return m_materials;
-	}
-
-	const std::vector<GLTexture>& GLDrawObject::GetTextures() const
-	{
-		return m_textures;
+		model.meshes.swap(emptyMeshes);
+		model.textures.swap(emptyTextures);
 	}
 }

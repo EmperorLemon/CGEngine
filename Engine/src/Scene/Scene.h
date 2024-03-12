@@ -4,6 +4,8 @@
 
 #include "Renderer/Camera.h"
 
+#include "ECS/System/EntityList.hpp"
+
 namespace CGEngine
 {
 	class Renderer;
@@ -11,6 +13,7 @@ namespace CGEngine
 	struct SceneCreateInfo
 	{
 		std::string name;
+		EntityList list;
 	};
 
 	class Scene
@@ -28,10 +31,9 @@ namespace CGEngine
 		[[nodiscard]]  const std::string& GetName() const;
 		[[nodiscard]] const Camera& GetMainCamera() const;
 	private:
-		void SetupCamera();
-
 		std::string& m_name;
-
 		Camera m_camera;
+
+		EntityList& m_entityList;
 	};
 }

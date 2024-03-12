@@ -4,13 +4,8 @@
 
 #include <vector>
 
-#include "Math/Vector2.h"
-#include "Math/Vector3.h"
-
 namespace CGEngine
 {
-#define BIT(x) (1 << (x))
-
 	struct VertexAttribute
 	{
 		uint32_t index;
@@ -24,6 +19,7 @@ namespace CGEngine
 	{
 		switch (type)
 		{
+		case DataType::NONE:   return 0;
 		case DataType::VOID:
 		case DataType::UNSIGNED_BYTE:
 		case DataType::BYTE:   return BIT(0);

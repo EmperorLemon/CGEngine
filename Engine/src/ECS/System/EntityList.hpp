@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <entt/entity/registry.hpp>
 
 namespace CGEngine
@@ -9,6 +10,10 @@ namespace CGEngine
 	class EntityList
 	{
 	public:
+		EntityList() = default;
+
+		Entity& CreateEntity();
+
 		template <typename... Components, typename Func>
 		void Iterate(Func&& func);
 
@@ -16,6 +21,7 @@ namespace CGEngine
 		void Sort(Func&& func);
 	private:
 		entt::registry m_registry;
+		static std::vector<Entity> m_entities;
 
 		friend class Entity;
 	};

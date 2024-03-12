@@ -4,6 +4,8 @@
 
 namespace CGEngine
 {
+#define BIT(x) (1 << (x))
+
 	enum class BufferMask : uint8_t
 	{
 		NONE = 0,
