@@ -14,8 +14,13 @@ namespace CGEngine
 		DestroyGLFWWindow(window);
 	}
 
-	bool PollEvents(const Window& window)
+	bool WindowClosed(const Window& window)
 	{
-		return PollGLFWEvents(window);
+		return GLFWWindowClosed(window);
+	}
+
+	void PollEvents()
+	{
+		return PollGLFWEvents();
 	}
 }

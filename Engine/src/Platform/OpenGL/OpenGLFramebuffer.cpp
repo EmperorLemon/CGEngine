@@ -38,7 +38,7 @@ namespace CGEngine::OpenGL
 		glBindFramebuffer(Convert(target), 0);
 	}
 
-	void GLFramebuffer::Blit(const Math::IVector4& src, const Math::IVector4& dst, const BufferMask mask, const TextureFilter filter) const
+	void GLFramebuffer::Blit(const Math::IVector4& src, const Math::IVector4& dst, const BufferMask mask, const TParamValue filter) const
 	{
 		glBlitNamedFramebuffer(p_id, 0, src[0], src[1], src[2], src[3], dst[0], dst[1], dst[2], dst[3], Convert(mask), Convert(filter));
 	}

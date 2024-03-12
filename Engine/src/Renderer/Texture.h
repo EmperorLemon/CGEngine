@@ -7,12 +7,33 @@
 
 namespace CGEngine
 {
+	struct TextureParameter
+	{
+		TParamName  name  =  TParamName::NONE;
+		TParamValue value = TParamValue::NONE;
+	};
+
 	struct Image
 	{
 		int32_t width = 0;
 		int32_t height = 0;
 		int32_t channels = 0;
 		std::vector<unsigned char> pixels;
+	};
+
+	class TextureLayout
+	{
+	public:
+		TextureLayout& add(const TParamName name, const TParamValue value)
+		{
+			m_layout.emplace_back(name, value);
+
+			return *this;
+		}
+
+		[[nodiscard]] const std::vector<TextureParameter>& GetParameters() const { return m_layout; }
+	private:
+		std::vector<TextureParameter> m_layout;
 	};
 
 	class Texture

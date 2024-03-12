@@ -1,5 +1,7 @@
 #include "Platform/Windows/GLFWWindow.h"
+
 #include "Core/Window.h"
+#include "Core/Logger.hpp"
 
 #include <stdexcept>
 
@@ -46,22 +48,24 @@ void DestroyGLFWWindow(const CGEngine::Window& window)
 {
 	if (s_WindowCount >= 1)
 	{
+		CG_TRACE("Destroyed Window {0}", s_WindowCount - 1);
 		glfwDestroyWindow(static_cast<GLFWwindow*>(window.window));
 		s_WindowCount--;
 	}
 
 	if (s_WindowCount == 0)
+	{
+		CG_TRACE("Terminated GLFW Context!");
 		glfwTerminate();
+	}
 }
 
-bool PollGLFWEvents(const CGEngine::Window& window)
+bool GLFWWindowClosed(const CGEngine::Window& window)
 {
-	if (s_WindowCount >= 1)
-	{
-		glfwPollEvents();
+	return glfwWindowShouldClose(static_cast<GLFWwindow*>(window.window));
+}
 
-		return !glfwWindowShouldClose(static_cast<GLFWwindow*>(window.window));
-	}
-
-	return true;
+void PollGLFWEvents()
+{
+	glfwPollEvents();
 }

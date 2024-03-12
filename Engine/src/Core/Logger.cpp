@@ -14,7 +14,7 @@ namespace CGEngine
 
 	void Logger::Init()
 	{
-		spdlog::set_pattern("%^[%T] - %v%$");
+		spdlog::set_pattern("%^[%T] %v%$");
 
 		s_logger = spdlog::stdout_color_mt("ENGINE");
 		s_logger->set_level(spdlog::level::trace);

@@ -93,7 +93,7 @@ namespace CGEngine::OpenGL
 #ifdef CG_DEBUG
 		if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
 		{
-			CG_INFO("OpenGL Debug Enabled!");
+			CG_INFO("OpenGL debug context enabled!");
 
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

@@ -9,6 +9,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (mask)
 		{
+		case BufferMask::NONE:					 return 0;
 		case BufferMask::COLOR_BUFFER_BIT:	     return GL_COLOR_BUFFER_BIT;
 		case BufferMask::DEPTH_BUFFER_BIT:       return GL_DEPTH_BUFFER_BIT;
 		case BufferMask::COLOR_DEPTH_BUFFER_BIT: return GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
@@ -22,6 +23,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (func)
 		{
+		case DepthFunc::NONE:	return 0;
 		case DepthFunc::LESS:   return GL_LESS;
 		case DepthFunc::LEQUAL: return GL_LEQUAL;
 		case DepthFunc::EQUAL:  return GL_EQUAL;
@@ -34,6 +36,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (capability)
 		{
+		case APICapability::NONE:			  return 0;
 		case APICapability::BLEND:			  return GL_BLEND;
 		case APICapability::CULL_FACE:		  return GL_CULL_FACE;
 		case APICapability::DEPTH_TEST:		  return GL_DEPTH_TEST;
@@ -51,6 +54,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (mode)
 		{
+		case PolygonMode::NONE:		 return 0;
 		case PolygonMode::WIREFRAME: return GL_LINE;
 		case PolygonMode::SOLID:	 return GL_FILL;
 		}
@@ -62,6 +66,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (target)
 		{
+		case TextureTarget::NONE:			  return 0;
 		case TextureTarget::TEXTURE_2D:		  return GL_TEXTURE_2D;
 		case TextureTarget::TEXTURE_3D:		  return GL_TEXTURE_3D;
 		case TextureTarget::TEXTURE_CUBE_MAP: return GL_TEXTURE_CUBE_MAP;
@@ -74,6 +79,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (format)
 		{
+		case TextureFormat::NONE:  return 0;
 		case TextureFormat::RED:   return GL_RED;
 		case TextureFormat::RG:    return GL_RG;
 		case TextureFormat::RGB:   return GL_RGB;
@@ -85,12 +91,30 @@ namespace CGEngine::OpenGL
 		return 0;
 	}
 
-	constexpr GLenum Convert(const TextureFilter filter)
+	constexpr GLenum Convert(const TParamName name)
 	{
-		switch (filter)
+		switch (name)
 		{
-		case TextureFilter::LINEAR:  return GL_LINEAR;
-		case TextureFilter::NEAREST: return GL_NEAREST;
+		case TParamName::NONE:				 return 0;
+		case TParamName::TEXTURE_WRAP_S:	 return GL_TEXTURE_WRAP_S;
+		case TParamName::TEXTURE_WRAP_T:	 return GL_TEXTURE_WRAP_T;
+		case TParamName::TEXTURE_WRAP_R:	 return GL_TEXTURE_WRAP_R;
+		case TParamName::TEXTURE_MIN_FILTER: return GL_TEXTURE_MIN_FILTER;
+		case TParamName::TEXTURE_MAG_FILTER: return GL_TEXTURE_MAG_FILTER;
+		}
+
+		return 0;
+	}
+
+	constexpr GLint Convert(const TParamValue value)
+	{
+		switch (value)
+		{
+		case TParamValue::NONE:			 return 0;
+		case TParamValue::CLAMP_TO_EDGE: return GL_CLAMP_TO_EDGE;
+		case TParamValue::REPEAT:		 return GL_REPEAT;
+		case TParamValue::LINEAR:		 return GL_LINEAR;
+		case TParamValue::NEAREST:		 return GL_NEAREST;
 		}
 
 		return 0;
@@ -100,6 +124,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (format)
 		{
+		case FramebufferTextureAttachmentFormat::NONE:			   return 0;
 		case FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8: return GL_DEPTH24_STENCIL8;
 		}
 
@@ -110,6 +135,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (attachment)
 		{
+		case FramebufferTextureAttachment::NONE:					 return 0;
 		case FramebufferTextureAttachment::COLOR_ATTACHMENT:		 return GL_COLOR_ATTACHMENT0;
 		case FramebufferTextureAttachment::DEPTH_ATTACHMENT:		 return GL_DEPTH_ATTACHMENT;
 		case FramebufferTextureAttachment::STENCIL_ATTACHMENT:		 return GL_STENCIL_ATTACHMENT;
@@ -123,6 +149,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (format)
 		{
+		case PixelFormat::NONE:  return 0;
 		case PixelFormat::RGB:	 return GL_RGB;
 		case PixelFormat::RGB8:  return GL_RGB8;
 		case PixelFormat::RGBA8: return GL_RGBA8;
@@ -135,6 +162,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (type)
 		{
+		case DataType::NONE:		   return 0;
 		case DataType::VOID:
 		case DataType::UNSIGNED_BYTE:  return GL_UNSIGNED_BYTE;
 		case DataType::BYTE:		   return GL_BYTE;
@@ -153,6 +181,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (type)
 		{
+		case BufferType::NONE:			return 0;
 		case BufferType::COLOR:			return GL_COLOR;
 		case BufferType::DEPTH:			return GL_DEPTH;
 		case BufferType::STENCIL:		return GL_STENCIL;
@@ -166,7 +195,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (target)
 		{
-		case BufferTarget::NONE: break;
+		case BufferTarget::NONE:				  return 0;
 		case BufferTarget::VERTEX_BUFFER:		  return GL_ARRAY_BUFFER;
 		case BufferTarget::INDEX_BUFFER:		  return GL_ELEMENT_ARRAY_BUFFER;
 		case BufferTarget::UNIFORM_BUFFER:		  return GL_UNIFORM_BUFFER;
@@ -182,6 +211,7 @@ namespace CGEngine::OpenGL
 	{
 		switch (target)
 		{
+		case FramebufferTarget::NONE:			  return 0;
 		case FramebufferTarget::FRAMEBUFFER:	  return GL_FRAMEBUFFER;
 		case FramebufferTarget::READ_FRAMEBUFFER: return GL_READ_FRAMEBUFFER;
 		case FramebufferTarget::DRAW_FRAMEBUFFER: return GL_DRAW_FRAMEBUFFER;

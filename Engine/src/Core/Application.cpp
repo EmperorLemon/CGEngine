@@ -1,5 +1,7 @@
 #include "Core/Application.h"
 
+#include "GUI/GUIContext.h"
+
 namespace CGEngine
 {
 	Application::Application(const ApplicationCreateInfo& appInfo [[maybe_unused]]) : m_logger(Logger("APP"))
@@ -9,6 +11,8 @@ namespace CGEngine
 		CreateWindow({ 800, 800,"Default Window" }, m_window);
 
 		m_renderer = std::make_unique<Renderer>(Renderer({ GraphicsAPI::CG_OPENGL_API, m_window }));
+
+		CreateGUIContext(m_window);
 	}
 
 	void Application::Run()
@@ -17,18 +21,29 @@ namespace CGEngine
 
 		m_renderer->PreRender(m_sceneManager.DefaultScene().GetMainCamera());
 
-		while (PollEvents(m_window))
+		while (!WindowClosed(m_window))
 		{
+			PollEvents();
+
 			m_time.Update();
 
-			m_renderer->Render(m_time);
-		}
+			BeginGUIFrame();
 
-		m_renderer->PostRender();
+			CreateGUIWindow();
+
+			EndGUIFrame();
+
+			m_renderer->Render(m_time);
+
+			DrawGUI();
+
+			m_renderer->PostRender();
+		}
 	}
 
-	void Application::Quit()
+	void Application::Quit() 
 	{
-
+		DestroyGUIContext();
+		DestroyWindow(m_window);
 	}
 }

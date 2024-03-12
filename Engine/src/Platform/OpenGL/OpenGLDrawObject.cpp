@@ -33,7 +33,12 @@ namespace CGEngine::OpenGL
 
 		for (auto& texture : model.textures)
 		{
-			m_textures.emplace_back(TextureTarget::TEXTURE_2D, PixelFormat::RGBA8, texture.width, texture.height, texture.pixels.data());
+			TextureLayout layout;
+
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
+
+			m_textures.emplace_back(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA8, texture.width, texture.height, layout, texture.pixels.data());
 
 			std::vector<unsigned char> pixels;
 			texture.pixels.swap(pixels);

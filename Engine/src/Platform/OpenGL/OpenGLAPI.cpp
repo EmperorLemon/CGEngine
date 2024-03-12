@@ -36,8 +36,6 @@ namespace CGEngine::OpenGL
 	void OpenGLAPI::Enable(const APICapability capability) const
 	{
 		glEnable(Convert(capability));
-
-		if (!glIsEnabled(Convert(capability))) CG_ERROR("Renderdoc was right!");
 	}
 
 	void OpenGLAPI::Disable(const APICapability capability) const

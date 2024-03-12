@@ -1,5 +1,5 @@
 set(EVENTS 
 
-${CMAKE_SOURCE_DIR}/Event.hpp
+${CMAKE_CURRENT_SOURCE_DIR}/Event.hpp
 
 PARENT_SCOPE)

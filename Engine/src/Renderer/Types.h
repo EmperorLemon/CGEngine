@@ -6,6 +6,7 @@ namespace CGEngine
 {
 	enum class BufferMask : uint8_t
 	{
+		NONE = 0,
 		COLOR_BUFFER_BIT,
 		DEPTH_BUFFER_BIT,
 		COLOR_DEPTH_BUFFER_BIT,
@@ -14,6 +15,7 @@ namespace CGEngine
 
 	enum class DepthFunc : uint8_t
 	{
+		NONE = 0,
 		LESS,
 		LEQUAL,
 		EQUAL
@@ -21,6 +23,7 @@ namespace CGEngine
 
 	enum class APICapability : uint8_t
 	{
+		NONE = 0,
 		BLEND,
 		CULL_FACE,
 		DEPTH_TEST,
@@ -33,6 +36,7 @@ namespace CGEngine
 
 	enum class DataType : uint8_t
 	{
+		NONE = 0,
 		VOID,
 		UNSIGNED_BYTE,
 		BYTE,
@@ -46,7 +50,7 @@ namespace CGEngine
 
 	enum class ShaderType : uint8_t
 	{
-		NONE,
+		NONE = 0,
 		VERTEX,
 		GEOMETRY,
 		TESSELATION_CONTROL,
@@ -58,6 +62,7 @@ namespace CGEngine
 
 	enum class BufferType : uint8_t
 	{
+		NONE = 0,
 		COLOR,
 		DEPTH,
 		STENCIL,
@@ -66,7 +71,7 @@ namespace CGEngine
 
 	enum class BufferTarget : uint8_t
 	{
-		NONE,
+		NONE = 0,
 		VERTEX_BUFFER,
 		INDEX_BUFFER,
 		UNIFORM_BUFFER,
@@ -77,6 +82,7 @@ namespace CGEngine
 
 	enum class FramebufferTarget : uint8_t
 	{
+		NONE = 0,
 		FRAMEBUFFER,
 		READ_FRAMEBUFFER,
 		DRAW_FRAMEBUFFER
@@ -84,6 +90,7 @@ namespace CGEngine
 
 	enum class FramebufferTextureAttachment : uint8_t
 	{
+		NONE = 0,
 		COLOR_ATTACHMENT,
 		DEPTH_ATTACHMENT,
 		STENCIL_ATTACHMENT,
@@ -92,11 +99,13 @@ namespace CGEngine
 
 	enum class FramebufferTextureAttachmentFormat : uint8_t
 	{
+		NONE = 0,
 		DEPTH24_STENCIL8
 	};
 
 	enum class TextureTarget : uint8_t
 	{
+		NONE = 0,
 		TEXTURE_2D,
 		TEXTURE_3D,
 		TEXTURE_CUBE_MAP
@@ -104,6 +113,7 @@ namespace CGEngine
 
 	enum class TextureFormat : uint8_t
 	{
+		NONE = 0,
 		RED,
 		RG,
 		RGB,
@@ -112,14 +122,28 @@ namespace CGEngine
 		SRGBA
 	};
 
-	enum class TextureFilter : uint8_t
+	enum class TParamName : uint8_t
 	{
+		NONE = 0,
+		TEXTURE_WRAP_S,
+		TEXTURE_WRAP_T,
+		TEXTURE_WRAP_R,
+		TEXTURE_MIN_FILTER,
+		TEXTURE_MAG_FILTER
+	};
+
+	enum class TParamValue : uint8_t
+	{
+		NONE = 0,
+		CLAMP_TO_EDGE,
+		REPEAT,
 		NEAREST,
 		LINEAR
 	};
 
 	enum class PixelFormat : uint8_t
 	{
+		NONE = 0,
 		RGB,
 		RGB8,
 		RGBA8
@@ -127,12 +151,14 @@ namespace CGEngine
 
 	enum class PolygonMode : uint8_t
 	{
+		NONE = 0,
 		WIREFRAME,
 		SOLID
 	};
 
 	enum class DrawType : uint8_t
 	{
+		NONE = 0,
 		DRAW_ARRAYS,
 		DRAW_ELEMENTS
 	};

@@ -7,9 +7,9 @@ namespace CGEngine::OpenGL
 	class GLTexture final : public Texture
 	{
 	public:
-		GLTexture(TextureTarget target, PixelFormat format, int32_t width, int32_t height, const void* pixels);
-		GLTexture(TextureTarget target, PixelFormat format, int32_t width, int32_t height);
-		GLTexture(TextureTarget target, TextureFormat format, PixelFormat internalFormat, std::vector<Image>&& bitmaps);
+		GLTexture(TextureTarget target, int32_t levels, PixelFormat format, int32_t width, int32_t height, const TextureLayout& layout, const void* pixels);
+		GLTexture(TextureTarget target, int32_t levels, PixelFormat format, int32_t width, int32_t height, const TextureLayout& layout);
+		GLTexture(TextureTarget target, int32_t levels, TextureFormat format, PixelFormat internalFormat,  const TextureLayout& layout, std::vector<Image>&& bitmaps);
 
 		GLTexture(GLTexture&&) noexcept = default;
 		GLTexture(const GLTexture&) noexcept = delete;

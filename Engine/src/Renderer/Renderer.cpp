@@ -141,7 +141,13 @@ namespace CGEngine
 
 			ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
 			screenShader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
-			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, PixelFormat::RGB8, width, height);
+
+			TextureLayout layout;
+
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::NEAREST);
+			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::NEAREST);
+
+			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB8, width, height, layout);
 		}
 
 		{
@@ -164,7 +170,16 @@ namespace CGEngine
 				bitmaps.emplace_back(std::move(image));
 			}
 
-			skyboxTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_CUBE_MAP, TextureFormat::RGBA, PixelFormat::RGBA8, std::move(bitmaps));
+			TextureLayout layout;
+
+			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
+			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
+			layout.add(TParamName::TEXTURE_WRAP_R, TParamValue::CLAMP_TO_EDGE);
+
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
+
+			skyboxTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_CUBE_MAP, 1, TextureFormat::RGBA, PixelFormat::RGBA8, layout, std::move(bitmaps));
 		}
 
 		{
@@ -323,14 +338,11 @@ namespace CGEngine
 			screenTexture->Bind(0);
 			m_backend->Draw(screenQuadVertexArray.get());
 		}
-
-		SwapBuffers(m_window);
 	}
 
 	void Renderer::PostRender()
 	{
-		shader->Disable();
-		screenShader->Disable();
+		SwapBuffers(m_window);
 	}
 
 	GraphicsAPI Renderer::GetAPI()
