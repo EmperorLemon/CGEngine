@@ -37,7 +37,7 @@ namespace CGEngine
 		Renderer() = delete;
 		explicit Renderer(const RendererCreateInfo& rendererInfo);
 
-		void PreRender(const Camera& camera);
+		void PreRender(Camera& camera);
 		void Render(const Time& time);
 		void RenderPrimitive(const Component::Transform& transform, const Component::DrawObject& primitive);
 		void PostRender();
@@ -45,7 +45,7 @@ namespace CGEngine
 		void FirstPass()  const;
 		void SecondPass() const;
 
-		void ResizeProjection(const Camera& camera) const;
+		void ResizeProjection(Camera& camera) const;
 		void ResizeViewport(int32_t width, int32_t height) const;
 		void ResizeFramebuffer(int32_t width, int32_t height) const;
 

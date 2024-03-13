@@ -236,7 +236,7 @@ namespace CGEngine
 		}
 	}
 
-	void Renderer::PreRender(const Camera& camera)
+	void Renderer::PreRender(Camera& camera)
 	{
 		// Various capabilities being enabled
 		{
@@ -244,13 +244,18 @@ namespace CGEngine
 			m_backend->Enable(APICapability::FRAMEBUFFER_SRGB);
 		}
 
-		const auto& PROJECTION_MATRIX = Math::Perspective(camera.fov, GetAspectRatio(m_window.width, m_window.height), camera.near, camera.far);
-		const auto& VIEW_MATRIX       = Math::View(camera.position, camera.direction, camera.up);
+
+		// Default camera setup
+		{
+			camera.aspect = GetAspectRatio(m_window.width, m_window.height);
+			camera.projection = Math::Perspective(camera.fov, camera.aspect, camera.near, camera.far);
+			camera.view = Math::View(camera.position, camera.direction, camera.up);
+		}
 
 		// Uniform buffer setup
 		{
-			uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(PROJECTION_MATRIX));
-			uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(VIEW_MATRIX));
+			uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
+			uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
 			uniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Math::Vector3), &camera.position);
 		}
 
@@ -290,7 +295,7 @@ namespace CGEngine
 
 			constexpr int skybox_texture_sampler = 0;
 			skyboxShader->BindUniform("skyboxSampler", OpenGL::UniformType::INT, &skybox_texture_sampler);
-			skyboxShader->BindUniform("SKYBOX_VIEW_MATRIX", OpenGL::UniformType::MAT4, Math::value_ptr(Math::Mat4(Math::Mat3(VIEW_MATRIX))));
+			skyboxShader->BindUniform("SKYBOX_VIEW_MATRIX", OpenGL::UniformType::MAT4, Math::value_ptr(Math::Mat4(Math::Mat3(camera.view))));
 
 			skyboxShader->Disable();
 		}
@@ -372,9 +377,12 @@ namespace CGEngine
 		SwapBuffers(m_window);
 	}
 
-	void Renderer::ResizeProjection(const Camera& camera) const
+	void Renderer::ResizeProjection(Camera& camera) const
 	{
-		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(Math::Perspective(camera.fov, GetAspectRatio(m_window.width, m_window.height), camera.near, camera.far)));
+		camera.aspect	  = GetAspectRatio(m_window.width, m_window.height);
+		camera.projection = Math::Perspective(camera.fov, camera.aspect, camera.near, camera.far);
+
+		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
 		//uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(Math::View(camera.position, camera.direction, camera.up)));
 	}
 

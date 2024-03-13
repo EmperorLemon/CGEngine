@@ -28,10 +28,12 @@ add_subdirectory(glad)
 add_subdirectory(glfw)
 add_subdirectory(glm)
 add_subdirectory(imgui)
+add_subdirectory(imguizmo)
 add_subdirectory(spdlog)
 add_subdirectory(tinygltf)
 
 target_include_directories(imgui PUBLIC glfw/include)
+target_include_directories(imguizmo PUBLIC imgui/imgui)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
     assimp/include
@@ -40,6 +42,7 @@ target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
     glad/include
     glfw/include
     glm
+    imguizmo/
     spdlog/include
     stb/
 )
