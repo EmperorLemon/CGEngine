@@ -45,7 +45,7 @@ namespace CGEngine
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
-	Assets::Light SCENE_LIGHTS[1] = {{Math::Vector4(0.0f), Assets::LightType::DIRECTIONAL_LIGHT}};
+	Assets::Light SCENE_LIGHTS[1] = {{Math::Vec4(0.0f), Assets::LightType::DIRECTIONAL_LIGHT}};
 	constexpr uint32_t NUM_LIGHTS = std::size(SCENE_LIGHTS);
 
 	std::vector QUAD_VERTICES =
@@ -206,9 +206,9 @@ namespace CGEngine
 
 		// Uniform buffer setup
 		{
-			uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Math::Vector3), nullptr);
+			uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Math::Vec3), nullptr);
 			uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4));
-			uniformBuffer->BindBufferRange(1, 2 * sizeof(Math::Mat4), sizeof(Math::Vector3));
+			uniformBuffer->BindBufferRange(1, 2 * sizeof(Math::Mat4), sizeof(Math::Vec3));
 		}
 
 		// Shader storage buffer setup
@@ -254,9 +254,9 @@ namespace CGEngine
 
 		// Uniform buffer setup
 		{
-			uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
-			uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(camera.view));
-			uniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Math::Vector3), &camera.position);
+			uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(camera.projection));
+			uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(camera.view));
+			uniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Math::Vec3), &camera.position);
 		}
 
 		// Shader storage buffer setup
@@ -295,7 +295,7 @@ namespace CGEngine
 
 			constexpr int skybox_texture_sampler = 0;
 			skyboxShader->BindUniform("skyboxSampler", OpenGL::UniformType::INT, &skybox_texture_sampler);
-			skyboxShader->BindUniform("SKYBOX_VIEW_MATRIX", OpenGL::UniformType::MAT4, Math::value_ptr(Math::Mat4(Math::Mat3(camera.view))));
+			skyboxShader->BindUniform("SKYBOX_VIEW_MATRIX", OpenGL::UniformType::MAT4, Math::ToArray(Math::Mat4(Math::Mat3(camera.view))));
 
 			skyboxShader->Disable();
 		}
@@ -320,18 +320,10 @@ namespace CGEngine
 
 	void Renderer::RenderPrimitive(const Component::Transform& transform, const Component::DrawObject& primitive)
 	{
-		auto model = Math::Mat4(1.0f);
+		const auto& model = GetModelMatrix(transform);
 
-		model = Math::Translate(model, transform.position);
-
-		model = Math::Rotate(model, Math::DegToRad(transform.rotation.x), Math::X_AXIS);
-		model = Math::Rotate(model, Math::DegToRad(transform.rotation.y), Math::Y_AXIS);
-		model = Math::Rotate(model, Math::DegToRad(transform.rotation.z), Math::Z_AXIS);
-
-		model = Math::Scale(model, transform.scale);
-
-		shader->BindUniform("MODEL_MATRIX",  OpenGL::UniformType::MAT4, Math::value_ptr(model));
-		shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::value_ptr(Math::Mat3(Math::Transpose(Math::Inverse(model)))));
+		shader->BindUniform("MODEL_MATRIX",  OpenGL::UniformType::MAT4, Math::ToArray(model));
+		shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Transpose(Math::Inverse(model)))));
 
 		int32_t unit = 0;
 		for (const auto& texture : primitive.textures)
@@ -382,8 +374,8 @@ namespace CGEngine
 		camera.aspect	  = GetAspectRatio(m_window.width, m_window.height);
 		camera.projection = Math::Perspective(camera.fov, camera.aspect, camera.near, camera.far);
 
-		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::value_ptr(camera.projection));
-		//uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::value_ptr(Math::View(camera.position, camera.direction, camera.up)));
+		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(camera.projection));
+		//uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(Math::View(camera.position, camera.direction, camera.up)));
 	}
 
 	void Renderer::ResizeViewport(const int32_t width, const int32_t height) const

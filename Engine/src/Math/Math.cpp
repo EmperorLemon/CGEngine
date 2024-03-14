@@ -1,8 +1,10 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include "Math.h"
 
 #include <glm/trigonometric.hpp>
-
 #include <glm/gtc/type_ptr.hpp>
+
+#include <glm/gtx/matrix_decompose.hpp>
 
 namespace CGEngine::Math
 {
@@ -16,12 +18,12 @@ namespace CGEngine::Math
 		return glm::radians(degrees);
 	}
 
-	Vector3 RadToDeg(const Vector3& radians)
+	Vec3 RadToDeg(const Vec3& radians)
 	{
 		return degrees(radians);
 	}
 
-	Vector3 DegToRad(const Vector3& degrees)
+	Vec3 DegToRad(const Vec3& degrees)
 	{
 		return radians(degrees);
 	}
@@ -41,53 +43,87 @@ namespace CGEngine::Math
 		return glm::tan(angle);
 	}
 
-	const float* value_ptr(const Vector2& vector)
+	const float* ToArray(const Vec2& vector)
 	{
-		return glm::value_ptr(vector);
+		return value_ptr(vector);
 	}
 
-	const float* value_ptr(const Vector3& vector)
+	const float* ToArray(const Vec3& vector)
 	{
-		return glm::value_ptr(vector);
+		return value_ptr(vector);
 	}
 
-	const float* value_ptr(const Vector4& vector)
+	const float* ToArray(const Vec4& vector)
 	{
-		return glm::value_ptr(vector);
+		return value_ptr(vector);
 	}
 
-	const float* value_ptr(const Mat3& matrix)
+	const float* ToArray(const Mat3& matrix)
 	{
-		return glm::value_ptr(matrix);
+		return value_ptr(matrix);
 	}
 
-	const float* value_ptr(const Mat4& matrix)
+	const float* ToArray(const Mat4& matrix)
 	{
-		return glm::value_ptr(matrix);
+		return value_ptr(matrix);
 	}
 
-	Vector2 make_vec2(const float* data)
+	float* ToPtr(Mat4& matrix)
+	{
+		return value_ptr(matrix);
+	}
+
+	Vec2 ToVec2(const float* data)
 	{
 		return glm::make_vec2(data);
 	}
 
-	Vector3 make_vec3(const float* data)
+	Vec3 ToVec3(const float* data)
 	{
 		return glm::make_vec3(data);
 	}
 
-	Vector4 make_vec4(const float* data)
+	Vec4 ToVec4(const float* data)
 	{
 		return glm::make_vec4(data);
 	}
 
-	Mat3 make_mat3(const float* data)
+	Quat ToQuat(const float* data)
+	{
+		return glm::make_quat(data);
+	}
+
+	Quat ToQuat(const Mat3& data)
+	{
+		return quat_cast(data);
+	}
+
+	Quat ToQuat(const Mat4& data)
+	{
+		return quat_cast(data);
+	}
+
+	Mat3 ToMat3(const float* data)
 	{
 		return glm::make_mat3x3(data);
 	}
 
-	Mat4 make_mat4(const float* data)
+	Mat4 ToMat4(const float* data)
 	{
 		return glm::make_mat4x4(data);
 	}
+
+	Mat4 ToMat4(const Quat& data)
+	{
+		return mat4_cast(data);
+	}
+
+	void Decompose(const Mat4& matrix, Vec3& position, Quat& rotation, Vec3& scale)
+	{
+		auto skew = Vec3(0.0f);
+		auto perspective = Vec4(0.0f);
+
+		decompose(matrix, scale, rotation, position, skew, perspective);
+	}
+
 }

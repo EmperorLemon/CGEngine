@@ -67,7 +67,7 @@ namespace CGEngine::IO
 				mesh.indices.insert(mesh.indices.end(), indexData, indexData + accessor.count);
 			}
 
-			std::vector<Math::Vector3> positions;
+			std::vector<Math::Vec3> positions;
 
 			if (primitive.attributes.contains("POSITION"))
 			{
@@ -85,11 +85,11 @@ namespace CGEngine::IO
 				{
 					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
 
-					positions.emplace_back(Math::make_vec3(data));
+					positions.emplace_back(Math::MakeVec3(data));
 				}
 			}
 
-			std::vector<Math::Vector3> normals;
+			std::vector<Math::Vec3> normals;
 
 			if (primitive.attributes.contains("NORMAL"))
 			{
@@ -106,11 +106,11 @@ namespace CGEngine::IO
 				{
 					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
 
-					normals.emplace_back(Math::make_vec3(data));
+					normals.emplace_back(Math::MakeVec3(data));
 				}
 			}
 
-			std::vector<Math::Vector2> uvs;
+			std::vector<Math::Vec2> uvs;
 
 			if (primitive.attributes.contains("TEXCOORD_0"))
 			{
@@ -127,7 +127,7 @@ namespace CGEngine::IO
 				{
 					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
 
-					uvs.emplace_back(Math::make_vec2(data));
+					uvs.emplace_back(Math::MakeVec2(data));
 				}
 			}
 
@@ -180,7 +180,7 @@ namespace CGEngine::IO
 				const auto& gltfMaterial = importModel.materials.at(primitive.material);
 
 				const auto& baseColorFactor = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
-				const auto& baseColor = Math::Vector4(baseColorFactor.at(0), baseColorFactor.at(1), baseColorFactor.at(2), baseColorFactor.at(3));
+				const auto& baseColor = Math::Vec4(baseColorFactor.at(0), baseColorFactor.at(1), baseColorFactor.at(2), baseColorFactor.at(3));
 				const auto  metallicFactor  = static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor);
 				const auto  roughnessFactor = static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor);
 

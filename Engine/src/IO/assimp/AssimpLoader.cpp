@@ -129,7 +129,7 @@ namespace CGEngine::IO
 
 		assimpMaterial->Get(AI_MATKEY_BASE_COLOR, albedo);
 
-		material.albedo = Math::Vector4(albedo.r, albedo.g, albedo.b, albedo.a);
+		material.albedo = Math::Vec4(albedo.r, albedo.g, albedo.b, albedo.a);
 	}
 
 	void ExtractTextures(const aiMaterial* material, const aiTextureType type, Assets::Model& model)

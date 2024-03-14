@@ -19,11 +19,9 @@ namespace CGEngine
 	void Scene::SetupScene() 
 	{
 		Assets::Model model;
-		IO::LoadModelFile("Assets/Models/Avocado/Avocado.gltf", model);
+		IO::LoadModelFile("Assets/Models/Cube/Cube.gltf", model);
 
 		auto& ent = m_entityList->CreateEntity();
 		ent.AddComponent<Component::DrawObject>(std::move(model));
-
-		ent.GetComponent<Component::Transform>().scale = Math::Vector3(10.0f, 10.0f, 10.0f);
 	}
 }

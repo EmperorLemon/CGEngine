@@ -8,9 +8,9 @@
 namespace CGEngine::Math
 {
 	Mat4 Perspective(float fov, float aspect, float near = 0.1f, float far = 1000.0f);
-	Mat4	    View(const Vector3& position, const Vector3& direction, const Vector3& up);
+	Mat4	    View(const Vec3& position, const Vec3& direction, const Vec3& up);
 
-	Mat4 Translate(const Mat4& transform, const Vector3& translation);
-	Mat4    Rotate(const Mat4& transform, float angle, const Vector3& axis);
-	Mat4	 Scale(const Mat4& transform, const Vector3& scale);
+	Mat4 Translate(const Mat4& transform, const Vec3& translation);
+	Mat4    Rotate(const Mat4& transform, float angle, const Vec3& axis);
+	Mat4	 Scale(const Mat4& transform, const Vec3& scale);
 }

@@ -19,8 +19,6 @@
 
 namespace CGEngine
 {
-	static float model[16];
-
 	void CreateGUIContext(const Window& window)
 	{
 		IMGUI_CHECKVERSION();
@@ -63,12 +61,14 @@ namespace CGEngine
 					{
 						if (ImGui::CollapsingHeader(std::string("Object##" + GUID.str()).c_str()))
 						{
+							static float model_matrix[16];
+
 							static ImGuizmo::OPERATION currentGizmoOperation(ImGuizmo::TRANSLATE);
 							static ImGuizmo::MODE currentGizmoMode(ImGuizmo::WORLD);
 
-							if (ImGui::IsKeyPressed(ImGuiKey_Q))
-								currentGizmoOperation = ImGuizmo::TRANSLATE;
 							if (ImGui::IsKeyPressed(ImGuiKey_W))
+								currentGizmoOperation = ImGuizmo::TRANSLATE;
+							if (ImGui::IsKeyPressed(ImGuiKey_E))
 								currentGizmoOperation = ImGuizmo::ROTATE;
 							if (ImGui::IsKeyPressed(ImGuiKey_R))
 								currentGizmoOperation = ImGuizmo::SCALE;
@@ -83,15 +83,22 @@ namespace CGEngine
 								currentGizmoOperation = ImGuizmo::SCALE;
 
 							ImGui::InputFloat3("Translation", &transform.position.x, "%.2f");
-							ImGui::InputFloat3("Rotation", &transform.rotation.x, "%.2f");
+							ImGui::InputFloat3("Rotation", &transform.eulerAngles.x, "%.2f");
 							ImGui::InputFloat3("Scale", &transform.scale.x, "%.2f");
-							ImGuizmo::RecomposeMatrixFromComponents(&transform.position.x, &transform.rotation.x, &transform.scale.x, model);
-
-							CG_TRACE("test");
 
 							const ImGuiIO& io = ImGui::GetIO(); static_cast<void>(io);
 							ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-							ImGuizmo::Manipulate(Math::value_ptr(camera.view), Math::value_ptr(camera.projection), currentGizmoOperation, currentGizmoMode, model, nullptr, nullptr);
+
+							auto model = GetModelMatrix(transform);
+							const auto matrix = Math::ToPtr(model);
+
+							Manipulate(Math::ToArray(camera.view), Math::ToArray(camera.projection), currentGizmoOperation, currentGizmoMode, matrix);
+
+							if (ImGuizmo::IsUsing())
+							{
+								const auto& tf_matrix = Math::ToMat4(matrix);
+								Math::Decompose(tf_matrix, transform.position, transform.rotation, transform.scale);
+							}
 						}
 				});
 
