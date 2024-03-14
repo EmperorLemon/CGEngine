@@ -53,6 +53,20 @@ namespace CGEngine
 				if (ImGui::CollapsingHeader("Main Camera"))
 				{
 					ImGui::DragFloat3(std::string("Position##" + std::string("Camera")).c_str(), &camera.position.x, 0.1f);
+
+					ImGui::Text("Projection");
+					ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[0],  camera.projection[1],  camera.projection[2],   camera.projection[3]);
+					ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[4],  camera.projection[5],  camera.projection[6],   camera.projection[7]);
+					ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[8],  camera.projection[9],  camera.projection[10],  camera.projection[11]);
+					ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[12], camera.projection[13], camera.projection[14],  camera.projection[15]);
+
+					ImGui::Spacing();
+
+					ImGui::Text("View");
+					ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[0],  camera.view[1],  camera.view[2],  camera.view[3]);
+					ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[4],  camera.view[5],  camera.view[6],  camera.view[7]);
+					ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[8],  camera.view[9],  camera.view[10], camera.view[11]);
+					ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[12], camera.view[13], camera.view[14], camera.view[15]);
 				}
 
 				ImGui::Spacing();
@@ -61,8 +75,6 @@ namespace CGEngine
 					{
 						if (ImGui::CollapsingHeader(std::string("Object##" + GUID.str()).c_str()))
 						{
-							static float model_matrix[16];
-
 							static ImGuizmo::OPERATION currentGizmoOperation(ImGuizmo::TRANSLATE);
 							static ImGuizmo::MODE currentGizmoMode(ImGuizmo::WORLD);
 
@@ -82,22 +94,20 @@ namespace CGEngine
 							if (ImGui::RadioButton("Scale", currentGizmoOperation == ImGuizmo::SCALE))
 								currentGizmoOperation = ImGuizmo::SCALE;
 
-							ImGui::InputFloat3("Translation", &transform.position.x, "%.2f");
-							ImGui::InputFloat3("Rotation", &transform.eulerAngles.x, "%.2f");
-							ImGui::InputFloat3("Scale", &transform.scale.x, "%.2f");
+							ImGui::InputFloat3("Translation", Math::ToPtr(transform.position), "%.2f");
+							ImGui::InputFloat3("Rotation", Math::ToPtr(transform.eulerAngles), "%.2f");
+							ImGui::InputFloat3("Scale", Math::ToPtr(transform.scale), "%.2f");
 
 							const ImGuiIO& io = ImGui::GetIO(); static_cast<void>(io);
 							ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-							auto model = GetModelMatrix(transform);
-							const auto matrix = Math::ToPtr(model);
+							auto matrix = GetModelMatrix(transform);
 
-							Manipulate(Math::ToArray(camera.view), Math::ToArray(camera.projection), currentGizmoOperation, currentGizmoMode, matrix);
+							Manipulate(Math::ToArray(camera.view), Math::ToArray(camera.projection), currentGizmoOperation, currentGizmoMode, Math::ToPtr(matrix));
 
 							if (ImGuizmo::IsUsing())
 							{
-								const auto& tf_matrix = Math::ToMat4(matrix);
-								Math::Decompose(tf_matrix, transform.position, transform.rotation, transform.scale);
+
 							}
 						}
 				});

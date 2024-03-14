@@ -1,9 +1,9 @@
-#define GLM_ENABLE_EXPERIMENTAL
 #include "Math.h"
 
 #include <glm/trigonometric.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace CGEngine::Math
@@ -66,6 +66,11 @@ namespace CGEngine::Math
 	const float* ToArray(const Mat4& matrix)
 	{
 		return value_ptr(matrix);
+	}
+
+	float* ToPtr(Vec3& vector)
+	{
+		return value_ptr(vector);
 	}
 
 	float* ToPtr(Mat4& matrix)

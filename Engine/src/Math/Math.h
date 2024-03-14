@@ -34,7 +34,8 @@ namespace CGEngine::Math
 	const float* ToArray(const Vec4& vector);
 	const float* ToArray(const Mat3& matrix);
 	const float* ToArray(const Mat4& matrix);
-		  float* ToPtr(Mat4& matrix);
+	float* ToPtr(Vec3& vector);
+	float* ToPtr(Mat4& matrix);
 
 	Vec2 ToVec2(const float* data);
 	Vec3 ToVec3(const float* data);

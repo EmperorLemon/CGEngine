@@ -85,7 +85,7 @@ namespace CGEngine::IO
 				{
 					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
 
-					positions.emplace_back(Math::MakeVec3(data));
+					positions.emplace_back(Math::ToVec3(data));
 				}
 			}
 
@@ -106,7 +106,7 @@ namespace CGEngine::IO
 				{
 					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
 
-					normals.emplace_back(Math::MakeVec3(data));
+					normals.emplace_back(Math::ToVec3(data));
 				}
 			}
 
@@ -127,7 +127,7 @@ namespace CGEngine::IO
 				{
 					const auto data = reinterpret_cast<const float*>(buffer.data.data() + byteOffset + i * accessor.ByteStride(bufferView));
 
-					uvs.emplace_back(Math::MakeVec2(data));
+					uvs.emplace_back(Math::ToVec2(data));
 				}
 			}
 
