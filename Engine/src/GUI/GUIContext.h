@@ -3,14 +3,15 @@
 namespace CGEngine
 {
 	class Scene;
+	struct Camera;
 	struct Window;
 
 	void CreateGUIContext(const Window& window);
 	void DestroyGUIContext();
 
 	void BeginGUIFrame();
+	void CreateViewport(const Camera& camera);
 	void CreateEditorWindow(Scene& scene);
-	void CreateGUIWindow(const char* name = "Default GUI Window");
 	void EndGUIFrame();
 
 	void DrawGUI();

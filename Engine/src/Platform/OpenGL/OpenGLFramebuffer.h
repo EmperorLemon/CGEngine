@@ -30,8 +30,10 @@ namespace CGEngine::OpenGL
 
 		[[nodiscard]] bool CheckStatus() const;
 
+		[[nodiscard]] uint32_t GetID() const override { return m_id; }
 	private:
 		BufferTarget m_target = BufferTarget::NONE;
+		uint32_t m_id = 0;
 	};
 
 	class GLRenderbuffer final : public Renderbuffer
@@ -48,10 +50,11 @@ namespace CGEngine::OpenGL
 
 		void ResizeBuffer(int32_t width, int32_t height) const;
 
-		[[nodiscard]] uint32_t GetID() const override { return p_id; }
+		[[nodiscard]] uint32_t GetID() const override { return m_id; }
 
 	private:
 		BufferTarget m_target = BufferTarget::NONE;
 		FramebufferTextureAttachmentFormat m_format = FramebufferTextureAttachmentFormat::NONE;
+		uint32_t m_id = 0;
 	};
 }

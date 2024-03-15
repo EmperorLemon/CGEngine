@@ -38,7 +38,7 @@ namespace CGEngine
 		explicit Renderer(const RendererCreateInfo& rendererInfo);
 
 		void PreRender(Camera& camera);
-		void Render(const Time& time);
+		void Render(const Camera& camera, const Time& time);
 		void RenderPrimitive(const Component::Transform& transform, const Component::DrawObject& primitive);
 		void PostRender();
 

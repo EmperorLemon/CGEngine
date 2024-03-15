@@ -51,14 +51,12 @@ void DestroyGLFWWindow(const CGEngine::Window& window)
 {
 	if (s_WindowCount >= 1)
 	{
-		CG_TRACE("Destroyed Window {0}", s_WindowCount - 1);
 		glfwDestroyWindow(static_cast<GLFWwindow*>(window.window));
 		s_WindowCount--;
 	}
 
 	if (s_WindowCount == 0)
 	{
-		CG_TRACE("Terminated GLFW context");
 		glfwTerminate();
 	}
 }

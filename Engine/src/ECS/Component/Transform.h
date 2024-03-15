@@ -10,10 +10,8 @@ namespace CGEngine::Component
 	struct Transform
 	{
 		Math::Vec3 position = Math::Vec3(0.0f);
-		Math::Quat rotation = Math::Quat(1.0f, Math::Vec3(0.0f));
+		Math::Vec3 rotation = Math::Vec3(0.0f);
 		Math::Vec3 scale    = Math::Vec3(1.0f);
-
-		Math::Vec3 eulerAngles = Math::Vec3(0.0f);
 	};
 }
 
@@ -21,7 +19,7 @@ namespace CGEngine
 {
 	inline Math::Mat4 GetModelMatrix(const Component::Transform& transform)
 	{
-		const Math::Mat4 rotation = Math::ToMat4(transform.rotation);
+		const Math::Mat4 rotation = Math::ToMat4(Math::Quat(Math::DegToRad(transform.rotation)));
 
 		return Math::Translate(Math::Mat4(1.0f), transform.position)
 			   * rotation

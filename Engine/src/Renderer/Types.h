@@ -138,17 +138,27 @@ namespace CGEngine
 	{
 		NONE = 0,
 		CLAMP_TO_EDGE,
+		CLAMP_TO_BORDER,
 		REPEAT,
+		MIRRORED_REPEAT,
 		NEAREST,
-		LINEAR
+		NEAREST_MIPMAP_NEAREST,
+		NEAREST_MIPMAP_LINEAR,
+		LINEAR,
+		LINEAR_MIPMAP_NEAREST,
+		LINEAR_MIPMAP_LINEAR
 	};
 
 	enum class PixelFormat : uint8_t
 	{
 		NONE = 0,
+		R8,
+		RG8,
 		RGB,
 		RGB8,
-		RGBA8
+		RGBA8,
+		SRGB8,
+		SRGB8_ALPHA8
 	};
 
 	enum class PolygonMode : uint8_t

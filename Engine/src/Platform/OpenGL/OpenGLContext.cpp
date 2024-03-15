@@ -103,6 +103,16 @@ namespace CGEngine::OpenGL
 #endif
 	}
 
+	void* GetContext()
+	{
+		return glfwGetCurrentContext();
+	}
+
+	void SetContext(void* context)
+	{
+		glfwMakeContextCurrent(static_cast<GLFWwindow*>(context));
+	}
+
 	void QueryDeviceProperties(DeviceProperties& properties)
 	{
 		properties.vendor      = reinterpret_cast<const char*>(glGetString(GL_VENDOR));

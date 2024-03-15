@@ -31,7 +31,8 @@ namespace CGEngine
 
 		auto& entities = defaultScene.GetEntities();
 
-		m_renderer->PreRender(defaultScene.GetMainCamera());
+		auto& mainCamera = defaultScene.GetMainCamera();
+		m_renderer->PreRender(mainCamera);
 
 		while (!WindowClosed(m_window))
 		{
@@ -41,13 +42,14 @@ namespace CGEngine
 
 			BeginGUIFrame();
 
-			CreateEditorWindow(defaultScene);
+			CreateViewport(mainCamera);
+			//CreateEditorWindow(defaultScene);
 
 			EndGUIFrame();
 
 			m_renderer->FirstPass();
 
-			m_renderer->Render(m_time);
+			m_renderer->Render(mainCamera, m_time);
 			entities.Iterate<Component::Transform, Component::DrawObject>([&](const Component::Transform& transform, const Component::DrawObject& object)
 			{
 				m_renderer->RenderPrimitive(transform, object);

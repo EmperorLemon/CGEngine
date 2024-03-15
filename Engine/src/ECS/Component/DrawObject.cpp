@@ -1,5 +1,6 @@
 #include "DrawObject.h"
 
+#include "Core/Logger.hpp"
 #include "Platform/OpenGL/OpenGLTexture.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
@@ -34,13 +35,22 @@ namespace CGEngine::Component
 		{
 			TextureLayout layout;
 
-			//layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
-			//layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
-
-			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR_MIPMAP_LINEAR);
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
-			textures.emplace_back(std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA8, texture.width, texture.height, layout, texture.pixels.data()));
+			auto format = PixelFormat::NONE;
+
+			switch (texture.channels)
+			{
+			case 0: CG_WARN("Texture Channels = 0");  break;
+			case 1: format = PixelFormat::R8;         break;
+			case 2: format = PixelFormat::RG8;		  break;
+			case 3: format = PixelFormat::RGB8;		  break;
+			case 4: format = PixelFormat::RGBA8;	  break;
+			default:								  break;
+			}
+
+			textures.emplace_back(std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, format, texture.width, texture.height, layout, texture.pixels.data()));
 
 			std::vector<unsigned char> emptyPixels;
 			texture.pixels.swap(emptyPixels);

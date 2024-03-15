@@ -17,4 +17,6 @@ namespace CGEngine::IO
 	void ReadFile(std::string_view filepath, std::string& data);
 
 	bool FileExists(std::string_view filepath);
+
+	std::string GetDirectoryPath(std::string_view filepath);
 }

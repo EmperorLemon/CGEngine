@@ -131,4 +131,20 @@ namespace CGEngine::Math
 		decompose(matrix, scale, rotation, position, skew, perspective);
 	}
 
+	Mat4 ViewLerp(const Mat4& viewA, const Mat4& viewB, const float t)
+	{
+		// Extract the camera position and orientation from the view matrices
+		const glm::vec3 positionA = inverse(viewA)[3];
+		const glm::quat orientationA = quat_cast(glm::mat3(viewA));
+
+		const glm::vec3 positionB = glm::inverse(viewB)[3];
+		const glm::quat orientationB = quat_cast(glm::mat3(viewB));
+
+		// Interpolate the camera position and orientation
+		const glm::vec3 positionInterp = mix(positionA, positionB, t);
+		const glm::quat orientationInterp = slerp(orientationA, orientationB, t);
+
+		return translate(glm::mat4(1.0f), -positionInterp) * mat4_cast(inverse(orientationInterp));
+	}
+
 }

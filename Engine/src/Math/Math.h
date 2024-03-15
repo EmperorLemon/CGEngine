@@ -48,4 +48,6 @@ namespace CGEngine::Math
 	Mat4 ToMat4(const Quat&  data);
 
 	void Decompose(const Mat4& matrix, Vec3& position, Quat& rotation, Vec3& scale);
+
+	Mat4 ViewLerp(const Mat4& viewA, const Mat4& viewB, float t);
 }

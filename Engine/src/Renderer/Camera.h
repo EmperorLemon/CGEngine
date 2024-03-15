@@ -18,6 +18,8 @@ namespace CGEngine
 
 		Math::Mat4 view = Math::Mat4(1.0f);
 		Math::Mat4 projection = Math::Mat4(1.0f);
+
+		uint32_t viewportID = 0;
 	};
 
 	float GetFieldOfView(float degrees);

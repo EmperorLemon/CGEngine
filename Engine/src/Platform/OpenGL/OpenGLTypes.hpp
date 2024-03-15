@@ -110,11 +110,17 @@ namespace CGEngine::OpenGL
 	{
 		switch (value)
 		{
-		case TParamValue::NONE:			 return 0;
-		case TParamValue::CLAMP_TO_EDGE: return GL_CLAMP_TO_EDGE;
-		case TParamValue::REPEAT:		 return GL_REPEAT;
-		case TParamValue::LINEAR:		 return GL_LINEAR;
-		case TParamValue::NEAREST:		 return GL_NEAREST;
+		case TParamValue::NONE:					  return 0;
+		case TParamValue::CLAMP_TO_EDGE:		  return GL_CLAMP_TO_EDGE;
+		case TParamValue::CLAMP_TO_BORDER:		  return GL_CLAMP_TO_BORDER;
+		case TParamValue::REPEAT:				  return GL_REPEAT;
+		case TParamValue::MIRRORED_REPEAT:		  return GL_MIRRORED_REPEAT;
+		case TParamValue::NEAREST:				  return GL_NEAREST;
+		case TParamValue::NEAREST_MIPMAP_NEAREST: return GL_NEAREST_MIPMAP_NEAREST;
+		case TParamValue::NEAREST_MIPMAP_LINEAR:  return GL_NEAREST_MIPMAP_LINEAR;
+		case TParamValue::LINEAR:				  return GL_LINEAR;
+		case TParamValue::LINEAR_MIPMAP_NEAREST:  return GL_LINEAR_MIPMAP_NEAREST;
+		case TParamValue::LINEAR_MIPMAP_LINEAR:   return GL_LINEAR_MIPMAP_LINEAR;
 		}
 
 		return 0;
@@ -149,10 +155,14 @@ namespace CGEngine::OpenGL
 	{
 		switch (format)
 		{
-		case PixelFormat::NONE:  return 0;
-		case PixelFormat::RGB:	 return GL_RGB;
-		case PixelFormat::RGB8:  return GL_RGB8;
-		case PixelFormat::RGBA8: return GL_RGBA8;
+		case PixelFormat::NONE:			return 0;
+		case PixelFormat::R8:			return GL_R8;
+		case PixelFormat::RG8:			return GL_RG8;
+		case PixelFormat::RGB:			return GL_RGB;
+		case PixelFormat::RGB8:			return GL_RGB8;
+		case PixelFormat::RGBA8:		return GL_RGBA8;
+		case PixelFormat::SRGB8:		return GL_SRGB8;
+		case PixelFormat::SRGB8_ALPHA8: return GL_SRGB8_ALPHA8;
 		}
 
 		return 0;

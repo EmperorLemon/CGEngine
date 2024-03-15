@@ -24,6 +24,8 @@ namespace CGEngine::IO
 
 	static void ExtractTextures(const aiMaterial* material, const aiTextureType type, Assets::Model& model);
 
+	static std::string ASSET_DIRECTORY_PATH;
+
 	void AssimpLoadModel(const std::string_view filepath, Assets::Model& model)
 	{
 		auto importer = Assimp::Importer{};
@@ -32,6 +34,8 @@ namespace CGEngine::IO
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			CG_ERROR("Assimp Error: {0}", importer.GetErrorString());
+
+		ASSET_DIRECTORY_PATH = GetDirectoryPath(filepath) + "/";
 
 		try
 		{
@@ -142,10 +146,10 @@ namespace CGEngine::IO
 
 			if (material->GetTexture(type, i, &importedPath) == AI_SUCCESS)
 			{
-				const std::string path(std::string("Assets/Models/Avocado/") + importedPath.C_Str());
+				const std::string path = ASSET_DIRECTORY_PATH + importedPath.C_Str();
 
 				Image image = {};
-				LoadImageFile(path.c_str(), image.width, image.height, image.channels, image.pixels, true);
+				LoadImageFile(path.c_str(), image.width, image.height, image.channels, image.pixels, false);
 				model.textures.emplace_back(std::move(image));
 			}
 		}

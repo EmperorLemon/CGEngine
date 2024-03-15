@@ -10,7 +10,7 @@ namespace CGEngine
 	struct TextureParameter
 	{
 		TParamName  name  =  TParamName::NONE;
-		TParamValue value = TParamValue::NONE;
+		TParamValue value =  TParamValue::NONE;
 	};
 
 	struct Image
@@ -48,7 +48,7 @@ namespace CGEngine
 
 		virtual ~Texture() = default;
 
-		virtual void SetSubImage(TextureFormat format, DataType type, const void* pixels) const = 0;
+		virtual void SetSubImage(DataType type, const void* pixels) const = 0;
 
 		virtual void Bind(uint32_t unit)   const = 0;
 		virtual void Unbind(uint32_t unit) const = 0;

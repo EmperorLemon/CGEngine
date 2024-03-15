@@ -22,7 +22,7 @@ namespace CGEngine::IO
 
 		stbi_set_flip_vertically_on_load(flip);
 
-		const auto pixels = stbi_load(filepath.data(), &width, &height, &channels, STBI_rgb_alpha);
+		const auto pixels = stbi_load(filepath.data(), &width, &height, &channels, 0);
 
 		if (!pixels)
 		{
@@ -32,7 +32,7 @@ namespace CGEngine::IO
 			return;
 		}
 
-		const size_t size = static_cast<size_t>(width * height) * STBI_rgb_alpha;
+		const size_t size = static_cast<size_t>(width * height) * channels;
 		data.insert(data.end(), pixels, pixels + size);
 
 		stbi_image_free(pixels);
@@ -43,8 +43,8 @@ namespace CGEngine::IO
 		if (!FileExists(filepath))
 			CG_ERROR("File {0} does not exist!", filepath.data());
 
-		LoadglTFModel(filepath, model);
-		//AssimpLoadModel(filepath, model);
+		//LoadglTFModel(filepath, model);
+		AssimpLoadModel(filepath, model);
 	}
 
 	void ReadFile(const std::string_view filepath, std::vector<unsigned char>& data)
@@ -89,5 +89,10 @@ namespace CGEngine::IO
 	{
 		const auto s = std::filesystem::file_status{};
 		return status_known(s) ? exists(s) : std::filesystem::exists(filepath);
+	}
+
+	std::string GetDirectoryPath(const std::string_view filepath)
+	{
+		return std::filesystem::path(filepath).parent_path().string();
 	}
 }
