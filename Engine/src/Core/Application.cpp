@@ -70,11 +70,18 @@ namespace CGEngine
 		if (event.handled) return;
 
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResized));
+		dispatcher.Dispatch<FramebufferResizeEvent>(BIND_EVENT_FN(OnFramebufferResized));
 	}
 
 	bool Application::OnWindowResized(const WindowResizeEvent& event)
 	{
-		m_renderer->ResizeProjection(m_sceneManager.DefaultScene().GetMainCamera());
+		m_renderer->ResizeProjection(event.GetWidth(), event.GetHeight(), m_sceneManager.DefaultScene().GetMainCamera());
+
+		return true;
+	}
+
+	bool Application::OnFramebufferResized(const FramebufferResizeEvent& event)
+	{
 		m_renderer->ResizeViewport(event.GetWidth(), event.GetHeight());
 
 		return true;

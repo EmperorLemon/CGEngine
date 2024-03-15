@@ -21,7 +21,8 @@ void CreateGLFWWindow(const CGEngine::WindowCreateInfo& windowInfo, CGEngine::Wi
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6); // Request OpenGL version x.6
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Use core profile
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-	glfwWindowHint(GLFW_SAMPLES, 4); // take advantage of multi-sample anti-aliasing
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SRGB_CAPABLE, true);
 
 	window.title = windowInfo.title;
 
@@ -41,6 +42,14 @@ void CreateGLFWWindow(const CGEngine::WindowCreateInfo& windowInfo, CGEngine::Wi
 		winptr->height = height;
 
 		CGEngine::WindowResizeEvent event(width, height);
+		winptr->eventCallback(event);
+	});
+
+	glfwSetFramebufferSizeCallback(static_cast<GLFWwindow*>(window.window), [](GLFWwindow* glfwWindow, const int width, const int height)
+	{
+		const auto winptr = static_cast<CGEngine::Window*>(glfwGetWindowUserPointer(glfwWindow));
+
+		CGEngine::FramebufferResizeEvent event(width, height);
 		winptr->eventCallback(event);
 	});
 

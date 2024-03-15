@@ -138,10 +138,10 @@ namespace CGEngine
 
 			TextureLayout layout;
 
-			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR_MIPMAP_LINEAR);
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
-			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB8, width, height, layout);
+			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA8, width, height, layout);
 
 			Assets::Mesh mesh;
 
@@ -158,51 +158,51 @@ namespace CGEngine
 			screenQuadVertexArray = std::make_shared<OpenGL::GLVertexArray>(screenQuadVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
 		}
 
-		//// Skybox setup
-		//{
-		//	std::string vert_src, frag_src;
-		//	IO::ReadFile("Assets/Shaders/skybox.vert", vert_src);
-		//	IO::ReadFile("Assets/Shaders/skybox.frag", frag_src);
+		// Skybox setup
+		{
+			std::string vert_src, frag_src;
+			IO::ReadFile("Assets/Shaders/skybox.vert", vert_src);
+			IO::ReadFile("Assets/Shaders/skybox.frag", frag_src);
 
-		//	ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
-		//	skyboxShader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
+			ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
+			skyboxShader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 
-		//	std::vector<std::string_view> faces = { "Assets/Textures/Skybox/right.jpg", "Assets/Textures/Skybox/left.jpg", "Assets/Textures/Skybox/top.jpg",
-		//											"Assets/Textures/Skybox/bottom.jpg","Assets/Textures/Skybox/front.jpg","Assets/Textures/Skybox/back.jpg" };
-		//	std::vector<Image> bitmaps;
-		//	bitmaps.reserve(faces.size());
+			std::vector<std::string_view> faces = { "Assets/Textures/Skybox/right.jpg", "Assets/Textures/Skybox/left.jpg", "Assets/Textures/Skybox/top.jpg",
+													"Assets/Textures/Skybox/bottom.jpg","Assets/Textures/Skybox/front.jpg","Assets/Textures/Skybox/back.jpg" };
+			std::vector<Image> bitmaps;
+			bitmaps.reserve(faces.size());
 
-		//	for (auto face : faces)
-		//	{
-		//		Image image = {};
-		//		IO::LoadImageFile(face, image.width, image.height, image.channels, image.pixels);
-		//		bitmaps.emplace_back(std::move(image));
-		//	}
+			for (auto face : faces)
+			{
+				Image image = {};
+				IO::LoadImageFile(face, image.width, image.height, image.channels, image.pixels);
+				bitmaps.emplace_back(std::move(image));
+			}
 
-		//	TextureLayout layout;
+			TextureLayout layout;
 
-		//	layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
-		//	layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
-		//	layout.add(TParamName::TEXTURE_WRAP_R, TParamValue::CLAMP_TO_EDGE);
+			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
+			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
+			layout.add(TParamName::TEXTURE_WRAP_R, TParamValue::CLAMP_TO_EDGE);
 
-		//	layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
-		//	layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
-		//	skyboxTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_CUBE_MAP, 1, TextureFormat::SRGB, PixelFormat::SRGB8, layout, std::move(bitmaps));
+			skyboxTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_CUBE_MAP, 1, PixelFormat::SRGB8, layout, std::move(bitmaps));
 
-		//	Assets::Mesh mesh;
+			Assets::Mesh mesh;
 
-		//	mesh.vertices.swap(SKYBOX_VERTICES);
+			mesh.vertices.swap(SKYBOX_VERTICES);
 
-		//	mesh.layout.add(0, 3, DataType::FLOAT, 0);
+			mesh.layout.add(0, 3, DataType::FLOAT, 0);
 
-		//	mesh.layout.SetStride(3 * sizeof(float));
+			mesh.layout.SetStride(3 * sizeof(float));
 
-		//	const BufferInfo vertexBuffer = { mesh.vertices.size() * sizeof(float), mesh.vertices.size(), 0 };
+			const BufferInfo vertexBuffer = { mesh.vertices.size() * sizeof(float), mesh.vertices.size(), 0 };
 
-		//	skyboxVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
-		//	skyboxVertexArray = std::make_shared<OpenGL::GLVertexArray>(skyboxVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
-		//}
+			skyboxVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
+			skyboxVertexArray = std::make_shared<OpenGL::GLVertexArray>(skyboxVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
+		}
 
 		// Uniform buffer setup
 		{
@@ -241,9 +241,8 @@ namespace CGEngine
 		// Various capabilities being enabled
 		{
 			m_backend->Enable(APICapability::DEPTH_TEST);
-			//m_backend->Enable(APICapability::FRAMEBUFFER_SRGB);
+			m_backend->Enable(APICapability::FRAMEBUFFER_SRGB);
 		}
-
 
 		// Default camera setup
 		{
@@ -290,16 +289,16 @@ namespace CGEngine
 			screenShader->Disable();
 		}
 
-		//// Skybox shader setup
-		//{
-		//	skyboxShader->Use();
+		// Skybox shader setup
+		{
+			skyboxShader->Use();
 
-		//	constexpr int skybox_texture_sampler = 0;
-		//	skyboxShader->BindUniform("skyboxSampler", OpenGL::UniformType::INT, &skybox_texture_sampler);
-		//	skyboxShader->BindUniform("SKYBOX_VIEW_MATRIX", OpenGL::UniformType::MAT4, Math::ToArray(Math::Mat4(Math::Mat3(camera.view))));
+			constexpr int skybox_texture_sampler = 0;
+			skyboxShader->BindUniform("skyboxSampler", OpenGL::UniformType::INT, &skybox_texture_sampler);
+			skyboxShader->BindUniform("SKYBOX_VIEW_MATRIX", OpenGL::UniformType::MAT4, Math::ToArray(Math::Mat4(Math::Mat3(camera.view))));
 
-		//	skyboxShader->Disable();
-		//}
+			skyboxShader->Disable();
+		}
 	}
 
 	void Renderer::FirstPass() const
@@ -342,15 +341,15 @@ namespace CGEngine
 	void Renderer::SecondPass() const
 	{
 		// Draw skybox after drawn objects, but before second pass.
-		//{
-		//	m_backend->SetDepthFunc(DepthFunc::LEQUAL);
-		//	skyboxShader->Use();
-		//	{
-		//		skyboxTexture->Bind(0);
-		//		m_backend->Draw(skyboxVertexArray.get());
-		//	}
-		//	m_backend->SetDepthFunc(DepthFunc::LESS);
-		//}
+		{
+			m_backend->SetDepthFunc(DepthFunc::LEQUAL);
+			skyboxShader->Use();
+			{
+				skyboxTexture->Bind(0);
+				m_backend->Draw(skyboxVertexArray.get());
+			}
+			m_backend->SetDepthFunc(DepthFunc::LESS);
+		}
 
 		// Second pass
 		{
@@ -372,13 +371,12 @@ namespace CGEngine
 		SwapBuffers(m_window);
 	}
 
-	void Renderer::ResizeProjection(Camera& camera) const
+	void Renderer::ResizeProjection(const int32_t width, const int32_t height, Camera& camera) const
 	{
-		camera.aspect	  = GetAspectRatio(m_window.width, m_window.height);
+		camera.aspect	  = GetAspectRatio(width, height);
 		camera.projection = Math::Perspective(camera.fov, camera.aspect, camera.near, camera.far);
 
 		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(camera.projection));
-		//uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(Math::View(camera.position, camera.direction, camera.up)));
 	}
 
 	void Renderer::ResizeViewport(const int32_t width, const int32_t height) const
@@ -390,7 +388,8 @@ namespace CGEngine
 	void Renderer::ResizeFramebuffer(const int32_t width, const int32_t height) const
 	{
 		TextureLayout layout;
-		const auto& resizedScreenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB8, width, height, layout);
+
+		const auto& resizedScreenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA8, width, height, layout);
 		renderBuffer->ResizeBuffer(width, height);
 
 		frameBuffer->Bind();

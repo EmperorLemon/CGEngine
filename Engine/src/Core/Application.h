@@ -39,6 +39,7 @@ namespace CGEngine
 	private:
 		void OnEvent(Event& event);
 		[[nodiscard]] bool OnWindowResized(const WindowResizeEvent& event);
+		[[nodiscard]] bool OnFramebufferResized(const FramebufferResizeEvent& event);
 	private:
 		Logger m_logger;
 		SceneManager m_sceneManager;

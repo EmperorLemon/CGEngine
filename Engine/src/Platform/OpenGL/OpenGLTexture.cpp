@@ -13,10 +13,10 @@ namespace CGEngine::OpenGL
 		case PixelFormat::R8:			return TextureFormat::RED;
 		case PixelFormat::RG8:			return TextureFormat::RG;
 		case PixelFormat::RGB:
-		case PixelFormat::RGB8:			return TextureFormat::RGB;
-		case PixelFormat::RGBA8:		return TextureFormat::RGBA;
-		case PixelFormat::SRGB8:		return TextureFormat::SRGB;
-		case PixelFormat::SRGB8_ALPHA8: return TextureFormat::SRGBA;
+		case PixelFormat::RGB8:
+		case PixelFormat::SRGB8:		return TextureFormat::RGB;
+		case PixelFormat::RGBA8:
+		case PixelFormat::SRGB8_ALPHA8: return TextureFormat::RGBA;
 		}
 
 		return TextureFormat::NONE;
@@ -52,11 +52,11 @@ namespace CGEngine::OpenGL
 		glTextureStorage2D(p_id, levels, Convert(pixelFormat), width, height);
 	}
 
-	GLTexture::GLTexture(const TextureTarget target, const int32_t levels, const TextureFormat textureFormat, const PixelFormat pixelFormat, const TextureLayout& layout, std::vector<Image>&& bitmaps) : Texture(0, 0)
+	GLTexture::GLTexture(const TextureTarget target, const int32_t levels, const PixelFormat pixelFormat, const TextureLayout& layout, std::vector<Image>&& bitmaps) : Texture(0, 0)
 	{
 		m_levels = levels;
 		m_pixelFormat = pixelFormat;
-		m_textureFormat = textureFormat;
+		m_textureFormat = GetTextureFormat(pixelFormat);
 
 		glCreateTextures(Convert(target), 1, &p_id);
 
@@ -70,7 +70,7 @@ namespace CGEngine::OpenGL
 			int face = 0;
 			for (const auto& bitmap : bitmaps)
 			{
-				glTextureSubImage3D(p_id, 0, 0, 0, face, bitmap.width, bitmap.height, 1, Convert(textureFormat), GL_UNSIGNED_BYTE, bitmap.pixels.data());
+				glTextureSubImage3D(p_id, 0, 0, 0, face, bitmap.width, bitmap.height, 1, Convert(m_textureFormat), GL_UNSIGNED_BYTE, bitmap.pixels.data());
 				face++;
 			}
 		}

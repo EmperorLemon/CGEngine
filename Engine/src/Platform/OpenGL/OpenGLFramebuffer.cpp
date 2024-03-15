@@ -75,6 +75,4 @@ namespace CGEngine::OpenGL
 	{
 		glNamedRenderbufferStorage(m_id, Convert(m_format), width, height);
 	}
-
-
 }

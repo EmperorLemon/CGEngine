@@ -45,7 +45,7 @@ namespace CGEngine
 		void FirstPass()  const;
 		void SecondPass() const;
 
-		void ResizeProjection(Camera& camera) const;
+		void ResizeProjection(int32_t width, int32_t height, Camera& camera) const;
 		void ResizeViewport(int32_t width, int32_t height) const;
 		void ResizeFramebuffer(int32_t width, int32_t height) const;
 

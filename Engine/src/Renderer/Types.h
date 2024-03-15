@@ -119,9 +119,7 @@ namespace CGEngine
 		RED,
 		RG,
 		RGB,
-		RGBA,
-		SRGB,
-		SRGBA
+		RGBA
 	};
 
 	enum class TParamName : uint8_t

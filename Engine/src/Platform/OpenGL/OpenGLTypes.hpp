@@ -84,8 +84,6 @@ namespace CGEngine::OpenGL
 		case TextureFormat::RG:    return GL_RG;
 		case TextureFormat::RGB:   return GL_RGB;
 		case TextureFormat::RGBA:  return GL_RGBA;
-		case TextureFormat::SRGB:  return GL_SRGB;
-		case TextureFormat::SRGBA: return GL_SRGB_ALPHA;
 		}
 
 		return 0;

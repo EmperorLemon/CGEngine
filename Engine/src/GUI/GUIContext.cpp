@@ -91,79 +91,9 @@ namespace CGEngine
 		Manipulate(Math::ToArray(camera.view), Math::ToArray(camera.projection), currentGizmoOperation, currentGizmoMode, MODEL_MATRIX, nullptr, nullptr, nullptr, nullptr);
 	}
 
-	static void CreateDockSpace()
-	{
-		static bool dockspaceOpen   = true;
-		static bool fullscreen_cond = true;
-		const bool fullscreen = fullscreen_cond;
-
-		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-		static ImGuiWindowFlags   window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-
-		if (fullscreen)
-		{
-			const auto viewport = ImGui::GetMainViewport();
-
-			ImGui::SetNextWindowPos(viewport->Pos);
-			ImGui::SetNextWindowSize(viewport->Size);
-			ImGui::SetNextWindowViewport(viewport->ID);
-
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding,   0);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-
-			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-		}
-
-		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-			window_flags |= ImGuiWindowFlags_NoBackground;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		ImGui::Begin("Dockspace", &dockspaceOpen, window_flags);
-		ImGui::PopStyleVar();
-
-		if (fullscreen)
-			ImGui::PopStyleVar(2);
-
-		ImGuiStyle& style = ImGui::GetStyle();
-
-		const float minWinSizeX = style.WindowMinSize.x;
-		style.WindowMinSize.x = 370.0f;
-
-		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
-		{
-			const auto dockspace_id = ImGui::GetID("Dockspace_0");
-			ImGui::DockSpace(dockspace_id, ImVec2(0, 0), dockspace_flags);
-		}
-
-		style.WindowMinSize.x = minWinSizeX;
-	}
-
 	void CreateViewport(const Camera& camera)
 	{
-		CreateDockSpace();
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
-
-		const auto& viewportMinRegion = ImGui::GetWindowContentRegionMin();
-		const auto& viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-		const auto& viewportOffset    = ImGui::GetWindowPos();
-
-		viewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-		viewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
-
-		const auto& viewportSize = ImGui::GetContentRegionAvail();
-
-		ImGui::Image(reinterpret_cast<ImTextureID>(camera.viewportID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
-
-		ImGuizmo::SetOrthographic(false);
-		ImGuizmo::SetDrawlist();
-
-		ImGuizmo::SetRect(viewportBounds[0].x, viewportBounds[0].y, viewportBounds[1].x - viewportBounds[0].x, viewportBounds[1].y - viewportBounds[0].y);
-
-		ImGui::End();
-		ImGui::PopStyleVar();
 
 		ImGui::End();
 	}
@@ -235,14 +165,16 @@ namespace CGEngine
 	{
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		// Update and Render additional Platform Windows
-		// (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+
+	}
+
+	void HandleWindowResize()
+	{
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			const auto backup_current_context = OpenGL::GetContext();
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			OpenGL::SetContext(backup_current_context);
+			//OpenGL::SetContext(OpenGL::GetContext());
 		}
 	}
 

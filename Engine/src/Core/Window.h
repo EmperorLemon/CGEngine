@@ -22,6 +22,21 @@ namespace CGEngine
 		int32_t m_height = 0;
 	};
 
+	class FramebufferResizeEvent : public Event
+	{
+	public:
+		FramebufferResizeEvent(const int32_t width, const int32_t height) : m_width(width), m_height(height) {}
+
+		[[nodiscard]] int32_t  GetWidth() const { return m_width; }
+		[[nodiscard]] int32_t GetHeight() const { return m_height; }
+
+		EVENT_CLASS_TYPE(FRAMEBUFFER_RESIZE)
+		EVENT_CLASS_CATEGORY(EVENT_CATEGORY_WINDOW)
+	private:
+		int32_t m_width = 0;
+		int32_t m_height = 0;
+	};
+
 	struct Window
 	{
 		using EventCallbackFn = std::function<void(Event&)>;
