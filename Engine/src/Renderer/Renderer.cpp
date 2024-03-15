@@ -173,7 +173,7 @@ namespace CGEngine
 			std::vector<Image> bitmaps;
 			bitmaps.reserve(faces.size());
 
-			for (auto face : faces)
+			for (auto& face : faces)
 			{
 				Image image = {};
 				IO::LoadImageFile(face, image.width, image.height, image.channels, image.pixels);
@@ -367,7 +367,7 @@ namespace CGEngine
 		}
 	}
 
-	void Renderer::PostRender()
+	void Renderer::PostRender() const
 	{
 		SwapBuffers(m_window);
 	}

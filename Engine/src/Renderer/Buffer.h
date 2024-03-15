@@ -3,7 +3,6 @@
 #include "Types.h"
 
 #include <cstdint>
-#include <optional>
 
 namespace CGEngine
 {
@@ -52,8 +51,12 @@ namespace CGEngine
 
 		[[nodiscard]] virtual uint32_t GetID() const = 0;
 
-		[[nodiscard]] virtual const BufferInfo& GetVertices() const = 0;
-		[[nodiscard]] virtual const BufferInfo& GetIndices()  const = 0;
+		[[nodiscard]] virtual const BufferInfo& GetVertices()   const = 0;
+		[[nodiscard]] virtual const BufferInfo& GetIndices()    const = 0;
+
+		[[nodiscard]] virtual int32_t GetInstanceCount() const = 0;
+
+		virtual void SetupInstancing(uint32_t bindingIndex, size_t amount, const void* data) = 0;
 
 		virtual void SetDrawType(DrawType type) = 0;
 	};

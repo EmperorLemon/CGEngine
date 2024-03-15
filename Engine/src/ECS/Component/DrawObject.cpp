@@ -1,6 +1,7 @@
 #include "DrawObject.h"
 
 #include "Core/Logger.hpp"
+
 #include "Platform/OpenGL/OpenGLTexture.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
@@ -14,18 +15,18 @@ namespace CGEngine::Component
 
 		for (const auto& mesh : model.meshes)
 		{
-			const auto   vBufferSize = sizeof(float) * mesh.vertices.size();
-			const auto   iBufferSize = sizeof(uint16_t) * mesh.indices.size();
-			const size_t bufferSize = vBufferSize + iBufferSize;
+			const auto   vtxBufferSize = sizeof(float) * mesh.vertices.size();
+			const auto   idxBufferSize = sizeof(uint16_t) * mesh.indices.size();
+			const size_t bufferSize = vtxBufferSize + idxBufferSize;
 
-			const BufferInfo vBufferInfo = { vBufferSize, mesh.vertices.size(), 0 };
-			const BufferInfo iBufferInfo = { iBufferSize, mesh.indices.size(),  vBufferInfo.size };
+			const BufferInfo vtxBufferInfo = { vtxBufferSize, mesh.vertices.size(), 0 };
+			const BufferInfo idxBufferInfo = { idxBufferSize, mesh.indices.size(),  vtxBufferInfo.size };
 
 			vertexBuffers.emplace_back(std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, bufferSize, nullptr));
-			vertexBuffers.at(index)->SetSubData(vBufferInfo.offset, vBufferInfo.size, mesh.vertices.data());
-			vertexBuffers.at(index)->SetSubData(iBufferInfo.offset, iBufferInfo.size, mesh.indices.data());
+			vertexBuffers.at(index)->SetSubData(vtxBufferInfo.offset, vtxBufferInfo.size, mesh.vertices.data());
+			vertexBuffers.at(index)->SetSubData(idxBufferInfo.offset, idxBufferInfo.size, mesh.indices.data());
 
-			vertexArrays.emplace_back(std::make_shared<OpenGL::GLVertexArray>(vertexBuffers.at(index)->GetID(), vBufferInfo, &iBufferInfo, mesh.layout));
+			vertexArrays.emplace_back(std::make_shared<OpenGL::GLVertexArray>(vertexBuffers.at(index)->GetID(), vtxBufferInfo, &idxBufferInfo, mesh.layout));
 			vertexArrays.at(index)->SetDrawType(DrawType::DRAW_ELEMENTS);
 
 			index++;

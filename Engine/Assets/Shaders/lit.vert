@@ -18,7 +18,7 @@ layout (std140, binding = 0) uniform Matrices
     mat4 VIEW_MATRIX;
 };
 
-uniform bool USE_INSTANCING = false;
+uniform bool USE_INSTANCING = true;
 
 uniform mat4  MODEL_MATRIX;
 uniform mat3 NORMAL_MATRIX;

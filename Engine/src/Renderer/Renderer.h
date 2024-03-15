@@ -40,7 +40,7 @@ namespace CGEngine
 		void PreRender(Camera& camera);
 		void Render(const Camera& camera, const Time& time);
 		void RenderPrimitive(const Component::Transform& transform, const Component::DrawObject& primitive);
-		void PostRender();
+		void PostRender() const;
 
 		void FirstPass()  const;
 		void SecondPass() const;

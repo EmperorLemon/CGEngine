@@ -137,6 +137,12 @@ namespace CGEngine
 		}
 
 		Manipulate(Math::ToArray(camera.view), Math::ToArray(camera.projection), currentGizmoOperation, currentGizmoMode, MODEL_MATRIX, nullptr, nullptr, nullptr, nullptr);
+
+		ImGui::Text("Model");
+		ImGui::Text("[%f] [%f] [%f] [%f]", MODEL_MATRIX[0], MODEL_MATRIX[1], MODEL_MATRIX[2], MODEL_MATRIX[3]);
+		ImGui::Text("[%f] [%f] [%f] [%f]", MODEL_MATRIX[4], MODEL_MATRIX[5], MODEL_MATRIX[6], MODEL_MATRIX[7]);
+		ImGui::Text("[%f] [%f] [%f] [%f]", MODEL_MATRIX[8], MODEL_MATRIX[9], MODEL_MATRIX[10], MODEL_MATRIX[11]);
+		ImGui::Text("[%f] [%f] [%f] [%f]", MODEL_MATRIX[12], MODEL_MATRIX[13], MODEL_MATRIX[14], MODEL_MATRIX[15]);
 	}
 
 	void CreateViewport(const uint32_t viewportID)

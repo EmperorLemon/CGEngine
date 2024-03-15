@@ -206,6 +206,7 @@ namespace CGEngine::OpenGL
 		case BufferTarget::NONE:				  return 0;
 		case BufferTarget::VERTEX_BUFFER:		  return GL_ARRAY_BUFFER;
 		case BufferTarget::INDEX_BUFFER:		  return GL_ELEMENT_ARRAY_BUFFER;
+		case BufferTarget::INSTANCE_BUFFER:		  return 0;
 		case BufferTarget::UNIFORM_BUFFER:		  return GL_UNIFORM_BUFFER;
 		case BufferTarget::SHADER_STORAGE_BUFFER: return GL_SHADER_STORAGE_BUFFER;
 		case BufferTarget::FRAMEBUFFER:			  return GL_FRAMEBUFFER;

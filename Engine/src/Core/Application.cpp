@@ -42,8 +42,8 @@ namespace CGEngine
 
 			BeginGUIFrame();
 
-			//CreateViewport(m_renderer->GetViewportID());
-			//CreateEditorWindow(defaultScene);
+			CreateViewport(m_renderer->GetViewportID());
+			CreateEditorWindow(defaultScene);
 
 			EndGUIFrame();
 

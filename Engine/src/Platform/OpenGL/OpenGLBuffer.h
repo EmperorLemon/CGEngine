@@ -52,14 +52,20 @@ namespace CGEngine::OpenGL
 		void SetDrawType(const DrawType type) override { m_drawType = type; }
 		[[nodiscard]] DrawType GetDrawType() const { return m_drawType; }
 
-		[[nodiscard]] const BufferInfo& GetVertices() const override { return m_vertexBuffer; }
-		[[nodiscard]] const BufferInfo& GetIndices()  const override { return m_indexBuffer; }
+		[[nodiscard]] const BufferInfo& GetVertices()  const override { return m_vertexBuffer; }
+		[[nodiscard]] const BufferInfo& GetIndices()   const override { return m_indexBuffer; }
+
+		[[nodiscard]] int32_t GetInstanceCount() const override { return m_instanceCount; }
+
+		void SetupInstancing(uint32_t bindingIndex, size_t amount, const void* data) override;
 
 	private:
 		DrawType m_drawType = DrawType::NONE;
+
 		uint32_t m_id = 0;
+		 int32_t m_instanceCount = 0;
 
 		BufferInfo m_vertexBuffer;
-		BufferInfo  m_indexBuffer;
+		BufferInfo m_indexBuffer;
 	};
 }

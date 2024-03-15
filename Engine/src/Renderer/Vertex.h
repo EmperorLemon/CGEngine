@@ -13,6 +13,7 @@ namespace CGEngine
 		DataType type;
 		bool	 normalized;
 		uint32_t offset;
+		bool	 instanced;
 	};
 
 	constexpr int32_t GetAttributeTypeSize(const DataType type)
@@ -37,9 +38,9 @@ namespace CGEngine
 	class VertexLayout
 	{
 	public:
-		VertexLayout& add(const uint32_t index, const int32_t count, const DataType type, const size_t offset, const bool normalized = false)
+		VertexLayout& add(const uint32_t index, const int32_t count, const DataType type, const size_t offset, const bool normalized = false, const bool instanced = false)
 		{
-			m_layout.emplace_back(index, count, type, normalized, static_cast<uint32_t>(offset));
+			m_layout.emplace_back(index, count, type, normalized, static_cast<uint32_t>(offset), instanced);
 
 			return *this;
 		}

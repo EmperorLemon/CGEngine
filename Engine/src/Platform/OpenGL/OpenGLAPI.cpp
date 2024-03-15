@@ -35,12 +35,13 @@ namespace CGEngine::OpenGL
 				}
 			case DrawType::DRAW_ARRAYS_INSTANCED:
 				{
-					const auto& vertices = vertexArray->GetVertices();
-					//glDrawArraysInstanced(GL_TRIANGLES, )
+				CG_WARN("Draw arrays instanced not implemented yet!");
 					break;
 				}
 			case DrawType::DRAW_ELEMENTS_INSTANCED:
 				{
+					const auto& indices = vertexArray->GetIndices();
+					glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset), 10);
 					break;
 				}
 			}
