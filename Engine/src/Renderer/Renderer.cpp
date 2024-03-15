@@ -249,7 +249,6 @@ namespace CGEngine
 			camera.aspect = GetAspectRatio(m_window.width, m_window.height);
 			camera.projection = Math::Perspective(camera.fov, camera.aspect, camera.near, camera.far);
 			camera.view = Math::View(camera.position, camera.direction, camera.up);
-			camera.viewportID = frameBuffer->GetID();
 		}
 
 		// Uniform buffer setup
@@ -381,8 +380,8 @@ namespace CGEngine
 
 	void Renderer::ResizeViewport(const int32_t width, const int32_t height) const
 	{
-		m_backend->ResizeViewport(0, 0, width, height);
 		ResizeFramebuffer(width, height);
+		m_backend->ResizeViewport(0, 0, width, height);
 	}
 
 	void Renderer::ResizeFramebuffer(const int32_t width, const int32_t height) const
@@ -401,6 +400,11 @@ namespace CGEngine
 		screenTexture = resizedScreenTexture;
 
 		frameBuffer->Unbind();
+	}
+
+	uint32_t Renderer::GetViewportID() const
+	{
+		return screenTexture->GetID();
 	}
 
 	GraphicsAPI Renderer::GetAPI()

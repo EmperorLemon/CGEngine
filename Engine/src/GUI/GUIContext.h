@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace CGEngine
 {
 	class Scene;
@@ -10,7 +12,7 @@ namespace CGEngine
 	void DestroyGUIContext();
 
 	void BeginGUIFrame();
-	void CreateViewport(const Camera& camera);
+	void CreateViewport(uint32_t viewportID);
 	void CreateEditorWindow(Scene& scene);
 	void EndGUIFrame();
 

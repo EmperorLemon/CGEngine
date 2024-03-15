@@ -48,12 +48,62 @@ namespace CGEngine
 		ImGui_ImplOpenGL3_Init("#version 460");
 	}
 
+	static void CreateDockSpace()
+	{
+		static bool dockspaceOpen = true;
+		static bool fullscreen_cond = true;
+		const bool fullscreen = fullscreen_cond;
+
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+		static ImGuiWindowFlags   window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+
+		const auto viewport = ImGui::GetMainViewport();
+
+		if (fullscreen)
+		{
+			ImGui::SetNextWindowPos(viewport->Pos);
+			ImGui::SetNextWindowSize(viewport->Size);
+			ImGui::SetNextWindowViewport(viewport->ID);
+
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+
+			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		}
+
+		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+			window_flags |= ImGuiWindowFlags_NoBackground;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::Begin("Dockspace", &dockspaceOpen, window_flags);
+		ImGui::PopStyleVar();
+
+		if (fullscreen)
+			ImGui::PopStyleVar(2);
+
+		ImGuiStyle& style = ImGui::GetStyle();
+
+		const float minWinSizeX = style.WindowMinSize.x;
+		style.WindowMinSize.x = 370.0f;
+
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			const auto dockspace_id = ImGui::GetID("Dockspace_0");
+			ImGui::DockSpace(dockspace_id, ImVec2(0, 0), dockspace_flags);
+		}
+
+		style.WindowMinSize.x = minWinSizeX;
+	}
+
 	void BeginGUIFrame()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
+
+		CreateDockSpace();
 	}
 
 	static void EditTransform(Component::Transform& transform, const Camera& camera)
@@ -91,9 +141,13 @@ namespace CGEngine
 		Manipulate(Math::ToArray(camera.view), Math::ToArray(camera.projection), currentGizmoOperation, currentGizmoMode, MODEL_MATRIX, nullptr, nullptr, nullptr, nullptr);
 	}
 
-	void CreateViewport(const Camera& camera)
+	void CreateViewport(const uint32_t viewportID)
 	{
-		ImGui::Begin("Viewport");
+		ImGui::Begin("Viewport", nullptr);
+
+		const auto& viewportSize = ImGui::GetContentRegionAvail();
+
+		ImGui::Image(reinterpret_cast<ImTextureID>(viewportID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGui::End();
 	}
@@ -158,24 +212,24 @@ namespace CGEngine
 
 	void EndGUIFrame()
 	{
+		ImGui::End();
+
 		ImGui::Render();
+
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			const auto context = OpenGL::GetContext();
+
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+
+			OpenGL::SetContext(context);
+		}
 	}
 
 	void DrawGUI()
 	{
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-
-	}
-
-	void HandleWindowResize()
-	{
-		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			//OpenGL::SetContext(OpenGL::GetContext());
-		}
 	}
 
 	void DestroyGUIContext()

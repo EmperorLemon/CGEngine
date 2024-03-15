@@ -49,6 +49,8 @@ namespace CGEngine
 		void ResizeViewport(int32_t width, int32_t height) const;
 		void ResizeFramebuffer(int32_t width, int32_t height) const;
 
+		[[nodiscard]] uint32_t GetViewportID() const;
+
 		static GraphicsAPI GetAPI();
 	private:
 		static GraphicsAPI m_API;

@@ -42,7 +42,7 @@ namespace CGEngine
 
 			BeginGUIFrame();
 
-			CreateViewport(mainCamera);
+			CreateViewport(m_renderer->GetViewportID());
 			//CreateEditorWindow(defaultScene);
 
 			EndGUIFrame();
@@ -80,7 +80,7 @@ namespace CGEngine
 		return true;
 	}
 
-	bool Application::OnFramebufferResized(const FramebufferResizeEvent& event)
+	bool Application::OnFramebufferResized(const FramebufferResizeEvent& event) const
 	{
 		m_renderer->ResizeViewport(event.GetWidth(), event.GetHeight());
 
