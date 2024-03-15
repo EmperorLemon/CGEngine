@@ -17,7 +17,7 @@ namespace CGEngine
 	class Buffer
 	{
 	public:
-		explicit Buffer(const uint32_t id) : p_id(id) {}
+		Buffer() = default;
 
 		Buffer(Buffer&&) noexcept = default;
 		Buffer(const Buffer&) noexcept = delete;
@@ -33,14 +33,12 @@ namespace CGEngine
 		virtual void BindBufferRange(uint32_t binding, size_t offset, size_t size) const = 0;
 
 		[[nodiscard]] virtual uint32_t GetID() const = 0;
-	protected:
-		uint32_t p_id = 0;
 	};
 
 	class VertexArray
 	{
 	public:
-		explicit VertexArray(const uint32_t id) : p_id(id) {}
+		VertexArray() = default;
 
 		VertexArray(VertexArray&&) noexcept = default;
 		VertexArray(const VertexArray&) noexcept = delete;
@@ -58,7 +56,5 @@ namespace CGEngine
 		[[nodiscard]] virtual const BufferInfo& GetIndices()  const = 0;
 
 		virtual void SetDrawType(DrawType type) = 0;
-	protected:
-		uint32_t p_id = 0;
 	};
 }

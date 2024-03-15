@@ -26,9 +26,10 @@ namespace CGEngine::OpenGL
 		void BindBufferBase(uint32_t binding) const override;
 		void BindBufferRange(uint32_t binding, size_t offset, size_t size) const override;
 
-		[[nodiscard]] uint32_t GetID() const override { return p_id; }
+		[[nodiscard]] uint32_t GetID() const override { return m_id; }
 	private:
 		BufferTarget m_target = BufferTarget::NONE;
+		uint32_t m_id = 0;
 	};
 
 	class GLVertexArray final : public VertexArray
@@ -46,7 +47,7 @@ namespace CGEngine::OpenGL
 		void Bind()   const override;
 		void Unbind() const override;
 
-		[[nodiscard]] uint32_t GetID() const override { return p_id; }
+		[[nodiscard]] uint32_t GetID() const override { return m_id; }
 
 		void SetDrawType(const DrawType type) override { m_drawType = type; }
 		[[nodiscard]] DrawType GetDrawType() const { return m_drawType; }
@@ -55,7 +56,8 @@ namespace CGEngine::OpenGL
 		[[nodiscard]] const BufferInfo& GetIndices()  const override { return m_indexBuffer; }
 
 	private:
-		DrawType m_drawType = DrawType::DRAW_ARRAYS;
+		DrawType m_drawType = DrawType::NONE;
+		uint32_t m_id = 0;
 
 		BufferInfo m_vertexBuffer;
 		BufferInfo  m_indexBuffer;

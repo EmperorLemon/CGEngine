@@ -42,7 +42,7 @@ namespace CGEngine
 
 			BeginGUIFrame();
 
-			CreateViewport(m_renderer->GetViewportID());
+			//CreateViewport(m_renderer->GetViewportID());
 			//CreateEditorWindow(defaultScene);
 
 			EndGUIFrame();

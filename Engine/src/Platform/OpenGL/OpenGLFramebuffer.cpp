@@ -15,7 +15,7 @@ namespace CGEngine::OpenGL
 
 	GLFramebuffer::~GLFramebuffer()
 	{
-		CG_TRACE("Deleted GLFramebuffer {0}", m_id);
+		//CG_TRACE("Deleted GLFramebuffer {0}", m_id);
 
 		glDeleteFramebuffers(1, &m_id);
 	}
@@ -66,7 +66,7 @@ namespace CGEngine::OpenGL
 
 	GLRenderbuffer::~GLRenderbuffer()
 	{
-		CG_TRACE("Deleted GLRenderbuffer {0}", m_id);
+		//CG_TRACE("Deleted GLRenderbuffer {0}", m_id);
 
 		glDeleteRenderbuffers(1, &m_id);
 	}

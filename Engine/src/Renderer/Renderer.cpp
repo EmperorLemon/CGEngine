@@ -138,17 +138,17 @@ namespace CGEngine
 
 			TextureLayout layout;
 
-			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR_MIPMAP_LINEAR);
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
-			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA8, width, height, layout);
+			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, layout);
 
 			Assets::Mesh mesh;
 
 			mesh.vertices.swap(QUAD_VERTICES);
 
 			mesh.layout.add(0, 2, DataType::FLOAT, 0)
-				.add(1, 2, DataType::FLOAT, 2 * sizeof(float));
+					   .add(1, 2, DataType::FLOAT, 2 * sizeof(float));
 
 			mesh.layout.SetStride(4 * sizeof(float));
 
@@ -156,6 +156,7 @@ namespace CGEngine
 
 			screenQuadVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
 			screenQuadVertexArray = std::make_shared<OpenGL::GLVertexArray>(screenQuadVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
+			screenQuadVertexArray->SetDrawType(DrawType::DRAW_ARRAYS);
 		}
 
 		// Skybox setup
@@ -202,6 +203,7 @@ namespace CGEngine
 
 			skyboxVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
 			skyboxVertexArray = std::make_shared<OpenGL::GLVertexArray>(skyboxVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
+			skyboxVertexArray->SetDrawType(DrawType::DRAW_ARRAYS);
 		}
 
 		// Uniform buffer setup
@@ -388,7 +390,7 @@ namespace CGEngine
 	{
 		TextureLayout layout;
 
-		const auto& resizedScreenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA8, width, height, layout);
+		const auto& resizedScreenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, layout);
 		renderBuffer->ResizeBuffer(width, height);
 
 		frameBuffer->Bind();

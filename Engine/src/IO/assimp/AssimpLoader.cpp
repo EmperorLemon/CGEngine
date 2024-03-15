@@ -11,8 +11,9 @@
 
 namespace CGEngine::IO
 {
-	constexpr uint32_t ASSIMP_LOADER_OPTIONS = 
-		aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_ImproveCacheLocality | aiProcess_FixInfacingNormals;
+	constexpr uint32_t ASSIMP_LOADER_OPTIONS = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_ImproveCacheLocality | 
+											   aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes |
+											   aiProcess_OptimizeGraph | aiProcess_SplitLargeMeshes;
 
 	static void ExtractModel(const aiScene& scene, Assets::Model& model);
 

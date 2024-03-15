@@ -84,8 +84,8 @@ namespace CGEngine
 
 		ImGuiStyle& style = ImGui::GetStyle();
 
-		const float minWinSizeX = style.WindowMinSize.x;
-		style.WindowMinSize.x = 370.0f;
+		const float minWindowSizeX = style.WindowMinSize.x;
+		style.WindowMinSize.x = 350.0f;
 
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
@@ -93,7 +93,7 @@ namespace CGEngine
 			ImGui::DockSpace(dockspace_id, ImVec2(0, 0), dockspace_flags);
 		}
 
-		style.WindowMinSize.x = minWinSizeX;
+		style.WindowMinSize.x = minWindowSizeX;
 	}
 
 	void BeginGUIFrame()
@@ -102,8 +102,6 @@ namespace CGEngine
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
-
-		CreateDockSpace();
 	}
 
 	static void EditTransform(Component::Transform& transform, const Camera& camera)
@@ -143,13 +141,32 @@ namespace CGEngine
 
 	void CreateViewport(const uint32_t viewportID)
 	{
-		ImGui::Begin("Viewport", nullptr);
+		CreateDockSpace();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+		ImGui::Begin("Viewport");
+
+		const auto& viewportMinRegion = ImGui::GetWindowContentRegionMin();
+		const auto& viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+		const auto& viewportOffset = ImGui::GetWindowPos();
+
+		viewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+		viewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
+
+		viewportFocused = ImGui::IsWindowFocused();
+		viewportHovered = ImGui::IsWindowHovered();
 
 		const auto& viewportSize = ImGui::GetContentRegionAvail();
 
 		ImGui::Image(reinterpret_cast<ImTextureID>(viewportID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
 
+		ImGuizmo::SetOrthographic(false);
+		ImGuizmo::SetDrawlist();
+
+		ImGuizmo::SetRect(viewportBounds[0].x, viewportBounds[0].y, viewportBounds[1].x - viewportBounds[0].x, viewportBounds[1].y - viewportBounds[0].y);
+
 		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 
 	void CreateEditorWindow(Scene& scene)
@@ -208,12 +225,12 @@ namespace CGEngine
 
 			ImGui::End();
 		}
+
+		ImGui::End();
 	}
 
 	void EndGUIFrame()
 	{
-		ImGui::End();
-
 		ImGui::Render();
 
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)

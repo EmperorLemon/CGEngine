@@ -8,33 +8,33 @@
 
 namespace CGEngine::OpenGL
 {
-	GLBuffer::GLBuffer(const BufferTarget target, const size_t size, const void* data) : Buffer(0)
+	GLBuffer::GLBuffer(const BufferTarget target, const size_t size, const void* data) : Buffer()
 	{
 		m_target = target;
 
-		glCreateBuffers(1, &p_id);
-		glNamedBufferStorage(p_id, static_cast<GLsizeiptr>(size), data, GL_DYNAMIC_STORAGE_BIT);
+		glCreateBuffers(1, &m_id);
+		glNamedBufferStorage(m_id, static_cast<GLsizeiptr>(size), data, GL_DYNAMIC_STORAGE_BIT);
 	}
 
 	GLBuffer::~GLBuffer()
 	{
-		CG_TRACE("Deleted GLBuffer {0}", p_id);
-		glDeleteBuffers(1, &p_id);
+		//CG_TRACE("Deleted GLBuffer {0}", m_id);
+		glDeleteBuffers(1, &m_id);
 	}
 
 	void GLBuffer::SetData(const size_t size, const void* data) const
 	{
-		glNamedBufferData(p_id, static_cast<GLsizeiptr>(size), data, GL_STATIC_DRAW);
+		glNamedBufferData(m_id, static_cast<GLsizeiptr>(size), data, GL_STATIC_DRAW);
 	}
 
 	void GLBuffer::SetSubData(const size_t offset, const size_t size, const void* data) const
 	{
-		glNamedBufferSubData(p_id, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);
+		glNamedBufferSubData(m_id, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);
 	}
 
 	void GLBuffer::BindBufferBase(const uint32_t binding) const
 	{
-		glBindBufferBase(Convert(m_target), binding, p_id);
+		glBindBufferBase(Convert(m_target), binding, m_id);
 	}
 
 	void GLBuffer::BindBufferRange(const uint32_t binding, const size_t offset, const size_t size) const
@@ -44,26 +44,26 @@ namespace CGEngine::OpenGL
 
 		const GLintptr alignedOffset = static_cast<GLintptr>(offset) / alignment * alignment;
 
-		glBindBufferRange(Convert(m_target), binding, p_id, alignedOffset, static_cast<GLsizeiptr>(size));
+		glBindBufferRange(Convert(m_target), binding, m_id, alignedOffset, static_cast<GLsizeiptr>(size));
 	}
 
-	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const VertexLayout& layout) : VertexArray(0)
+	GLVertexArray::GLVertexArray(const uint32_t bufferID, const BufferInfo& vertexBuffer, const BufferInfo* indexBuffer, const VertexLayout& layout) : VertexArray()
 	{
-		glCreateVertexArrays(1, &p_id);
+		glCreateVertexArrays(1, &m_id);
 
 		const std::vector<VertexAttribute>& attributes = layout.GetAttributes();
 
-		glVertexArrayVertexBuffer(p_id, 0, bufferID, static_cast<GLintptr>(vertexBuffer.offset), layout.GetStride());
-		if (indexBuffer != nullptr) glVertexArrayElementBuffer(p_id, bufferID);
+		glVertexArrayVertexBuffer(m_id, 0, bufferID, static_cast<GLintptr>(vertexBuffer.offset), layout.GetStride());
+		if (indexBuffer != nullptr) glVertexArrayElementBuffer(m_id, bufferID);
 
 		for (const auto& attribute : attributes)
-			glEnableVertexArrayAttrib(p_id, attribute.index);
+			glEnableVertexArrayAttrib(m_id, attribute.index);
 
 		for (const auto& attribute : attributes)
-			glVertexArrayAttribFormat(p_id, attribute.index, attribute.count, Convert(attribute.type), attribute.normalized, attribute.offset);
+			glVertexArrayAttribFormat(m_id, attribute.index, attribute.count, Convert(attribute.type), attribute.normalized, attribute.offset);
 
 		for (const auto& attribute : attributes)
-			glVertexArrayAttribBinding(p_id, attribute.index, 0);
+			glVertexArrayAttribBinding(m_id, attribute.index, 0);
 
 		m_vertexBuffer = vertexBuffer;
 		if (indexBuffer != nullptr) m_indexBuffer = *indexBuffer;
@@ -71,13 +71,13 @@ namespace CGEngine::OpenGL
 
 	GLVertexArray::~GLVertexArray()
 	{
-		CG_TRACE("Deleted GLVertexArray {0}", p_id);
-		glDeleteVertexArrays(1, &p_id);
+		//CG_TRACE("Deleted GLVertexArray {0}", m_id);
+		glDeleteVertexArrays(1, &m_id);
 	}
 
 	void GLVertexArray::Bind() const
 	{
-		glBindVertexArray(p_id);
+		glBindVertexArray(m_id);
 	}
 
 	void GLVertexArray::Unbind() const

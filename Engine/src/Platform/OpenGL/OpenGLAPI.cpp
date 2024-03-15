@@ -16,6 +16,11 @@ namespace CGEngine::OpenGL
 			vertexArray->Bind();
 			switch (vertexArray->GetDrawType())
 			{
+			case DrawType::NONE:
+				{
+					CG_WARN("Please select a draw type!");
+					break;
+				}
 			case DrawType::DRAW_ARRAYS:
 				{
 					const auto& vertices = vertexArray->GetVertices();
@@ -26,6 +31,16 @@ namespace CGEngine::OpenGL
 				{
 					const auto& indices  = vertexArray->GetIndices();
 					glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset));
+					break;
+				}
+			case DrawType::DRAW_ARRAYS_INSTANCED:
+				{
+					const auto& vertices = vertexArray->GetVertices();
+					//glDrawArraysInstanced(GL_TRIANGLES, )
+					break;
+				}
+			case DrawType::DRAW_ELEMENTS_INSTANCED:
+				{
 					break;
 				}
 			}

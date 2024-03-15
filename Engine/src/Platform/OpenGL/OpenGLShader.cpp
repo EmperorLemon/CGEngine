@@ -127,7 +127,7 @@ namespace CGEngine::OpenGL
 
 	GLShader::~GLShader()
 	{
-		CG_TRACE("Deleted GLShader {0}", p_id);
+		//CG_TRACE("Deleted GLShader {0}", p_id);
 		glDeleteProgram(p_id);
 	}
 
