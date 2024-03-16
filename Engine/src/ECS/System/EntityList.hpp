@@ -12,7 +12,7 @@ namespace CGEngine
 	public:
 		EntityList() = default;
 
-		Entity& CreateEntity();
+		Entity& CreateEntity(std::string_view name);
 
 		template <typename... Components, typename Func>
 		void Iterate(Func&& func);

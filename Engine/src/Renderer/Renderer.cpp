@@ -48,7 +48,7 @@ namespace CGEngine
 	Assets::Light SCENE_LIGHTS[1] = {{Math::Vec4(0.0f), Assets::LightType::DIRECTIONAL_LIGHT}};
 	constexpr uint32_t NUM_LIGHTS = std::size(SCENE_LIGHTS);
 
-	constexpr uint32_t NUM_INSTANCES = 1;
+	constexpr uint32_t NUM_INSTANCES = 10;
 
 	std::vector QUAD_VERTICES =
 	{
@@ -325,11 +325,17 @@ namespace CGEngine
 		m_backend->Enable(APICapability::DEPTH_TEST);
 	}
 
-	void Renderer::Render(const Camera& camera, const Time& time)
+	void Renderer::Update(const Camera& camera, const Time& time)
 	{
 		shader->Use();
 
 		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(camera.view));
+	}
+
+	void Renderer::UpdateTransform(const int32_t offset, const Component::Transform& transform)
+	{
+		//CG_TRACE("{0}", offset);
+		shaderStorageBuffer->SetSubData(offset * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(transform.model));
 	}
 
 	void Renderer::RenderPrimitive(const Component::Transform& transform, const Component::DrawObject& primitive)

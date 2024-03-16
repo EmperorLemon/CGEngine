@@ -38,9 +38,11 @@ namespace CGEngine
 		explicit Renderer(const RendererCreateInfo& rendererInfo);
 
 		void PreRender(Camera& camera);
-		void Render(const Camera& camera, const Time& time);
 		void RenderPrimitive(const Component::Transform& transform, const Component::DrawObject& primitive);
 		void PostRender() const;
+
+		void Update(const Camera& camera, const Time& time);
+		void UpdateTransform(int32_t offset, const Component::Transform& transform);
 
 		void FirstPass()  const;
 		void SecondPass() const;

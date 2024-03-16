@@ -11,10 +11,8 @@
 #include "Core/Window.h"
 #include "Scene/Scene.h"
 
-#include "Utils/GUID.h"
-
 #include "ECS/Component/Transform.h"
-#include "ECS/Component/DrawObject.h"
+#include "ECS/Component/Tag.h"
 
 #include "Math/Math.h"
 
@@ -220,11 +218,11 @@ namespace CGEngine
 								ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[3][0], camera.view[3][1], camera.view[3][2], camera.view[3][3]);
 							}
 
-							entities.Iterate<Utils::GUID, Component::Transform>([&](const Utils::GUID& guid, Component::Transform& transform)
+							entities.Iterate<Component::Tag, Component::Transform>([&](const Component::Tag& tag, Component::Transform& transform)
 							{
-								if (ImGui::CollapsingHeader(("Entity##" + guid.str()).c_str()))
+								if (ImGui::CollapsingHeader((tag.name + "##" + tag.guid.str()).c_str()))
 								{
-									EditTransform(guid, transform, camera);
+									EditTransform(tag.guid, transform, camera);
 								}
 							});
 						}

@@ -31,8 +31,8 @@ namespace CGEngine
 
 		auto& entities = defaultScene.GetEntities();
 
-		auto& mainCamera = defaultScene.GetMainCamera();
-		m_renderer->PreRender(mainCamera);
+		auto& main_camera = defaultScene.GetMainCamera();
+		m_renderer->PreRender(main_camera);
 
 		while (!WindowClosed(m_window))
 		{
@@ -49,7 +49,14 @@ namespace CGEngine
 
 			m_renderer->FirstPass();
 
-			m_renderer->Render(mainCamera, m_time);
+			m_renderer->Update(main_camera, m_time);
+
+			int32_t offset = 0;
+			entities.Iterate<Component::Transform>([&](const Component::Transform& transform)
+			{
+				m_renderer->UpdateTransform(offset, transform);
+				offset++;
+			});
 
 			entities.Iterate<Component::Transform, Component::DrawObject>([&](const Component::Transform& transform, const Component::DrawObject& object)
 			{
