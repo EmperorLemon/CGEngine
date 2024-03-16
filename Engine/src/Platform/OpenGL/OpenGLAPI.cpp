@@ -41,7 +41,7 @@ namespace CGEngine::OpenGL
 			case DrawType::DRAW_ELEMENTS_INSTANCED:
 				{
 					const auto& indices = vertexArray->GetIndices();
-					glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset), 10);
+					glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(indices.count), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(indices.offset), vertexArray->GetInstanceCount());
 					break;
 				}
 			}

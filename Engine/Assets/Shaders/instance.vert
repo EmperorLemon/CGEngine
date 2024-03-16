@@ -5,7 +5,6 @@ layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aTangent;
 
 out VS_OUT {
-    vec3 FragPos;
     vec3 Normal;
     vec2 TexCoords;
     vec3 Tangent;
@@ -17,13 +16,16 @@ layout (std140, binding = 0) uniform Matrices
     mat4 VIEW_MATRIX;
 };
 
-uniform mat4  MODEL_MATRIX;
-uniform mat3 NORMAL_MATRIX;
+layout (std430, binding = 1) buffer  Instance
+{
+    mat4 INSTANCE_TRANSFORMS[];
+};
 
 void main()
 {
-    vs_out.FragPos   = vec3(MODEL_MATRIX * vec4(aPos, 1.0));
-    vs_out.Normal    = NORMAL_MATRIX * aNormal;
+    mat4 MODEL_MATRIX = INSTANCE_TRANSFORMS[gl_InstanceID];
+
+    vs_out.Normal    = aNormal;
     vs_out.TexCoords = aTexCoords;
 
     gl_Position = PROJECTION_MATRIX * VIEW_MATRIX * MODEL_MATRIX * vec4(aPos, 1.0);

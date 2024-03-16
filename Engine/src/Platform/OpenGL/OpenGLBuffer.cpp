@@ -84,30 +84,4 @@ namespace CGEngine::OpenGL
 	{
 		glBindVertexArray(0);
 	}
-
-	void GLVertexArray::SetupInstancing(const uint32_t bindingIndex, const size_t amount, const void* data)
-	{
-		if (m_drawType == DrawType::DRAW_ARRAYS_INSTANCED || m_drawType == DrawType::DRAW_ELEMENTS_INSTANCED)
-		{
-			constexpr GLsizei mat4_size = 64;
-
-			unsigned int buffer;
-			glCreateBuffers(1, &buffer);
-			glNamedBufferData(buffer, static_cast<GLsizeiptr>(amount) * mat4_size, data, GL_STATIC_DRAW);
-
-			glVertexArrayVertexBuffer(m_id, bindingIndex, buffer, 0, mat4_size);
-
-			for (int i = 0; i < 4; ++i)
-			{
-				constexpr GLsizei vec4_size = 16;
-
-				glEnableVertexArrayAttrib(m_id, bindingIndex + i);
-				glVertexArrayAttribFormat(m_id, bindingIndex + i, 4, GL_FLOAT, GL_FALSE, i * vec4_size);
-				glVertexArrayAttribBinding(m_id, bindingIndex + i, bindingIndex);
-				glVertexArrayBindingDivisor(m_id, bindingIndex + i, 1);
-			}
-		}
-		else
-			CG_WARN("Draw type not set to instanced! Make sure to enable instancing!");
-	}
 }

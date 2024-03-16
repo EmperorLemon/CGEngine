@@ -12,6 +12,8 @@ namespace CGEngine::Component
 		Math::Vec3 position = Math::Vec3(0.0f);
 		Math::Vec3 rotation = Math::Vec3(0.0f);
 		Math::Vec3 scale    = Math::Vec3(1.0f);
+
+		Math::Mat4 model    = Math::Mat4(1.0f);
 	};
 }
 

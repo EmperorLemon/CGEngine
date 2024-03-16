@@ -38,12 +38,12 @@ struct Light
 	float outerCutOff;
 };
 
-layout (std140, binding = 1) uniform CameraBuffer
+layout (std140, binding = 2) uniform CameraBuffer
 {
     vec3 VIEW_POSITION;
 };
 
-layout (std430, binding = 2) buffer  LightBuffer
+layout (std430, binding = 3) buffer  LightBuffer
 {
     uint  NUM_LIGHTS;
     Light LIGHTS[8];

@@ -48,6 +48,8 @@ namespace CGEngine
 	Assets::Light SCENE_LIGHTS[1] = {{Math::Vec4(0.0f), Assets::LightType::DIRECTIONAL_LIGHT}};
 	constexpr uint32_t NUM_LIGHTS = std::size(SCENE_LIGHTS);
 
+	constexpr uint32_t NUM_INSTANCES = 1;
+
 	std::vector QUAD_VERTICES =
 	{
 		-1.0f,  1.0f, 0.0f, 1.0f,
@@ -120,8 +122,8 @@ namespace CGEngine
 		// Default lit shader setup
 		{
 			std::string vert_src, frag_src;
-			IO::ReadFile("Assets/Shaders/lit.vert", vert_src);
-			IO::ReadFile("Assets/Shaders/lit.frag", frag_src);
+			IO::ReadFile("Assets/Shaders/instance.vert", vert_src);
+			IO::ReadFile("Assets/Shaders/instance.frag", frag_src);
 
 			ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
 			shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
@@ -209,21 +211,26 @@ namespace CGEngine
 		// Uniform buffer setup
 		{
 			uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Math::Vec3), nullptr);
-			uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4));
-			uniformBuffer->BindBufferRange(1, 2 * sizeof(Math::Mat4), sizeof(Math::Vec3));
+			uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4)); // Camera projection + view
+			uniformBuffer->BindBufferRange(2, 2 * sizeof(Math::Mat4), sizeof(Math::Vec3)); // Camera position
 		}
 
 		// Shader storage buffer setup
 		{
-			shaderStorageBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::SHADER_STORAGE_BUFFER, sizeof(uint32_t) + NUM_LIGHTS * sizeof(Assets::Light), nullptr);
-			shaderStorageBuffer->BindBufferRange(2, 0, sizeof(uint32_t));
-			shaderStorageBuffer->BindBufferRange(2, sizeof(uint32_t), NUM_LIGHTS * sizeof(Assets::Light));
+			constexpr size_t light_buffer_size = sizeof(uint32_t) + NUM_LIGHTS * sizeof(Assets::Light);
+			constexpr size_t instance_buffer_size = NUM_INSTANCES * sizeof(Math::Mat4);
+			constexpr size_t size = light_buffer_size + instance_buffer_size;
 
-			for (auto& light : SCENE_LIGHTS)
-			{
-				light.cutOff	  = Math::Cos(Math::DegToRad(light.cutOff));
-				light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
-			}
+			shaderStorageBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::SHADER_STORAGE_BUFFER, size, nullptr);
+			shaderStorageBuffer->BindBufferRange(1, 0, instance_buffer_size);
+			//shaderStorageBuffer->BindBufferRange(3, instance_buffer_size, sizeof(uint32_t));
+			//shaderStorageBuffer->BindBufferRange(3, sizeof(uint32_t), NUM_LIGHTS * sizeof(Assets::Light));
+
+			//for (auto& light : SCENE_LIGHTS)
+			//{
+			//	light.cutOff	  = Math::Cos(Math::DegToRad(light.cutOff));
+			//	light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
+			//}
 		}
 
 		// Framebuffer setup
@@ -262,8 +269,12 @@ namespace CGEngine
 
 		// Shader storage buffer setup
 		{
-			shaderStorageBuffer->SetSubData(0, sizeof(uint32_t), &NUM_LIGHTS);
-			shaderStorageBuffer->SetSubData(sizeof(uint32_t), NUM_LIGHTS * sizeof(Assets::Light), SCENE_LIGHTS);
+			const std::vector default_matrices(NUM_INSTANCES, Math::Mat4(1.0f));
+			constexpr size_t instance_buffer_size = NUM_INSTANCES * sizeof(Math::Mat4);
+
+			shaderStorageBuffer->SetSubData(0, instance_buffer_size, default_matrices.data());
+			//shaderStorageBuffer->SetSubData(instance_buffer_size, sizeof(uint32_t), &NUM_LIGHTS);
+			//shaderStorageBuffer->SetSubData(sizeof(uint32_t), NUM_LIGHTS * sizeof(Assets::Light), SCENE_LIGHTS);
 		}
 
 		// Default lit shader setup
@@ -325,8 +336,8 @@ namespace CGEngine
 	{
 		const auto& model = GetModelMatrix(transform);
 
-		shader->BindUniform("MODEL_MATRIX",  OpenGL::UniformType::MAT4, Math::ToArray(model));
-		shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Transpose(Math::Inverse(model)))));
+		//shader->BindUniform("MODEL_MATRIX",  OpenGL::UniformType::MAT4, Math::ToArray(model));
+		//shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Transpose(Math::Inverse(model)))));
 
 		int32_t unit = 0;
 		for (const auto& texture : primitive.textures)

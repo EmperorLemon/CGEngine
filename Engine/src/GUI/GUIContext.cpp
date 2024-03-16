@@ -22,9 +22,6 @@
 
 namespace CGEngine
 {
-	static float MODEL_MATRIX[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-	//static float  VIEW_MATRIX[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-
 	static ImGuizmo::OPERATION currentGizmoOperation(ImGuizmo::TRANSLATE);
 	static ImGuizmo::MODE currentGizmoMode(ImGuizmo::LOCAL);
 
@@ -104,8 +101,10 @@ namespace CGEngine
 		ImGuizmo::BeginFrame();
 	}
 
-	static void EditTransform(Component::Transform& transform, const Camera& camera)
+	static void EditTransform(const Utils::GUID& guid, Component::Transform& transform, const Camera& camera)
 	{
+		ImGui::PushID(guid.str().c_str());
+
 		if (ImGui::RadioButton("Translate", currentGizmoOperation == ImGuizmo::TRANSLATE))
 			currentGizmoOperation = ImGuizmo::TRANSLATE;
 
@@ -119,11 +118,10 @@ namespace CGEngine
 		if (ImGui::RadioButton("Scale", currentGizmoOperation == ImGuizmo::SCALE))
 			currentGizmoOperation = ImGuizmo::SCALE;
 
-		ImGuizmo::DecomposeMatrixToComponents(MODEL_MATRIX, Math::ToPtr(transform.position), Math::ToPtr(transform.rotation), Math::ToPtr(transform.scale));
-		ImGui::DragFloat3("Translation", Math::ToPtr(transform.position), 0.1f, 0, 0, "%.2f");
-		ImGui::DragFloat3("Rotation", Math::ToPtr(transform.rotation), 0.1f, 0, 0, "%.2f");
-		ImGui::DragFloat3("Scale", Math::ToPtr(transform.scale), 0.1f, 0.0000001f, std::numeric_limits<float>::max(), "%.2f");
-		ImGuizmo::RecomposeMatrixFromComponents(Math::ToArray(transform.position), Math::ToArray(transform.rotation), Math::ToArray(transform.scale), MODEL_MATRIX);
+		ImGui::DragFloat3("##Translation", Math::ToPtr(transform.position), 0.1f, 0, 0, "%.2f");
+		ImGui::DragFloat3("##Rotation", Math::ToPtr(transform.rotation), 0.1f, 0, 0, "%.2f");
+		ImGui::DragFloat3("##Scale", Math::ToPtr(transform.scale), 0.1f, 0.0000001f, std::numeric_limits<float>::max(), "%.2f");
+		ImGuizmo::RecomposeMatrixFromComponents(Math::ToArray(transform.position), Math::ToArray(transform.rotation), Math::ToArray(transform.scale), Math::ToPtr(transform.model));
 
 		if (currentGizmoOperation != ImGuizmo::SCALE)
 		{
@@ -136,13 +134,20 @@ namespace CGEngine
 				currentGizmoMode = ImGuizmo::WORLD;
 		}
 
-		Manipulate(Math::ToArray(camera.view), Math::ToArray(camera.projection), currentGizmoOperation, currentGizmoMode, MODEL_MATRIX, nullptr, nullptr, nullptr, nullptr);
+		Manipulate(Math::ToArray(camera.view), Math::ToArray(camera.projection), currentGizmoOperation, currentGizmoMode, Math::ToPtr(transform.model), nullptr, nullptr, nullptr, nullptr);
+
+		if (ImGuizmo::IsUsing())
+		{
+			ImGuizmo::DecomposeMatrixToComponents(Math::ToArray(transform.model), Math::ToPtr(transform.position), Math::ToPtr(transform.rotation), Math::ToPtr(transform.scale));
+		}
 
 		ImGui::Text("Model");
-		ImGui::Text("[%f] [%f] [%f] [%f]", MODEL_MATRIX[0], MODEL_MATRIX[1], MODEL_MATRIX[2], MODEL_MATRIX[3]);
-		ImGui::Text("[%f] [%f] [%f] [%f]", MODEL_MATRIX[4], MODEL_MATRIX[5], MODEL_MATRIX[6], MODEL_MATRIX[7]);
-		ImGui::Text("[%f] [%f] [%f] [%f]", MODEL_MATRIX[8], MODEL_MATRIX[9], MODEL_MATRIX[10], MODEL_MATRIX[11]);
-		ImGui::Text("[%f] [%f] [%f] [%f]", MODEL_MATRIX[12], MODEL_MATRIX[13], MODEL_MATRIX[14], MODEL_MATRIX[15]);
+		ImGui::Text("[%f] [%f] [%f] [%f]", transform.model[0][0], transform.model[0][1], transform.model[0][2], transform.model[0][3]);
+		ImGui::Text("[%f] [%f] [%f] [%f]", transform.model[1][0], transform.model[1][1], transform.model[1][2], transform.model[1][3]);
+		ImGui::Text("[%f] [%f] [%f] [%f]", transform.model[2][0], transform.model[2][1], transform.model[2][2], transform.model[2][3]);
+		ImGui::Text("[%f] [%f] [%f] [%f]", transform.model[3][0], transform.model[3][1], transform.model[3][2], transform.model[3][3]);
+
+		ImGui::PopID();
 	}
 
 	void CreateViewport(const uint32_t viewportID)
@@ -215,13 +220,13 @@ namespace CGEngine
 								ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[3][0], camera.view[3][1], camera.view[3][2], camera.view[3][3]);
 							}
 
-							entities.Iterate<Utils::GUID, Component::Transform, Component::DrawObject>([&](const Utils::GUID& GUID, Component::Transform& transform, const Component::DrawObject& object)
+							entities.Iterate<Utils::GUID, Component::Transform>([&](const Utils::GUID& guid, Component::Transform& transform)
+							{
+								if (ImGui::CollapsingHeader(("Entity##" + guid.str()).c_str()))
 								{
-									if (ImGui::CollapsingHeader(std::string("Object##" + GUID.str()).c_str()))
-									{
-										EditTransform(transform, camera);
-									}
-								});
+									EditTransform(guid, transform, camera);
+								}
+							});
 						}
 
 						ImGui::EndChild();

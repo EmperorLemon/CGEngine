@@ -12,4 +12,10 @@ namespace CGEngine
 
 		return m_entities.back();
 	}
+
+	std::vector<Entity>& EntityList::GetEntities()
+	{
+		return m_entities;
+	}
+
 }

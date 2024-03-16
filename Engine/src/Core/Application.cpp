@@ -50,6 +50,7 @@ namespace CGEngine
 			m_renderer->FirstPass();
 
 			m_renderer->Render(mainCamera, m_time);
+
 			entities.Iterate<Component::Transform, Component::DrawObject>([&](const Component::Transform& transform, const Component::DrawObject& object)
 			{
 				m_renderer->RenderPrimitive(transform, object);

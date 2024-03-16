@@ -19,6 +19,8 @@ namespace CGEngine
 
 		template <typename Component, typename Func>
 		void Sort(Func&& func);
+
+		static std::vector<Entity>& GetEntities();
 	private:
 		entt::registry m_registry;
 		static std::vector<Entity> m_entities;

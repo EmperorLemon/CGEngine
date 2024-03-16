@@ -56,9 +56,7 @@ namespace CGEngine::OpenGL
 		[[nodiscard]] const BufferInfo& GetIndices()   const override { return m_indexBuffer; }
 
 		[[nodiscard]] int32_t GetInstanceCount() const override { return m_instanceCount; }
-
-		void SetupInstancing(uint32_t bindingIndex, size_t amount, const void* data) override;
-
+		void SetInstanceCount(const int32_t instanceCount) override { m_instanceCount = instanceCount; }
 	private:
 		DrawType m_drawType = DrawType::NONE;
 
