@@ -104,7 +104,12 @@ namespace CGEngine
 	enum class FramebufferTextureAttachmentFormat : uint8_t
 	{
 		NONE = 0,
-		DEPTH24_STENCIL8
+		DEPTH16,
+		DEPTH24,
+		DEPTH32F,
+		STENCIL8,
+		DEPTH24_STENCIL8,
+		DEPTH32F_STENCIL8,
 	};
 
 	enum class TextureTarget : uint8_t
@@ -121,7 +126,11 @@ namespace CGEngine
 		RED,
 		RG,
 		RGB,
-		RGBA
+		BGR,
+		RGBA,
+		BGRA,
+		DEPTH,
+		STENCIL
 	};
 
 	enum class TParamName : uint8_t
@@ -158,7 +167,10 @@ namespace CGEngine
 		RGB8,
 		RGBA8,
 		SRGB8,
-		SRGB8_ALPHA8
+		SRGB8_ALPHA8,
+		DEPTH16,
+		DEPTH24,
+		DEPTH32F
 	};
 
 	enum class PolygonMode : uint8_t

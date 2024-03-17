@@ -80,11 +80,15 @@ namespace CGEngine::OpenGL
 	{
 		switch (format)
 		{
-		case TextureFormat::NONE:  return 0;
-		case TextureFormat::RED:   return GL_RED;
-		case TextureFormat::RG:    return GL_RG;
-		case TextureFormat::RGB:   return GL_RGB;
-		case TextureFormat::RGBA:  return GL_RGBA;
+		case TextureFormat::NONE:    return 0;
+		case TextureFormat::RED:     return GL_RED;
+		case TextureFormat::RG:      return GL_RG;
+		case TextureFormat::RGB:     return GL_RGB;
+		case TextureFormat::BGR:	 return GL_BGR;
+		case TextureFormat::RGBA:    return GL_RGBA;
+		case TextureFormat::BGRA:	 return GL_BGRA;
+		case TextureFormat::DEPTH:   return GL_DEPTH_COMPONENT;
+		case TextureFormat::STENCIL: return GL_STENCIL_INDEX;
 		}
 
 		return 0;
@@ -129,8 +133,13 @@ namespace CGEngine::OpenGL
 	{
 		switch (format)
 		{
-		case FramebufferTextureAttachmentFormat::NONE:			   return 0;
-		case FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8: return GL_DEPTH24_STENCIL8;
+		case FramebufferTextureAttachmentFormat::NONE:				return 0;
+		case FramebufferTextureAttachmentFormat::DEPTH16:			return GL_DEPTH_COMPONENT16;
+		case FramebufferTextureAttachmentFormat::DEPTH24:			return GL_DEPTH_COMPONENT24;
+		case FramebufferTextureAttachmentFormat::DEPTH32F:			return GL_DEPTH_COMPONENT32F;
+		case FramebufferTextureAttachmentFormat::STENCIL8:			return GL_STENCIL_INDEX8;
+		case FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8:	return GL_DEPTH24_STENCIL8;
+		case FramebufferTextureAttachmentFormat::DEPTH32F_STENCIL8: return GL_DEPTH32F_STENCIL8;
 		}
 
 		return 0;
@@ -162,6 +171,9 @@ namespace CGEngine::OpenGL
 		case PixelFormat::RGBA8:		return GL_RGBA8;
 		case PixelFormat::SRGB8:		return GL_SRGB8;
 		case PixelFormat::SRGB8_ALPHA8: return GL_SRGB8_ALPHA8;
+		case PixelFormat::DEPTH16:		return GL_DEPTH_COMPONENT16;
+		case PixelFormat::DEPTH24:		return GL_DEPTH_COMPONENT24;
+		case PixelFormat::DEPTH32F:		return GL_DEPTH_COMPONENT32F;
 		}
 
 		return 0;

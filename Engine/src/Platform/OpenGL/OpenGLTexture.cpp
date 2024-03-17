@@ -17,6 +17,9 @@ namespace CGEngine::OpenGL
 		case PixelFormat::SRGB8:		return TextureFormat::RGB;
 		case PixelFormat::RGBA8:
 		case PixelFormat::SRGB8_ALPHA8: return TextureFormat::RGBA;
+		case PixelFormat::DEPTH16:		
+		case PixelFormat::DEPTH24:		
+		case PixelFormat::DEPTH32F:		return TextureFormat::DEPTH;
 		}
 
 		return TextureFormat::NONE;

@@ -43,7 +43,7 @@ struct Light
     uint  type;
 };
 
-layout (std140, binding = 2) uniform Lights
+layout (std140, binding = 3) uniform Lights
 {
     Light LIGHTS[MAX_NUM_LIGHTS];
     uint NUM_LIGHTS;
@@ -68,7 +68,7 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
     vec3  reflectDir      =   reflect(-lightDir, normal);
     vec3  halfwayDir      = normalize(lightDir + viewDir);
 
-    float ambientFactor   = 0.1;
+    float ambientFactor   = 0.15;
     ambient               = ambientFactor * albedo;                   
 
     float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
