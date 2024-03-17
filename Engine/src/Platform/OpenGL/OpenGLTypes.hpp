@@ -45,6 +45,7 @@ namespace CGEngine::OpenGL
 		case APICapability::LINE_SMOOTH:	  return GL_LINE_SMOOTH;
 		case APICapability::POLYGON_SMOOTH:   return GL_POLYGON_SMOOTH;
 		case APICapability::SCISSOR_TEST:     return GL_SCISSOR_TEST;
+		case APICapability::MULTISAMPLING:	  return GL_MULTISAMPLE;
 		}
 
 		return 0;

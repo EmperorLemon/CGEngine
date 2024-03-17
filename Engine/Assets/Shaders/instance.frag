@@ -53,28 +53,24 @@ vec3 Lighting(in vec3 normal, in vec3 albedo)
     vec3 diffuse  = vec3(0.0);
     vec3 specular = vec3(0.0);
 
-    Light light = LIGHTS[0];
+    for (int i = 0; i < NUM_LIGHTS; ++i)
+    {
+        Light light           = LIGHTS[i];
 
-    ambient.x = light.direction.x;
+        vec3  lightDir        = normalize(light.direction.xyz  - fs_in.FragPos);
+        vec3  viewDir         = normalize(fs_in.ViewPos - fs_in.FragPos);
+        vec3  reflectDir      =   reflect(-lightDir, normal);
+        vec3  halfwayDir      = normalize(lightDir + viewDir);
 
-//    for (int i = 0; i < NUM_LIGHTS; ++i)
-//    {
-//        Light light           = LIGHTS[i];
-//
-//        vec3  lightDir        = normalize(light.direction.xyz  - fs_in.FragPos);
-//        vec3  viewDir         = normalize(fs_in.ViewPos - fs_in.FragPos);
-//        vec3  reflectDir      =   reflect(-lightDir, normal);
-//        vec3  halfwayDir      = normalize(lightDir + viewDir);
-//
-//        float ambientFactor   = 0.1;
-//        ambient               = ambientFactor * albedo;                   
-//
-//        float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
-//        diffuse               = diffuseFactor * albedo;                  
-//
-//        float specularFactor  = pow(max(dot(normal, halfwayDir), 0.0), 32);
-//        specular              = specularFactor * vec3(0.2);
-//
+        float ambientFactor   = 0.1;
+        ambient               = ambientFactor * albedo;                   
+
+        float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
+        diffuse               = diffuseFactor * albedo;                  
+
+        float specularFactor  = pow(max(dot(normal, halfwayDir), 0.0), 32);
+        specular              = specularFactor * vec3(0.2);
+
 //        if (light.type == SPOT_LIGHT)
 //        {
 //            float theta       = dot(lightDir, normalize(-light.direction.xyz));
@@ -94,7 +90,7 @@ vec3 Lighting(in vec3 normal, in vec3 albedo)
 //            diffuse  *= attenuation;
 //            specular *= attenuation;
 //        }
-//    }
+    }
 
     return (ambient + diffuse + specular) * albedo;
 }

@@ -34,6 +34,7 @@ namespace CGEngine
 		LINE_SMOOTH,
 		POLYGON_SMOOTH,
 		SCISSOR_TEST,
+		MULTISAMPLING,
 	};
 
 	enum class DataType : uint8_t

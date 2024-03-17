@@ -247,6 +247,7 @@ namespace CGEngine
 		{
 			m_backend->Enable(APICapability::DEPTH_TEST);
 			m_backend->Enable(APICapability::FRAMEBUFFER_SRGB);
+			m_backend->Enable(APICapability::MULTISAMPLING);
 		}
 
 		// Default camera setup
@@ -339,7 +340,7 @@ namespace CGEngine
 	void Renderer::UpdateInstance(const int32_t offset, const Component::Transform& transform) const
 	{
 		shaderStorageBuffer->SetSubData(offset * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(transform.model));
-		//shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Inverse(transform.model))), true);
+		shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Inverse(transform.model))), true);
 	}
 
 	void Renderer::UpdateLight(const int32_t offset, const Component::Light& light) const
