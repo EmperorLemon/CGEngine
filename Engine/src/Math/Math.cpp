@@ -68,7 +68,17 @@ namespace CGEngine::Math
 		return value_ptr(matrix);
 	}
 
+	float* ToPtr(Vec2& vector)
+	{
+		return value_ptr(vector);
+	}
+
 	float* ToPtr(Vec3& vector)
+	{
+		return value_ptr(vector);
+	}
+
+	float* ToPtr(Vec4& vector)
 	{
 		return value_ptr(vector);
 	}

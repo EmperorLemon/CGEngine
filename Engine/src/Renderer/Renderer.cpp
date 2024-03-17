@@ -270,13 +270,7 @@ namespace CGEngine
 			cameraUniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Math::Vec4), Math::ToArray(Math::Vec4(camera.position, 0.0)));
 
 			constexpr uint32_t num_lights = 0;
-			std::vector default_lights(MAX_NUM_LIGHTS, Component::Light());
-
-			for (auto& light : default_lights)
-			{
-				light.cutOff      = Math::Cos(Math::DegToRad(light.cutOff));
-				light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
-			}
+			const std::vector default_lights(MAX_NUM_LIGHTS, Component::Light());
 
 			lightUniformBuffer->SetSubData(0, MAX_NUM_LIGHTS * sizeof(Component::Light), default_lights.data());
 			lightUniformBuffer->SetSubData(MAX_NUM_LIGHTS * sizeof(Component::Light), sizeof(uint32_t), &num_lights);

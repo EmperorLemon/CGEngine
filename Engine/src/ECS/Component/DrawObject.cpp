@@ -43,12 +43,12 @@ namespace CGEngine::Component
 
 			switch (texture.channels)
 			{
-			case 0: CG_WARN("Texture Channels = 0");  break;
-			case 1: format = PixelFormat::R8;         break;
-			case 2: format = PixelFormat::RG8;		  break;
-			case 3: format = PixelFormat::RGB8;		  break;
-			case 4: format = PixelFormat::RGBA8;	  break;
-			default:								  break;
+			case 0: CG_WARN("Texture Channels = 0");    break;
+			case 1: format = PixelFormat::R8;           break;
+			case 2: format = PixelFormat::RG8;		    break;
+			case 3: format = PixelFormat::SRGB8;	    break;
+			case 4: format = PixelFormat::SRGB8_ALPHA8; break;
+			default:								    break;
 			}
 
 			textures.emplace_back(std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, format, texture.width, texture.height, layout, texture.pixels.data()));

@@ -68,11 +68,10 @@ namespace CGEngine
 
 				entities.Iterate<Component::Transform, Component::Light>([&](const Component::Transform& transform, Component::Light& light)
 				{
-					//if (light.type == Component::LightType::DIRECTIONAL_LIGHT)
-					//	light.direction = Math::Vec4(Math::DegToRad(transform.rotation), 0.0f);
-					//else
-
-					light.direction = Math::Vec4(transform.position, 0.0f);
+					if (light.type == Component::LightType::DIRECTIONAL_LIGHT)
+						light.direction = Math::Vec4(Math::DegToRad(transform.rotation), 0.0f);
+					else 
+						light.direction = Math::Vec4(transform.position, 0.0f);
 
 					m_renderer->UpdateLight(offset, light);
 					offset++;

@@ -15,6 +15,8 @@ namespace CGEngine::Math
 	constexpr Vec3 Y_AXIS = { 0.0f, 1.0f, 0.0f };
 	constexpr Vec3 Z_AXIS = { 0.0f, 0.0f, 1.0f };
 
+	constexpr float PI = glm::pi<float>();
+
 	// out: degrees
 	float RadToDeg(float radians);
 	// out: radians
@@ -34,7 +36,9 @@ namespace CGEngine::Math
 	const float* ToArray(const Vec4& vector);
 	const float* ToArray(const Mat3& matrix);
 	const float* ToArray(const Mat4& matrix);
+	float* ToPtr(Vec2& vector);
 	float* ToPtr(Vec3& vector);
+	float* ToPtr(Vec4& vector);
 	float* ToPtr(Mat4& matrix);
 
 	Vec2 ToVec2(const float* data);

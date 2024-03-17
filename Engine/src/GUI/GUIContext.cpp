@@ -11,8 +11,11 @@
 #include "Core/Window.h"
 #include "Scene/Scene.h"
 
-#include "ECS/Component/Transform.h"
+#include "ECS/Entity/Entity.hpp"
+
+#include "ECS/Component/Light.h"
 #include "ECS/Component/Tag.h"
+#include "ECS/Component/Transform.h"
 
 #include "Math/Math.h"
 
@@ -80,7 +83,7 @@ namespace CGEngine
 		ImGuiStyle& style = ImGui::GetStyle();
 
 		const float minWindowSizeX = style.WindowMinSize.x;
-		style.WindowMinSize.x = 350.0f;
+		style.WindowMinSize.x = 250.0f;
 
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
@@ -99,9 +102,9 @@ namespace CGEngine
 		ImGuizmo::BeginFrame();
 	}
 
-	static void EditTransform(const Utils::GUID& guid, Component::Transform& transform, const Camera& camera)
+	static void EditTransform(const bool useScale, Component::Transform& transform, const Camera& camera)
 	{
-		ImGui::PushID(guid.str().c_str());
+		ImGui::SeparatorText("Transform");
 
 		if (ImGui::RadioButton("Translate", currentGizmoOperation == ImGuizmo::TRANSLATE))
 			currentGizmoOperation = ImGuizmo::TRANSLATE;
@@ -113,13 +116,14 @@ namespace CGEngine
 
 		ImGui::SameLine();
 
-		if (ImGui::RadioButton("Scale", currentGizmoOperation == ImGuizmo::SCALE))
-			currentGizmoOperation = ImGuizmo::SCALE;
+		if (useScale)
+		{
+			if (ImGui::RadioButton("Scale", currentGizmoOperation == ImGuizmo::SCALE))
+				currentGizmoOperation = ImGuizmo::SCALE;
+		}
 
-		ImGui::DragFloat3("##Translation", Math::ToPtr(transform.position), 0.1f, 0, 0, "%.2f");
-		ImGui::DragFloat3("##Rotation", Math::ToPtr(transform.rotation), 0.1f, 0, 0, "%.2f");
-		ImGui::DragFloat3("##Scale", Math::ToPtr(transform.scale), 0.1f, 0.0000001f, std::numeric_limits<float>::max(), "%.2f");
-		ImGuizmo::RecomposeMatrixFromComponents(Math::ToArray(transform.position), Math::ToArray(transform.rotation), Math::ToArray(transform.scale), Math::ToPtr(transform.model));
+		ImGui::Spacing();
+		ImGui::Spacing();
 
 		if (currentGizmoOperation != ImGuizmo::SCALE)
 		{
@@ -132,20 +136,63 @@ namespace CGEngine
 				currentGizmoMode = ImGuizmo::WORLD;
 		}
 
+		ImGui::DragFloat3("##Translation", Math::ToPtr(transform.position), 0.1f, 0, 0, "%.2f");
+		ImGui::DragFloat3("##Rotation", Math::ToPtr(transform.rotation), 0.1f, 0, 0, "%.2f");
+		if (useScale) ImGui::DragFloat3("##Scale", Math::ToPtr(transform.scale), 0.1f, 0.0000001f, std::numeric_limits<float>::max(), "%.2f");
+		ImGuizmo::RecomposeMatrixFromComponents(Math::ToArray(transform.position), Math::ToArray(transform.rotation), Math::ToArray(transform.scale), Math::ToPtr(transform.model));
+
 		Manipulate(Math::ToArray(camera.view), Math::ToArray(camera.projection), currentGizmoOperation, currentGizmoMode, Math::ToPtr(transform.model), nullptr, nullptr, nullptr, nullptr);
 
 		if (ImGuizmo::IsUsing())
-		{
 			ImGuizmo::DecomposeMatrixToComponents(Math::ToArray(transform.model), Math::ToPtr(transform.position), Math::ToPtr(transform.rotation), Math::ToPtr(transform.scale));
+
+		ImGui::Spacing();
+	}
+
+	static void EditLight(Component::Light& light)
+	{
+		ImGui::SeparatorText("Light");
+
+		ImGui::ColorEdit4("Diffuse Color", Math::ToPtr(light.diffuseColor));
+		ImGui::ColorEdit4("Specular Color", Math::ToPtr(light.specularColor));
+
+		const char* types[3] = { "Directional", "Point", "Spot" };
+		const char* preview_value = types[static_cast<uint32_t>(light.type)];
+
+		if (ImGui::BeginCombo("Light Type", preview_value))
+		{
+			for (uint32_t n = 0; n < IM_ARRAYSIZE(types); ++n)
+			{
+				const bool is_selected = light.type == static_cast<Component::LightType>(n);
+
+				if (ImGui::Selectable(types[n], is_selected))
+					light.type = static_cast<Component::LightType>(n);
+			}
+
+			ImGui::EndCombo();
 		}
 
-		ImGui::Text("Model");
-		ImGui::Text("[%f] [%f] [%f] [%f]", transform.model[0][0], transform.model[0][1], transform.model[0][2], transform.model[0][3]);
-		ImGui::Text("[%f] [%f] [%f] [%f]", transform.model[1][0], transform.model[1][1], transform.model[1][2], transform.model[1][3]);
-		ImGui::Text("[%f] [%f] [%f] [%f]", transform.model[2][0], transform.model[2][1], transform.model[2][2], transform.model[2][3]);
-		ImGui::Text("[%f] [%f] [%f] [%f]", transform.model[3][0], transform.model[3][1], transform.model[3][2], transform.model[3][3]);
+		ImGui::Spacing();
 
-		ImGui::PopID();
+		if (light.type == Component::LightType::POINT_LIGHT || light.type == Component::LightType::SPOT_LIGHT)
+		{
+			ImGui::DragFloat("Constant", &light.constant, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Linear", &light.linear , 0.01f, 0.014f, 0.7f);
+			ImGui::DragFloat("Quadratic", &light.quadratic, 0.01f, 0.00007f, 1.8f);
+
+			ImGui::Spacing();
+
+			if (light.type == Component::LightType::SPOT_LIGHT)
+			{
+				static float inner = 12.5f, outer = 15.0f;
+
+				ImGui::DragFloat("Inner Spotlight Angle", &inner, 0.01f, 0.0f, outer);
+				ImGui::DragFloat("Outer Spotlight Angle", &outer, 0.01f, inner, 180.0f);
+
+				light.innerSpotAngle = Math::Cos(inner);
+				light.outerSpotAngle = Math::Cos(outer);
+			}
+		}
 	}
 
 	void CreateViewport(const uint32_t viewportID)
@@ -180,60 +227,71 @@ namespace CGEngine
 
 	void CreateEditorWindow(Scene& scene)
 	{
-		auto& entities = scene.GetEntities();
+		//auto& entities = scene.GetEntities();
 		auto& camera = scene.GetMainCamera();
 
+		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
+
+		if (ImGui::Begin("Editor Window"))
 		{
-			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Appearing);
-			ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_Appearing);
+			if (ImGui::IsKeyPressed(ImGuiKey_W))
+				currentGizmoOperation = ImGuizmo::TRANSLATE;
+			if (ImGui::IsKeyPressed(ImGuiKey_E))
+				currentGizmoOperation = ImGuizmo::ROTATE;
+			if (ImGui::IsKeyPressed(ImGuiKey_R))
+				currentGizmoOperation = ImGuizmo::SCALE;
 
-			if (ImGui::Begin("Editor Window"))
+			if (ImGui::CollapsingHeader("Scene Hierarchy"))
 			{
-				if (ImGui::IsKeyPressed(ImGuiKey_W))
-					currentGizmoOperation = ImGuizmo::TRANSLATE;
-				if (ImGui::IsKeyPressed(ImGuiKey_E))
-					currentGizmoOperation = ImGuizmo::ROTATE;
-				if (ImGui::IsKeyPressed(ImGuiKey_R))
-					currentGizmoOperation = ImGuizmo::SCALE;
-
-				if (ImGui::CollapsingHeader("Scene Hierarchy"))
+				if (ImGui::BeginChild("Entities"))
 				{
+					if (ImGui::CollapsingHeader("Main Camera"))
 					{
-						if (ImGui::BeginChild("Entities"))
+						ImGui::DragFloat3(std::string("Position##" + std::string("Camera")).c_str(), Math::ToPtr(camera.position), 0.1f);
+
+						//ImGui::Text("Projection");
+						//ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[0][0], camera.projection[0][1], camera.projection[0][2], camera.projection[0][3]);
+						//ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[1][0], camera.projection[1][1], camera.projection[1][2], camera.projection[1][3]);
+						//ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[2][0], camera.projection[2][1], camera.projection[2][2], camera.projection[2][3]);
+						//ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[3][0], camera.projection[3][1], camera.projection[3][2], camera.projection[3][3]);
+
+						//ImGui::Text("View");
+						//ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[0][0], camera.view[0][1], camera.view[0][2], camera.view[0][3]);
+						//ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[1][0], camera.view[1][1], camera.view[1][2], camera.view[1][3]);
+						//ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[2][0], camera.view[2][1], camera.view[2][2], camera.view[2][3]);
+						//ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[3][0], camera.view[3][1], camera.view[3][2], camera.view[3][3]);
+					}
+
+
+					for (auto& entity : EntityList::GetEntities())
+					{
+						const auto& tag = entity.GetComponent<Component::Tag>();
+						auto& transform = entity.GetComponent<Component::Transform>();
+;
+						if (ImGui::CollapsingHeader((tag.name + "##" + tag.guid.str()).c_str()))
 						{
-							if (ImGui::CollapsingHeader("Main Camera"))
+							ImGui::PushID(tag.guid.str().c_str());
+
+							EditTransform(tag.type != Component::EntityType::LIGHT ? true : false, transform, camera);
+
+							if (entity.HasComponent<Component::Light>())
 							{
-								ImGui::DragFloat3(std::string("Position##" + std::string("Camera")).c_str(), Math::ToPtr(camera.position), 0.1f);
+								auto& light = entity.GetComponent<Component::Light>();
 
-								ImGui::Text("Projection");
-								ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[0][0], camera.projection[0][1], camera.projection[0][2], camera.projection[0][3]);
-								ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[1][0], camera.projection[1][1], camera.projection[1][2], camera.projection[1][3]);
-								ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[2][0], camera.projection[2][1], camera.projection[2][2], camera.projection[2][3]);
-								ImGui::Text("[%f] [%f] [%f] [%f]", camera.projection[3][0], camera.projection[3][1], camera.projection[3][2], camera.projection[3][3]);
-
-								ImGui::Text("View");
-								ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[0][0], camera.view[0][1], camera.view[0][2], camera.view[0][3]);
-								ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[1][0], camera.view[1][1], camera.view[1][2], camera.view[1][3]);
-								ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[2][0], camera.view[2][1], camera.view[2][2], camera.view[2][3]);
-								ImGui::Text("[%f] [%f] [%f] [%f]", camera.view[3][0], camera.view[3][1], camera.view[3][2], camera.view[3][3]);
+								EditLight(light);
 							}
 
-							entities.Iterate<Component::Tag, Component::Transform>([&](const Component::Tag& tag, Component::Transform& transform)
-							{
-								if (ImGui::CollapsingHeader((tag.name + "##" + tag.guid.str()).c_str()))
-								{
-									EditTransform(tag.guid, transform, camera);
-								}
-							});
+							ImGui::PopID();
 						}
-
-						ImGui::EndChild();
 					}
 				}
-			}
 
-			ImGui::End();
+				ImGui::EndChild();
+			}
 		}
+
+		ImGui::End();
 
 		ImGui::End();
 	}

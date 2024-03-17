@@ -14,7 +14,7 @@
 #include "IO/FileSystem.h"
 
 constexpr int32_t INSTANCE_COUNT = 2;
-constexpr int32_t    LIGHT_COUNT = 2;
+constexpr int32_t    LIGHT_COUNT = 1;
 
 namespace CGEngine
 {
