@@ -53,7 +53,7 @@ namespace CGEngine
 
 		[[nodiscard]] uint32_t GetViewportID() const;
 
-		static GraphicsAPI GetAPI();
+		static GraphicsAPI GetAPI() { return m_API; }
 	private:
 		static GraphicsAPI m_API;
 

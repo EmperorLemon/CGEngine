@@ -14,7 +14,6 @@
 
 #include "Math/Math.h"
 #include "Math/Transform.h"
-#include "Math/Vector3.h"
 
 #include "Platform/OpenGL/OpenGLAPI.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
@@ -28,27 +27,26 @@ namespace CGEngine
 
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
 
-	std::shared_ptr<OpenGL::GLShader>	   screenShader			  = nullptr;
-	std::shared_ptr<OpenGL::GLTexture>	   screenTexture		  = nullptr;
-	std::shared_ptr<OpenGL::GLBuffer>      screenQuadVertexBuffer = nullptr;
-	std::shared_ptr<OpenGL::GLVertexArray> screenQuadVertexArray  = nullptr;
+	std::shared_ptr<OpenGL::GLShader>	    screenShader		   = nullptr;
+	std::shared_ptr<OpenGL::GLTexture>	    screenTexture		   = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer>       screenQuadVertexBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLVertexArray>  screenQuadVertexArray  = nullptr;
 
-	std::shared_ptr<OpenGL::GLShader>      skyboxShader		  = nullptr;
-	std::shared_ptr<OpenGL::GLTexture>	   skyboxTexture	  = nullptr;
-	std::shared_ptr<OpenGL::GLBuffer>	   skyboxVertexBuffer = nullptr;
-	std::shared_ptr<OpenGL::GLVertexArray> skyboxVertexArray  = nullptr;
+	std::shared_ptr<OpenGL::GLShader>       skyboxShader       = nullptr;
+	std::shared_ptr<OpenGL::GLTexture>	    skyboxTexture	   = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer>	    skyboxVertexBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLVertexArray>  skyboxVertexArray  = nullptr;
 
-	std::shared_ptr<OpenGL::GLBuffer>       uniformBuffer       = nullptr;
 	std::shared_ptr<OpenGL::GLBuffer>		shaderStorageBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer>		lightStorageBuffer  = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer>       cameraUniformBuffer = nullptr;
 	std::shared_ptr<OpenGL::GLFramebuffer>  frameBuffer			= nullptr;
 	std::shared_ptr<OpenGL::GLRenderbuffer> renderBuffer		= nullptr;
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
-	Assets::Light SCENE_LIGHTS[1] = {{Math::Vec4(0.0f), Assets::LightType::DIRECTIONAL_LIGHT}};
-	constexpr uint32_t NUM_LIGHTS = std::size(SCENE_LIGHTS);
-
-	constexpr uint32_t NUM_INSTANCES = 10;
+	constexpr uint32_t MAX_NUM_LIGHTS = 1;
+	constexpr uint32_t MAX_NUM_INSTANCES = 5;
 
 	std::vector QUAD_VERTICES =
 	{
@@ -208,29 +206,24 @@ namespace CGEngine
 			skyboxVertexArray->SetDrawType(DrawType::DRAW_ARRAYS);
 		}
 
-		// Uniform buffer setup
+		// Shader storage buffers setup
 		{
-			uniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, 2 * sizeof(Math::Mat4) + sizeof(Math::Vec3), nullptr);
-			uniformBuffer->BindBufferRange(0, 0, 2 * sizeof(Math::Mat4)); // Camera projection + view
-			uniformBuffer->BindBufferRange(2, 2 * sizeof(Math::Mat4), sizeof(Math::Vec3)); // Camera position
+			constexpr size_t instance_buffer_size = MAX_NUM_INSTANCES * sizeof(Math::Mat4);
+			constexpr size_t light_buffer_size    = MAX_NUM_LIGHTS * sizeof(Assets::Light) + sizeof(uint32_t);
+
+			shaderStorageBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::SHADER_STORAGE_BUFFER, instance_buffer_size, nullptr);
+			shaderStorageBuffer->BindBufferBase(0);
+
+			lightStorageBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::SHADER_STORAGE_BUFFER, light_buffer_size, nullptr);
+			lightStorageBuffer->BindBufferBase(2);
 		}
 
-		// Shader storage buffer setup
+		// Uniform buffers setup
 		{
-			constexpr size_t light_buffer_size = sizeof(uint32_t) + NUM_LIGHTS * sizeof(Assets::Light);
-			constexpr size_t instance_buffer_size = NUM_INSTANCES * sizeof(Math::Mat4);
-			constexpr size_t size = light_buffer_size + instance_buffer_size;
+			constexpr size_t camera_buffer_size = 2 * sizeof(Math::Mat4) + sizeof(Math::Vec4);
 
-			shaderStorageBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::SHADER_STORAGE_BUFFER, size, nullptr);
-			shaderStorageBuffer->BindBufferRange(1, 0, instance_buffer_size);
-			//shaderStorageBuffer->BindBufferRange(3, instance_buffer_size, sizeof(uint32_t));
-			//shaderStorageBuffer->BindBufferRange(3, sizeof(uint32_t), NUM_LIGHTS * sizeof(Assets::Light));
-
-			//for (auto& light : SCENE_LIGHTS)
-			//{
-			//	light.cutOff	  = Math::Cos(Math::DegToRad(light.cutOff));
-			//	light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
-			//}
+			cameraUniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, camera_buffer_size, nullptr);
+			cameraUniformBuffer->BindBufferBase(1);
 		}
 
 		// Framebuffer setup
@@ -260,21 +253,28 @@ namespace CGEngine
 			camera.view = Math::View(camera.position, camera.direction, camera.up);
 		}
 
-		// Uniform buffer setup
-		{
-			uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(camera.projection));
-			uniformBuffer->SetSubData(1 * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(camera.view));
-			uniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Math::Vec3), Math::ToArray(camera.position));
-		}
-
 		// Shader storage buffer setup
 		{
-			const std::vector default_matrices(NUM_INSTANCES, Math::Mat4(1.0f));
-			constexpr size_t instance_buffer_size = NUM_INSTANCES * sizeof(Math::Mat4);
+			const std::vector matrices(MAX_NUM_INSTANCES, Math::Mat4(1.0f));
+			shaderStorageBuffer->SetSubData(0, MAX_NUM_INSTANCES * sizeof(Math::Mat4), matrices.data());
 
-			shaderStorageBuffer->SetSubData(0, instance_buffer_size, default_matrices.data());
-			//shaderStorageBuffer->SetSubData(instance_buffer_size, sizeof(uint32_t), &NUM_LIGHTS);
-			//shaderStorageBuffer->SetSubData(sizeof(uint32_t), NUM_LIGHTS * sizeof(Assets::Light), SCENE_LIGHTS);
+			std::vector lights(MAX_NUM_LIGHTS, Assets::Light());
+
+			for (auto& light : lights)
+			{
+				light.cutOff	  = Math::Cos(Math::DegToRad(light.cutOff));
+				light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
+			}
+
+			lightStorageBuffer->SetSubData(0, sizeof(uint32_t), &MAX_NUM_LIGHTS);
+			lightStorageBuffer->SetSubData(sizeof(uint32_t), MAX_NUM_LIGHTS * sizeof(Assets::Light), lights.data());
+		}
+
+		// Uniform buffer setup
+		{
+			cameraUniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(camera.projection));
+			cameraUniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(camera.view));
+			cameraUniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Math::Vec4), Math::ToArray(Math::Vec4(camera.position, 0.0)));
 		}
 
 		// Default lit shader setup
@@ -329,23 +329,19 @@ namespace CGEngine
 	{
 		shader->Use();
 
-		uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(camera.view));
+		//uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(camera.view));
 	}
 
 	void Renderer::UpdateTransform(const int32_t offset, const Component::Transform& transform)
 	{
-		//CG_TRACE("{0}", offset);
 		shaderStorageBuffer->SetSubData(offset * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(transform.model));
+		shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Inverse(transform.model))), true);
 	}
 
 	void Renderer::RenderPrimitive(const Component::Transform& transform, const Component::DrawObject& primitive)
 	{
-		const auto& model = GetModelMatrix(transform);
-
-		//shader->BindUniform("MODEL_MATRIX",  OpenGL::UniformType::MAT4, Math::ToArray(model));
-		//shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Transpose(Math::Inverse(model)))));
-
 		int32_t unit = 0;
+
 		for (const auto& texture : primitive.textures)
 		{
 			texture->Bind(unit);
@@ -394,7 +390,7 @@ namespace CGEngine
 		camera.aspect	  = GetAspectRatio(width, height);
 		camera.projection = Math::Perspective(camera.fov, camera.aspect, camera.near, camera.far);
 
-		uniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(camera.projection));
+		cameraUniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(camera.projection));
 	}
 
 	void Renderer::ResizeViewport(const int32_t width, const int32_t height) const
@@ -424,10 +420,5 @@ namespace CGEngine
 	uint32_t Renderer::GetViewportID() const
 	{
 		return screenTexture->GetID();
-	}
-
-	GraphicsAPI Renderer::GetAPI()
-	{
-		return m_API;
 	}
 }

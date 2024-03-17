@@ -2,7 +2,6 @@
 
 #include "ECS/Entity/Entity.hpp"
 
-#include "ECS/Component/Transform.h"
 #include "ECS/Component/DrawObject.h"
 
 #include "Platform/OpenGL/OpenGLBuffer.h"
@@ -10,7 +9,7 @@
 #include "Renderer/Assets/Model.h"
 #include "IO/FileSystem.h"
 
-constexpr int32_t INSTANCE_COUNT = 3;
+constexpr int32_t INSTANCE_COUNT = 5;
 
 namespace CGEngine
 {

@@ -5,10 +5,9 @@ out VS_OUT {
     vec3 TexCoords;
 } vs_out;
 
-layout (std140, binding = 0) uniform Matrices
+layout (std140, binding = 1) uniform Camera
 {
     mat4 PROJECTION_MATRIX;
-    mat4 VIEW_MATRIX;
 };
 
 uniform mat4 SKYBOX_VIEW_MATRIX;
