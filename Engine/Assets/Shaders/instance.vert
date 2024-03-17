@@ -30,7 +30,7 @@ layout (std140, binding = 1) uniform Camera
     vec4 VIEW_POSITION;     // 16               128
 };
 
-uniform mat3 NORMAL_MATRIX;
+//uniform mat3 NORMAL_MATRIX;
 
 void main()
 {
@@ -38,7 +38,8 @@ void main()
 
     vs_out.ViewPos   = VIEW_POSITION.xyz;
     vs_out.FragPos   = vec3(MODEL_MATRIX * vec4(aPos, 1.0));
-    vs_out.Normal    = NORMAL_MATRIX * aNormal;
+    //vs_out.Normal    = NORMAL_MATRIX * aNormal;
+    vs_out.Normal    = aNormal;
     vs_out.TexCoords = aTexCoords;
 
     gl_Position = PROJECTION_MATRIX * VIEW_MATRIX * MODEL_MATRIX * vec4(aPos, 1.0);

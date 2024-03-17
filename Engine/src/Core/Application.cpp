@@ -2,8 +2,10 @@
 
 #include "GUI/GUIContext.h"
 
-#include "ECS/Component/Transform.h"
 #include "ECS/Component/DrawObject.h"
+#include "ECS/Component/Instance.h"
+#include "ECS/Component/Light.h"
+#include "ECS/Component/Transform.h"
 
 namespace CGEngine
 {
@@ -51,16 +53,35 @@ namespace CGEngine
 
 			m_renderer->Update(main_camera, m_time);
 
-			int32_t offset = 0;
-			entities.Iterate<Component::Transform>([&](const Component::Transform& transform)
 			{
-				m_renderer->UpdateTransform(offset, transform);
-				offset++;
-			});
+				int32_t offset = 0;
+				
+				entities.Iterate<Component::Transform, Component::Instance>([&](const Component::Transform& transform, const Component::Instance& instance)
+				{
+					m_renderer->UpdateInstance(offset, transform);
+					offset++;
+				});
+			}
 
-			entities.Iterate<Component::Transform, Component::DrawObject>([&](const Component::Transform& transform, const Component::DrawObject& object)
 			{
-				m_renderer->RenderPrimitive(transform, object);
+				int32_t offset = 0;
+
+				entities.Iterate<Component::Transform, Component::Light>([&](const Component::Transform& transform, Component::Light& light)
+				{
+					//if (light.type == Component::LightType::DIRECTIONAL_LIGHT)
+					//	light.direction = Math::Vec4(Math::DegToRad(transform.rotation), 0.0f);
+					//else
+
+					light.direction = Math::Vec4(transform.position, 0.0f);
+
+					m_renderer->UpdateLight(offset, light);
+					offset++;
+				});
+			}
+
+			entities.Iterate<Component::DrawObject>([&](const Component::DrawObject& object)
+			{
+				m_renderer->RenderPrimitive(object);
 			});
 
 			m_renderer->SecondPass();

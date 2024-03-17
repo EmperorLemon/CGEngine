@@ -5,7 +5,6 @@
 #include <entt/entity/entity.hpp>
 
 #include <stdexcept>
-#include <string_view>
 
 #include "ECS/System/EntityList.hpp"
 
@@ -14,7 +13,7 @@ namespace CGEngine
 	class Entity
 	{
 	public:
-		Entity(entt::entity handle, EntityList& list, std::string_view name);
+		Entity(entt::entity handle, EntityList& list, std::string_view name, uint8_t type);
 
 		template <typename... Types>
 		[[nodiscard]] bool HasComponent() const;

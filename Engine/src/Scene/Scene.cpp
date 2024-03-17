@@ -1,15 +1,20 @@
 #include "Scene.h"
 
+#include "Core/Time.h"
+
 #include "ECS/Entity/Entity.hpp"
 
 #include "ECS/Component/DrawObject.h"
+#include "ECS/Component/Instance.h"
+#include "ECS/Component/Light.h"
 
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
 #include "Renderer/Assets/Model.h"
 #include "IO/FileSystem.h"
 
-constexpr int32_t INSTANCE_COUNT = 5;
+constexpr int32_t INSTANCE_COUNT = 2;
+constexpr int32_t    LIGHT_COUNT = 2;
 
 namespace CGEngine
 {
@@ -20,19 +25,34 @@ namespace CGEngine
 
 	void Scene::SetupScene() 
 	{
-		Assets::Model model;
-		IO::LoadModelFile("Assets/Models/Cube/cube.gltf", model);
+		{
+			Assets::Model model;
+			IO::LoadModelFile("Assets/Models/Cube/cube.gltf", model);
 
-		auto& entity = m_entityList->CreateEntity("Cube");
-		entity.AddComponent<Component::DrawObject>(std::move(model));
+			auto& entity = m_entityList->CreateEntity("Cube", static_cast<uint8_t>(Component::EntityType::DRAWOBJECT));
+			entity.AddComponent<Component::Instance>(0);
+			entity.AddComponent<Component::DrawObject>(std::move(model));
 
-		const auto& drawObject = entity.GetComponent<Component::DrawObject>();
-		drawObject.vertexArrays.at(0)->SetDrawType(DrawType::DRAW_ELEMENTS_INSTANCED);
-		drawObject.vertexArrays.at(0)->SetInstanceCount(INSTANCE_COUNT);
+			const auto& drawObject = entity.GetComponent<Component::DrawObject>();
+			drawObject.vertexArrays.at(0)->SetDrawType(DrawType::DRAW_ELEMENTS_INSTANCED);
+			drawObject.vertexArrays.at(0)->SetInstanceCount(INSTANCE_COUNT);
+		}
 
 		for (int32_t i = 0; i < INSTANCE_COUNT - 1; ++i)
 		{
-			m_entityList->CreateEntity("Cube Instance " + std::to_string(i + 1));
+			auto& entity = m_entityList->CreateEntity("Cube Instance " + std::to_string(i + 1), static_cast<uint8_t>(Component::EntityType::INSTANCE));
+			entity.AddComponent<Component::Instance>(i);
 		}
+
+		for (int32_t i = 0; i < LIGHT_COUNT; ++i)
+		{
+			auto& entity = m_entityList->CreateEntity("Light " + std::to_string(i), static_cast<uint8_t>(Component::EntityType::LIGHT));
+			entity.AddComponent<Component::Light>();
+		}
+	}
+
+	void Scene::Update(const Time& time)
+	{
+
 	}
 }

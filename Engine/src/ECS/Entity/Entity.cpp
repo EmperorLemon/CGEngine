@@ -5,9 +5,9 @@
 
 namespace CGEngine
 {
-	Entity::Entity(const entt::entity handle, EntityList& list, const std::string_view name) : m_handle(handle), m_list(list)
+	Entity::Entity(const entt::entity handle, EntityList& list, const std::string_view name, const uint8_t type) : m_handle(handle), m_list(list)
 	{
-		this->AddComponent<Component::Tag>(Component::Tag(name.data(), Utils::GUID()));
+		this->AddComponent<Component::Tag>(Component::Tag(name.data(), static_cast<Component::EntityType>(type), Utils::GUID()));
 		this->AddComponent<Component::Transform>();
 	}
 }

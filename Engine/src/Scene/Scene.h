@@ -8,6 +8,7 @@
 
 namespace CGEngine
 {
+	struct Time;
 	class Renderer;
 
 	class Scene
@@ -16,6 +17,8 @@ namespace CGEngine
 		explicit Scene(const std::string& name);
 
 		void SetupScene();
+
+		void Update(const Time& time);
 
 		[[nodiscard]] const std::string& GetName() const  { return m_name; }
 

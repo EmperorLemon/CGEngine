@@ -6,9 +6,9 @@ namespace CGEngine
 {
 	std::vector<Entity> EntityList::m_entities = {};
 
-	Entity& EntityList::CreateEntity(const std::string_view name)
+	Entity& EntityList::CreateEntity(const std::string_view name, const uint8_t type)
 	{
-		m_entities.emplace_back(m_registry.create(), *this, name);
+		m_entities.emplace_back(m_registry.create(), *this, name, type);
 
 		return m_entities.back();
 	}

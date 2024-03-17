@@ -5,11 +5,13 @@
 
 #include "Context.h"
 #include "Camera.h"
+
 #include "ECS/Component/DrawObject.h"
+#include "ECS/Component/Light.h"
 #include "ECS/Component/Transform.h"
 
 #include "Renderer/Assets/Mesh.h"
-#include "Renderer/Assets/Light.h"
+
 #include "IO/FileSystem.h"
 
 #include "Math/Math.h"
@@ -38,15 +40,15 @@ namespace CGEngine
 	std::shared_ptr<OpenGL::GLVertexArray>  skyboxVertexArray  = nullptr;
 
 	std::shared_ptr<OpenGL::GLBuffer>		shaderStorageBuffer = nullptr;
-	std::shared_ptr<OpenGL::GLBuffer>		lightStorageBuffer  = nullptr;
 	std::shared_ptr<OpenGL::GLBuffer>       cameraUniformBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer>		lightUniformBuffer  = nullptr;
 	std::shared_ptr<OpenGL::GLFramebuffer>  frameBuffer			= nullptr;
 	std::shared_ptr<OpenGL::GLRenderbuffer> renderBuffer		= nullptr;
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
-	constexpr uint32_t MAX_NUM_LIGHTS = 1;
-	constexpr uint32_t MAX_NUM_INSTANCES = 5;
+	constexpr uint32_t MAX_NUM_LIGHTS = 10;
+	constexpr uint32_t MAX_NUM_INSTANCES = 10;
 
 	std::vector QUAD_VERTICES =
 	{
@@ -209,13 +211,9 @@ namespace CGEngine
 		// Shader storage buffers setup
 		{
 			constexpr size_t instance_buffer_size = MAX_NUM_INSTANCES * sizeof(Math::Mat4);
-			constexpr size_t light_buffer_size    = MAX_NUM_LIGHTS * sizeof(Assets::Light) + sizeof(uint32_t);
 
 			shaderStorageBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::SHADER_STORAGE_BUFFER, instance_buffer_size, nullptr);
 			shaderStorageBuffer->BindBufferBase(0);
-
-			lightStorageBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::SHADER_STORAGE_BUFFER, light_buffer_size, nullptr);
-			lightStorageBuffer->BindBufferBase(2);
 		}
 
 		// Uniform buffers setup
@@ -224,6 +222,11 @@ namespace CGEngine
 
 			cameraUniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, camera_buffer_size, nullptr);
 			cameraUniformBuffer->BindBufferBase(1);
+
+			constexpr size_t light_buffer_size = sizeof(uint32_t) + MAX_NUM_LIGHTS * sizeof(Component::Light);
+
+			lightUniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, light_buffer_size, nullptr);
+			lightUniformBuffer->BindBufferBase(2);
 		}
 
 		// Framebuffer setup
@@ -255,19 +258,8 @@ namespace CGEngine
 
 		// Shader storage buffer setup
 		{
-			const std::vector matrices(MAX_NUM_INSTANCES, Math::Mat4(1.0f));
-			shaderStorageBuffer->SetSubData(0, MAX_NUM_INSTANCES * sizeof(Math::Mat4), matrices.data());
-
-			std::vector lights(MAX_NUM_LIGHTS, Assets::Light());
-
-			for (auto& light : lights)
-			{
-				light.cutOff	  = Math::Cos(Math::DegToRad(light.cutOff));
-				light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
-			}
-
-			lightStorageBuffer->SetSubData(0, sizeof(uint32_t), &MAX_NUM_LIGHTS);
-			lightStorageBuffer->SetSubData(sizeof(uint32_t), MAX_NUM_LIGHTS * sizeof(Assets::Light), lights.data());
+			const std::vector default_matrices(MAX_NUM_INSTANCES, Math::Mat4(1.0f));
+			shaderStorageBuffer->SetSubData(0, MAX_NUM_INSTANCES * sizeof(Math::Mat4), default_matrices.data());
 		}
 
 		// Uniform buffer setup
@@ -275,6 +267,18 @@ namespace CGEngine
 			cameraUniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(camera.projection));
 			cameraUniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(camera.view));
 			cameraUniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Math::Vec4), Math::ToArray(Math::Vec4(camera.position, 0.0)));
+
+			constexpr uint32_t num_lights = 0;
+			std::vector default_lights(MAX_NUM_LIGHTS, Component::Light());
+
+			for (auto& light : default_lights)
+			{
+				light.cutOff      = Math::Cos(Math::DegToRad(light.cutOff));
+				light.outerCutOff = Math::Cos(Math::DegToRad(light.outerCutOff));
+			}
+
+			lightUniformBuffer->SetSubData(0, MAX_NUM_LIGHTS * sizeof(Component::Light), default_lights.data());
+			lightUniformBuffer->SetSubData(MAX_NUM_LIGHTS * sizeof(Component::Light), sizeof(uint32_t), &num_lights);
 		}
 
 		// Default lit shader setup
@@ -325,20 +329,28 @@ namespace CGEngine
 		m_backend->Enable(APICapability::DEPTH_TEST);
 	}
 
-	void Renderer::Update(const Camera& camera, const Time& time)
+	void Renderer::Update(const Camera& camera, const Time& time) const
 	{
 		shader->Use();
 
 		//uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(camera.view));
 	}
 
-	void Renderer::UpdateTransform(const int32_t offset, const Component::Transform& transform)
+	void Renderer::UpdateInstance(const int32_t offset, const Component::Transform& transform) const
 	{
 		shaderStorageBuffer->SetSubData(offset * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(transform.model));
-		shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Inverse(transform.model))), true);
+		//shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Inverse(transform.model))), true);
 	}
 
-	void Renderer::RenderPrimitive(const Component::Transform& transform, const Component::DrawObject& primitive)
+	void Renderer::UpdateLight(const int32_t offset, const Component::Light& light) const
+	{
+		const uint32_t num_lights = offset + 1;
+
+		lightUniformBuffer->SetSubData(offset * sizeof(Component::Light), sizeof(Component::Light), &light);
+		lightUniformBuffer->SetSubData(MAX_NUM_LIGHTS * sizeof(Component::Light), sizeof(uint32_t), &num_lights);
+	}
+
+	void Renderer::RenderPrimitive(const Component::DrawObject& primitive) const
 	{
 		int32_t unit = 0;
 
@@ -387,6 +399,8 @@ namespace CGEngine
 
 	void Renderer::ResizeProjection(const int32_t width, const int32_t height, Camera& camera) const
 	{
+		if (width == 0 || height == 0) return;
+
 		camera.aspect	  = GetAspectRatio(width, height);
 		camera.projection = Math::Perspective(camera.fov, camera.aspect, camera.near, camera.far);
 
@@ -395,6 +409,8 @@ namespace CGEngine
 
 	void Renderer::ResizeViewport(const int32_t width, const int32_t height) const
 	{
+		if (width == 0 || height == 0) return;
+
 		ResizeFramebuffer(width, height);
 		m_backend->ResizeViewport(0, 0, width, height);
 	}

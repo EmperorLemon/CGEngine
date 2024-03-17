@@ -6,8 +6,9 @@
 
 namespace CGEngine::Component
 {
-	struct Transform;
 	struct DrawObject;
+	struct Light;
+	struct Transform;
 }
 
 namespace CGEngine
@@ -38,11 +39,12 @@ namespace CGEngine
 		explicit Renderer(const RendererCreateInfo& rendererInfo);
 
 		void PreRender(Camera& camera);
-		void RenderPrimitive(const Component::Transform& transform, const Component::DrawObject& primitive);
+		void RenderPrimitive(const Component::DrawObject& primitive) const;
 		void PostRender() const;
 
-		void Update(const Camera& camera, const Time& time);
-		void UpdateTransform(int32_t offset, const Component::Transform& transform);
+		void Update(const Camera& camera, const Time& time) const;
+		void UpdateInstance(int32_t offset, const Component::Transform& transform) const;
+		void UpdateLight(int32_t offset, const Component::Light& light) const;
 
 		void FirstPass()  const;
 		void SecondPass() const;
