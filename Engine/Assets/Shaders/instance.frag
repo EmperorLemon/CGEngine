@@ -11,6 +11,7 @@ const uint MAX_NUM_LIGHTS = 10;
 in VS_OUT {
     vec3 ViewPos;
     vec3 FragPos;
+    vec4 FragLightPos;
     vec3 Normal;
     vec2 TexCoords;
     vec3 Tangent;
@@ -50,6 +51,27 @@ layout (std140, binding = 3) uniform Lights
 };
 
 uniform Material material;
+uniform sampler2D shadowMapSampler;
+
+float CalculateShadow()
+{
+    // Perspective divide
+    vec3 projCoords = fs_in.FragLightPos.xyz / fs_in.FragLightPos.w;
+
+    // Normalize to [0, 1] range
+    projCoords = projCoords * 0.5 + 0.5;
+
+    // Get the closest depth value from light's perspective
+    float closestDepth = texture(shadowMapSampler, projCoords.xy).r;
+
+    // Get the depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+
+    // Check whether current frag pos is in shadow
+    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+
+    return shadow;
+}
 
 vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
 {
@@ -97,7 +119,9 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
         specular *= intensity;
     }
 
-    return (ambient + diffuse + specular) * albedo;
+    float shadow = CalculateShadow();
+
+    return (ambient + (1.0 - shadow) * (diffuse + specular)) * albedo;
 }
 
 void main()
@@ -119,5 +143,7 @@ void main()
     for (int i = 0; i < NUM_LIGHTS; ++i)
         result += Lighting(LIGHTS[i], normal, albedo.rgb);
 
-	FragColor = vec4(pow(result, vec3(1.0 / 2.2)), 1.0);
+    result = pow(result, vec3(1.0 / 2.2));
+
+	FragColor = vec4(result, 1.0);
 }

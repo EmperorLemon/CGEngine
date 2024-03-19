@@ -27,24 +27,24 @@ namespace CGEngine
 {
 	void SetupRenderScene(int32_t width, int32_t height);
 
-	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
+	std::shared_ptr<OpenGL::GLShader> defaultShader	= nullptr;
+	std::shared_ptr<OpenGL::GLShader> depthShader   = nullptr;
+	std::shared_ptr<OpenGL::GLShader> screenShader  = nullptr;
+	std::shared_ptr<OpenGL::GLShader> skyboxShader  = nullptr;
 
-	std::shared_ptr<OpenGL::GLShader>		shadowShader = nullptr;
-	std::shared_ptr<OpenGL::GLTexture>		depthTexture = nullptr;
-	std::shared_ptr<OpenGL::GLFramebuffer>  depthFramebuffer = nullptr;
+	std::shared_ptr<OpenGL::GLTexture> depthTexture  = nullptr;
+	std::shared_ptr<OpenGL::GLTexture> screenTexture = nullptr;
+	std::shared_ptr<OpenGL::GLTexture> skyboxTexture = nullptr;
 
-	std::shared_ptr<OpenGL::GLShader>	    screenShader		   = nullptr;
-	std::shared_ptr<OpenGL::GLTexture>	    screenTexture		   = nullptr;
-	std::shared_ptr<OpenGL::GLFramebuffer>  screenFramebuffer	   = nullptr;
-	std::shared_ptr<OpenGL::GLRenderbuffer> screenRenderbuffer	   = nullptr;
+	std::shared_ptr<OpenGL::GLFramebuffer>  depthFramebuffer   = nullptr;
+	std::shared_ptr<OpenGL::GLFramebuffer>  screenFramebuffer  = nullptr;
+	std::shared_ptr<OpenGL::GLRenderbuffer> screenRenderbuffer = nullptr;
 
-	std::shared_ptr<OpenGL::GLBuffer>       screenQuadVertexBuffer = nullptr;
-	std::shared_ptr<OpenGL::GLVertexArray>  screenQuadVertexArray  = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer> screenQuadVertexBuffer = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer> skyboxVertexBuffer     = nullptr;
 
-	std::shared_ptr<OpenGL::GLShader>       skyboxShader       = nullptr;
-	std::shared_ptr<OpenGL::GLTexture>	    skyboxTexture	   = nullptr;
-	std::shared_ptr<OpenGL::GLBuffer>	    skyboxVertexBuffer = nullptr;
-	std::shared_ptr<OpenGL::GLVertexArray>  skyboxVertexArray  = nullptr;
+	std::shared_ptr<OpenGL::GLVertexArray>  screenQuadVertexArray = nullptr;
+	std::shared_ptr<OpenGL::GLVertexArray>  skyboxVertexArray     = nullptr;
 
 	std::shared_ptr<OpenGL::GLBuffer>		shaderStorageBuffer = nullptr;
 	std::shared_ptr<OpenGL::GLBuffer>       cameraUniformBuffer = nullptr;
@@ -134,11 +134,18 @@ namespace CGEngine
 			IO::ReadFile("Assets/Shaders/instance.frag", frag_src);
 
 			ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
-			shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
+			defaultShader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 		}
 
 		// Shadow map setup
 		{
+			std::string vert_src, frag_src;
+			IO::ReadFile("Assets/Shaders/depth.vert", vert_src);
+			IO::ReadFile("Assets/Shaders/depth.frag", frag_src);
+
+			ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
+			depthShader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
+
 			TextureLayout layout;
 
 			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::NEAREST);
@@ -146,10 +153,12 @@ namespace CGEngine
 			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::REPEAT);
 			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::REPEAT);
 
-			depthTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::DEPTH24, width, height, layout);
+			depthTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::DEPTH32F, SHADOW_WIDTH, SHADOW_HEIGHT, layout);
 
-			depthFramebuffer = std::make_shared<OpenGL::GLFramebuffer>(BufferTarget::FRAMEBUFFER);
+			depthFramebuffer = std::make_shared<OpenGL::GLFramebuffer>();
 			depthFramebuffer->AttachTexture(FramebufferTextureAttachment::DEPTH_ATTACHMENT, depthTexture->GetID());
+			depthFramebuffer->DrawBuffer();
+			depthFramebuffer->ReadBuffer();
 
 			if (!depthFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
 		}
@@ -185,11 +194,10 @@ namespace CGEngine
 			screenQuadVertexArray = std::make_shared<OpenGL::GLVertexArray>(screenQuadVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
 			screenQuadVertexArray->SetDrawType(DrawType::DRAW_ARRAYS);
 
-			screenFramebuffer = std::make_shared<OpenGL::GLFramebuffer>(BufferTarget::FRAMEBUFFER);
+			screenFramebuffer = std::make_shared<OpenGL::GLFramebuffer>();
 			screenFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, screenTexture->GetID());
-			screenFramebuffer->AttachTexture(FramebufferTextureAttachment::DEPTH_ATTACHMENT, depthTexture->GetID());
 
-			screenRenderbuffer = std::make_shared<OpenGL::GLRenderbuffer>(BufferTarget::RENDERBUFFER, FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8, width, height);
+			screenRenderbuffer = std::make_shared<OpenGL::GLRenderbuffer>(FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8, width, height);
 			screenFramebuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_STENCIL_ATTACHMENT, screenRenderbuffer->GetID());
 
 			if (!screenFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
@@ -301,24 +309,51 @@ namespace CGEngine
 
 		// Default lit shader setup
 		{
-			shader->Use();
+			defaultShader->Use();
 
 			constexpr int albedo_texture_sampler = 0;
 			constexpr int normal_texture_sampler = 1;
 			constexpr int occlusion_texture_sampler = 2;
-			shader->BindUniform("material.baseAlbedoSampler", OpenGL::UniformType::INT, &albedo_texture_sampler);
+			constexpr int shadow_map_sampler = 3;
+			defaultShader->BindUniform("material.baseAlbedoSampler", OpenGL::UniformType::INT, &albedo_texture_sampler);
 			//shader->BindUniform("material.baseNormalSampler",	  OpenGL::UniformType::INT, &normal_texture_sampler);
 			//shader->BindUniform("material.baseOcclusionSampler", OpenGL::UniformType::INT, &occlusion_texture_sampler);
+			defaultShader->BindUniform("shadowMapSampler", OpenGL::UniformType::INT, &shadow_map_sampler);
 
-			shader->Disable();
+			constexpr float near_plane = 1.0f;
+			constexpr float far_plane = 12.5f;
+
+			const auto& lightProjection = Math::Orthographic(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+			const auto& lightView = Math::View(Math::Vec3(0.0f, 0.0f, 5.0f), Math::Vec3(0.0f), Math::Vec3(0.0, 1.0, 0.0));
+
+			defaultShader->BindUniform("LIGHT_TRANSFORM_MATRIX", OpenGL::UniformType::MAT4, Math::ToArray(lightProjection * lightView));
+
+			defaultShader->Disable();
+		}
+
+		// Shadow shader setup
+		{
+			depthShader->Use();
+
+			constexpr float near_plane = 1.0f;
+			constexpr float far_plane = 12.5f;
+
+			const auto& lightProjection = Math::Orthographic(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+			const auto& lightView = Math::View(Math::Vec3(0.0f, 0.0f, 5.0f), Math::Vec3(0.0f), Math::Vec3(0.0, 1.0, 0.0));
+
+			depthShader->BindUniform("LIGHT_TRANSFORM_MATRIX", OpenGL::UniformType::MAT4, Math::ToArray(lightProjection * lightView));
+
+			depthShader->Disable();
 		}
 
 		// Screen quad shader setup
 		{
 			screenShader->Use();
 
-			constexpr int screen_texture_sampler = 0;
-			screenShader->BindUniform("screenSampler", OpenGL::UniformType::INT, &screen_texture_sampler);
+			constexpr int screen_color_texture_sampler = 0;
+			//constexpr int screen_depth_texture_sampler = 1;
+			screenShader->BindUniform("screenColorSampler", OpenGL::UniformType::INT, &screen_color_texture_sampler);
+			//screenShader->BindUniform("screenDepthSampler", OpenGL::UniformType::INT, &screen_depth_texture_sampler);
 
 			screenShader->Disable();
 		}
@@ -335,29 +370,15 @@ namespace CGEngine
 		}
 	}
 
-	void Renderer::FirstPass() const
-	{
-		screenFramebuffer->Bind();
-
-		constexpr float clearColor[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
-		constexpr float clearDepth = 1.0f;
-		screenFramebuffer->Clear(BufferType::COLOR, 0, clearColor);
-		screenFramebuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
-
-		m_backend->Enable(APICapability::DEPTH_TEST);
-	}
-
 	void Renderer::Update(const Camera& camera, const Time& time) const
 	{
-		shader->Use();
-
-		//uniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(camera.view));
+		defaultShader->Use();
 	}
 
 	void Renderer::UpdateInstance(const int32_t offset, const Component::Transform& transform) const
 	{
 		shaderStorageBuffer->SetSubData(offset * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(transform.model));
-		shader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Inverse(transform.model))), true);
+		//defaultShader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Inverse(transform.model))), true);
 	}
 
 	void Renderer::UpdateLight(const int32_t offset, const Component::Light& light) const
@@ -378,13 +399,44 @@ namespace CGEngine
 			unit++;
 		}
 
+		depthTexture->Bind(3);
+
 		for (const auto& vertexArray : primitive.vertexArrays)
 			m_backend->Draw(vertexArray.get());
 	}
 
+	void Renderer::FirstPass() const
+	{
+		depthShader->Use();
+
+		m_backend->ResizeViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		depthFramebuffer->Bind();
+
+		constexpr float clearDepth = 1.0f;
+		depthFramebuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
+	}
+
 	void Renderer::SecondPass() const
 	{
-		// Draw skybox after drawn objects, but before second pass.
+		// Swap to default framebuffer
+		depthFramebuffer->Unbind();
+
+		// Reset viewport
+		m_backend->ResizeViewport(0, 0, m_window.width, m_window.height);
+		m_backend->Clear(BufferMask::COLOR_DEPTH_BUFFER_BIT);
+
+		screenFramebuffer->Bind();
+
+		constexpr float clearColor[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
+		constexpr float clearDepth = 1.0f;
+
+		screenFramebuffer->Clear(BufferType::COLOR, 0, clearColor);
+		screenFramebuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
+	}
+
+	void Renderer::ThirdPass() const
+	{
+		// Draw skybox after drawn objects
 		{
 			m_backend->SetDepthFunc(DepthFunc::LEQUAL);
 			skyboxShader->Use();
@@ -395,16 +447,15 @@ namespace CGEngine
 			m_backend->SetDepthFunc(DepthFunc::LESS);
 		}
 
-		// Second pass
+		//// Swap to default framebuffer
+		screenFramebuffer->Unbind();
+		m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
+
 		{
-			screenFramebuffer->Unbind();
-
-			m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
-			m_backend->Disable(APICapability::DEPTH_TEST);
-
 			screenShader->Use();
 			{
 				screenTexture->Bind(0);
+				depthTexture->Bind(1);
 				m_backend->Draw(screenQuadVertexArray.get());
 			}
 		}
@@ -451,8 +502,13 @@ namespace CGEngine
 		screenFramebuffer->Unbind();
 	}
 
-	uint32_t Renderer::GetViewportID() const
+	uint32_t Renderer::GetColorTextureID () const
 	{
 		return screenTexture->GetID();
+	}
+
+	uint32_t Renderer::GetDepthTextureID() const
+	{
+		return depthTexture->GetID();
 	}
 }

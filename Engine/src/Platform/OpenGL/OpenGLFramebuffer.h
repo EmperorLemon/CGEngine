@@ -9,7 +9,7 @@ namespace CGEngine::OpenGL
 	class GLFramebuffer final : public Framebuffer
 	{
 	public:
-		explicit GLFramebuffer(BufferTarget target);
+		explicit GLFramebuffer();
 
 		GLFramebuffer(GLFramebuffer&&) noexcept = default;
 		GLFramebuffer(const GLFramebuffer&) noexcept = delete;
@@ -28,18 +28,20 @@ namespace CGEngine::OpenGL
 
 		void Clear(BufferType type, int32_t index, const float* value) const override;
 
+		void DrawBuffer() const override;
+		void ReadBuffer() const override;
+
 		[[nodiscard]] bool CheckStatus() const;
 
 		[[nodiscard]] uint32_t GetID() const override { return m_id; }
 	private:
-		BufferTarget m_target = BufferTarget::NONE;
 		uint32_t m_id = 0;
 	};
 
 	class GLRenderbuffer final : public Renderbuffer
 	{
 	public:
-		explicit GLRenderbuffer(BufferTarget target, FramebufferTextureAttachmentFormat format, int32_t width, int32_t height);
+		explicit GLRenderbuffer(FramebufferTextureAttachmentFormat format, int32_t width, int32_t height);
 
 		GLRenderbuffer(GLRenderbuffer&&) noexcept = default;
 		GLRenderbuffer(const GLRenderbuffer&) noexcept = delete;
@@ -53,7 +55,6 @@ namespace CGEngine::OpenGL
 		[[nodiscard]] uint32_t GetID() const override { return m_id; }
 
 	private:
-		BufferTarget m_target = BufferTarget::NONE;
 		FramebufferTextureAttachmentFormat m_format = FramebufferTextureAttachmentFormat::NONE;
 		uint32_t m_id = 0;
 	};

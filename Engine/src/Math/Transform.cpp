@@ -4,6 +4,11 @@
 
 namespace CGEngine::Math
 {
+	Mat4 Orthographic(const float left, const float right, const float bottom, const float top, const float near, const float far)
+	{
+		return glm::ortho(left, right, bottom, top, near, far);
+	}
+
 	Mat4 Perspective(const float fov, const float aspect, const float near, const float far)
 	{
 		return glm::perspective(fov, aspect, near, far);

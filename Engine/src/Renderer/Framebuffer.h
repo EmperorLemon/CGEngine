@@ -24,6 +24,9 @@ namespace CGEngine
 		virtual void Bind(FramebufferTarget target) const = 0;
 		virtual void Unbind(FramebufferTarget target) const = 0;
 
+		virtual void DrawBuffer() const = 0;
+		virtual void ReadBuffer() const = 0;
+
 		virtual void Clear(BufferType type, int32_t index, const float* value) const = 0;
 
 		[[nodiscard]] virtual uint32_t GetID() const = 0;

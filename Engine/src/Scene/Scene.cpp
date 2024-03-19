@@ -7,13 +7,14 @@
 #include "ECS/Component/DrawObject.h"
 #include "ECS/Component/Instance.h"
 #include "ECS/Component/Light.h"
+#include "ECS/Component/Transform.h"
 
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
 #include "Renderer/Assets/Model.h"
 #include "IO/FileSystem.h"
 
-constexpr int32_t INSTANCE_COUNT = 2;
+constexpr int32_t INSTANCE_COUNT = 1;
 constexpr int32_t    LIGHT_COUNT = 1;
 
 namespace CGEngine

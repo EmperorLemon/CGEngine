@@ -12,7 +12,7 @@ namespace CGEngine
 	void DestroyGUIContext();
 
 	void BeginGUIFrame();
-	void CreateViewport(uint32_t viewportID);
+	void CreateViewport(uint32_t colorID, uint32_t depthID);
 	void CreateEditorWindow(Scene& scene);
 	void EndGUIFrame();
 

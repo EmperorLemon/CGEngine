@@ -4,9 +4,11 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aTangent;
 
-out VS_OUT {
+out VS_OUT 
+{
     vec3 ViewPos;
     vec3 FragPos;
+    vec4 FragLightPos;
     vec3 Normal;
     vec2 TexCoords;
     vec3 Tangent;
@@ -30,22 +32,25 @@ layout (std140, binding = 1) uniform Camera
     vec4 CAMERA_VIEW_POSITION;     // 16               128
 };
 
-layout (std140, binding = 2) uniform Light
-{
-    mat4 LIGHT_PROJECTION_MATRIX;
-    mat4 LIGHT_VIEW_MATRIX;
-};
+//layout (std140, binding = 2) uniform Light
+//{
+//    mat4 LIGHT_TRANSFORM_MATRIX;
+//};
 
+uniform mat4 LIGHT_TRANSFORM_MATRIX;
 uniform mat3 NORMAL_MATRIX;
 
 void main()
 {
     mat4 MODEL_MATRIX = INSTANCE_TRANSFORMS[gl_InstanceID];
 
-    vs_out.ViewPos    = CAMERA_VIEW_POSITION.xyz;
-    vs_out.FragPos    = vec3(MODEL_MATRIX * vec4(aPos, 1.0));
-    vs_out.Normal     = NORMAL_MATRIX * aNormal;
-    vs_out.TexCoords  = aTexCoords;
+    vs_out.ViewPos        = CAMERA_VIEW_POSITION.xyz;
+    vs_out.FragPos        = vec3(MODEL_MATRIX * vec4(aPos, 1.0));
+    vs_out.FragLightPos   = LIGHT_TRANSFORM_MATRIX * vec4(vs_out.FragPos, 1.0);
+
+    vs_out.Normal         = NORMAL_MATRIX * aNormal;
+    vs_out.Tangent        = aTangent;
+    vs_out.TexCoords      = aTexCoords;
 
     gl_Position = CAMERA_PROJECTION_MATRIX * CAMERA_VIEW_MATRIX * MODEL_MATRIX * vec4(aPos, 1.0);
 }

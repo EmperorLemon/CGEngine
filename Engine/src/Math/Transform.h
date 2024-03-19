@@ -7,6 +7,7 @@
 
 namespace CGEngine::Math
 {
+	Mat4 Orthographic(float left, float right, float bottom, float top, float near = 0.1f, float far = 1000.0f);
 	Mat4 Perspective(float fov, float aspect, float near = 0.1f, float far = 1000.0f);
 	Mat4	    View(const Vec3& position, const Vec3& direction, const Vec3& up);
 

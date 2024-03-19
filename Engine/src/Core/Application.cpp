@@ -21,7 +21,7 @@ namespace CGEngine
 
 		m_renderer = std::make_unique<Renderer>(Renderer({ GraphicsAPI::CG_OPENGL_API, m_window }));
 
-		CreateGUIContext(m_window);
+		//CreateGUIContext(m_window);
 	}
 
 	void Application::Run()
@@ -42,26 +42,12 @@ namespace CGEngine
 
 			m_time.Update();
 
-			BeginGUIFrame();
+			//BeginGUIFrame();
 
-			CreateViewport(m_renderer->GetViewportID());
-			CreateEditorWindow(defaultScene);
+			//CreateViewport(m_renderer->GetColorTextureID(), m_renderer->GetDepthTextureID());
+			//CreateEditorWindow(defaultScene);
 
-			EndGUIFrame();
-
-			m_renderer->FirstPass();
-
-			m_renderer->Update(main_camera, m_time);
-
-			{
-				int32_t offset = 0;
-				
-				entities.Iterate<Component::Transform, Component::Instance>([&](const Component::Transform& transform, const Component::Instance& instance)
-				{
-					m_renderer->UpdateInstance(offset, transform);
-					offset++;
-				});
-			}
+			//EndGUIFrame();
 
 			{
 				int32_t offset = 0;
@@ -70,7 +56,7 @@ namespace CGEngine
 				{
 					if (light.type == Component::LightType::DIRECTIONAL_LIGHT)
 						light.direction = Math::Vec4(Math::DegToRad(transform.rotation), 0.0f);
-					else 
+					else
 						light.direction = Math::Vec4(transform.position, 0.0f);
 
 					m_renderer->UpdateLight(offset, light);
@@ -78,14 +64,37 @@ namespace CGEngine
 				});
 			}
 
-			entities.Iterate<Component::DrawObject>([&](const Component::DrawObject& object)
+			m_renderer->Update(main_camera, m_time);
+
 			{
-				m_renderer->RenderPrimitive(object);
+				int32_t offset = 0;
+
+				entities.Iterate<Component::Transform, Component::Instance>([&](const Component::Transform& transform, const Component::Instance& instance)
+				{
+					m_renderer->UpdateInstance(offset, transform);
+					offset++;
+				});
+			}
+
+			m_renderer->FirstPass();
+
+			entities.Iterate<Component::DrawObject>([&](const Component::DrawObject& drawObject)
+			{
+				m_renderer->RenderPrimitive(drawObject);
 			});
 
 			m_renderer->SecondPass();
 
-			DrawGUI();
+			m_renderer->Update(main_camera, m_time);
+
+			entities.Iterate<Component::DrawObject>([&](const Component::DrawObject& drawObject)
+			{
+				m_renderer->RenderPrimitive(drawObject);
+			});
+
+			m_renderer->ThirdPass();
+
+			//DrawGUI();
 
 			m_renderer->PostRender();
 		}
@@ -117,7 +126,7 @@ namespace CGEngine
 
 	void Application::Quit() const
 	{
-		DestroyGUIContext();
+		//DestroyGUIContext();
 		DestroyWindow(m_window);
 	}
 }

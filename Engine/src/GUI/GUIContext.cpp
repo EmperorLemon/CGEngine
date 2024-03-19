@@ -195,12 +195,12 @@ namespace CGEngine
 		}
 	}
 
-	void CreateViewport(const uint32_t viewportID)
+	void CreateViewport(const uint32_t colorID, const uint32_t depthID)
 	{
 		CreateDockSpace();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport");
+		ImGui::Begin("Viewport Color");
 
 		const auto& viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		const auto& viewportMaxRegion = ImGui::GetWindowContentRegionMax();
@@ -214,12 +214,20 @@ namespace CGEngine
 
 		const auto& viewportSize = ImGui::GetContentRegionAvail();
 
-		ImGui::Image(reinterpret_cast<ImTextureID>(viewportID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(reinterpret_cast<ImTextureID>(colorID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
 
 		ImGuizmo::SetRect(viewportBounds[0].x, viewportBounds[0].y, viewportBounds[1].x - viewportBounds[0].x, viewportBounds[1].y - viewportBounds[0].y);
+
+		ImGui::End();
+		ImGui::PopStyleVar();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+		ImGui::Begin("Viewport Depth");
+
+		ImGui::Image(reinterpret_cast<ImTextureID>(depthID), ImVec2(1024, 1024), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 		ImGui::End();
 		ImGui::PopStyleVar();
@@ -292,7 +300,6 @@ namespace CGEngine
 		}
 
 		ImGui::End();
-
 		ImGui::End();
 	}
 
