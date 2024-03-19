@@ -70,6 +70,11 @@ namespace CGEngine::OpenGL
 		glClearColor(rgba[0], rgba[1], rgba[2], rgba[3]);
 	}
 
+	void OpenGLAPI::ClearColor(const float r, const float g, const float b, const float a)
+	{
+		glClearColor(r, g, b, a);
+	}
+
 	void OpenGLAPI::ResizeViewport(const int32_t x, const int32_t y, const int32_t width, const int32_t height)
 	{
 		glViewport(x, y, width, height);

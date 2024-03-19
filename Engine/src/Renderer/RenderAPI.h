@@ -27,6 +27,7 @@ namespace CGEngine
 
 		virtual void Clear(BufferMask mask) = 0;
 		virtual void ClearColor(const float* rgba) = 0;
+		virtual void ClearColor(float r, float g, float b, float a) = 0;
 
 		virtual void Draw(const VertexArray* vertexArrayPtr) const = 0;
 

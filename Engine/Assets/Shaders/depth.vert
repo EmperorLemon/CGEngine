@@ -6,7 +6,10 @@ layout (std430, binding = 0) buffer  Instance
     mat4 INSTANCE_TRANSFORMS[];
 };
 
-uniform mat4 LIGHT_TRANSFORM_MATRIX;
+layout (std140, binding = 2) uniform Shadow
+{
+	mat4 LIGHT_TRANSFORM_MATRIX;
+};
 
 void main()
 {

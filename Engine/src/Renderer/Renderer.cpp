@@ -49,6 +49,7 @@ namespace CGEngine
 	std::shared_ptr<OpenGL::GLBuffer>		shaderStorageBuffer = nullptr;
 	std::shared_ptr<OpenGL::GLBuffer>       cameraUniformBuffer = nullptr;
 	std::shared_ptr<OpenGL::GLBuffer>		lightUniformBuffer  = nullptr;
+	std::shared_ptr<OpenGL::GLBuffer>		shadowUniformBuffer = nullptr;
 
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
@@ -57,6 +58,8 @@ namespace CGEngine
 
 	constexpr uint32_t SHADOW_WIDTH  = 1024;
 	constexpr uint32_t SHADOW_HEIGHT = 1024;
+
+	const Math::Mat4 LIGHT_PROJECTION = Math::Orthographic(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 8.0f);
 
 	std::vector QUAD_VERTICES =
 	{
@@ -153,7 +156,7 @@ namespace CGEngine
 			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::REPEAT);
 			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::REPEAT);
 
-			depthTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::DEPTH32F, SHADOW_WIDTH, SHADOW_HEIGHT, layout);
+			depthTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::DEPTH24, SHADOW_WIDTH, SHADOW_HEIGHT, layout);
 
 			depthFramebuffer = std::make_shared<OpenGL::GLFramebuffer>();
 			depthFramebuffer->AttachTexture(FramebufferTextureAttachment::DEPTH_ATTACHMENT, depthTexture->GetID());
@@ -265,6 +268,11 @@ namespace CGEngine
 			cameraUniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, camera_buffer_size, nullptr);
 			cameraUniformBuffer->BindBufferBase(1);
 
+			constexpr size_t shadow_buffer_size = sizeof(Math::Mat4);
+
+			shadowUniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, shadow_buffer_size, nullptr);
+			shadowUniformBuffer->BindBufferBase(2);
+
 			constexpr size_t light_buffer_size = sizeof(uint32_t) + MAX_NUM_LIGHTS * sizeof(Component::Light);
 
 			lightUniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, light_buffer_size, nullptr);
@@ -300,8 +308,12 @@ namespace CGEngine
 			cameraUniformBuffer->SetSubData(sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(camera.view));
 			cameraUniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Math::Vec4), Math::ToArray(Math::Vec4(camera.position, 0.0)));
 
+			const auto& light_view = Math::View(Math::Vec3(0.0f), Math::Vec3(0.0f), Math::Vec3(0.0f, 1.0f, 0.0f));
+
+			shadowUniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(LIGHT_PROJECTION * light_view));
+
 			constexpr uint32_t num_lights = 0;
-			const std::vector default_lights(MAX_NUM_LIGHTS, Component::Light());
+			const std::vector default_lights(MAX_NUM_LIGHTS, Component::Light(Math::Vec4(0.0f, 0.5f, 5.0f, 0.0f)));
 
 			lightUniformBuffer->SetSubData(0, MAX_NUM_LIGHTS * sizeof(Component::Light), default_lights.data());
 			lightUniformBuffer->SetSubData(MAX_NUM_LIGHTS * sizeof(Component::Light), sizeof(uint32_t), &num_lights);
@@ -320,28 +332,12 @@ namespace CGEngine
 			//shader->BindUniform("material.baseOcclusionSampler", OpenGL::UniformType::INT, &occlusion_texture_sampler);
 			defaultShader->BindUniform("shadowMapSampler", OpenGL::UniformType::INT, &shadow_map_sampler);
 
-			constexpr float near_plane = 1.0f;
-			constexpr float far_plane = 12.5f;
-
-			const auto& lightProjection = Math::Orthographic(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-			const auto& lightView = Math::View(Math::Vec3(0.0f, 0.0f, 5.0f), Math::Vec3(0.0f), Math::Vec3(0.0, 1.0, 0.0));
-
-			defaultShader->BindUniform("LIGHT_TRANSFORM_MATRIX", OpenGL::UniformType::MAT4, Math::ToArray(lightProjection * lightView));
-
 			defaultShader->Disable();
 		}
 
 		// Shadow shader setup
 		{
 			depthShader->Use();
-
-			constexpr float near_plane = 1.0f;
-			constexpr float far_plane = 12.5f;
-
-			const auto& lightProjection = Math::Orthographic(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-			const auto& lightView = Math::View(Math::Vec3(0.0f, 0.0f, 5.0f), Math::Vec3(0.0f), Math::Vec3(0.0, 1.0, 0.0));
-
-			depthShader->BindUniform("LIGHT_TRANSFORM_MATRIX", OpenGL::UniformType::MAT4, Math::ToArray(lightProjection * lightView));
 
 			depthShader->Disable();
 		}
@@ -351,9 +347,7 @@ namespace CGEngine
 			screenShader->Use();
 
 			constexpr int screen_color_texture_sampler = 0;
-			//constexpr int screen_depth_texture_sampler = 1;
 			screenShader->BindUniform("screenColorSampler", OpenGL::UniformType::INT, &screen_color_texture_sampler);
-			//screenShader->BindUniform("screenDepthSampler", OpenGL::UniformType::INT, &screen_depth_texture_sampler);
 
 			screenShader->Disable();
 		}
@@ -377,7 +371,9 @@ namespace CGEngine
 
 	void Renderer::UpdateInstance(const int32_t offset, const Component::Transform& transform) const
 	{
-		shaderStorageBuffer->SetSubData(offset * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(transform.model));
+		const auto model = GetModelMatrix(transform);
+
+		shaderStorageBuffer->SetSubData(offset * sizeof(Math::Mat4), sizeof(Math::Mat4), Math::ToArray(model));
 		//defaultShader->BindUniform("NORMAL_MATRIX", OpenGL::UniformType::MAT3, Math::ToArray(Math::Mat3(Math::Inverse(transform.model))), true);
 	}
 
@@ -387,6 +383,9 @@ namespace CGEngine
 
 		lightUniformBuffer->SetSubData(offset * sizeof(Component::Light), sizeof(Component::Light), &light);
 		lightUniformBuffer->SetSubData(MAX_NUM_LIGHTS * sizeof(Component::Light), sizeof(uint32_t), &num_lights);
+
+		const auto& light_view = Math::View(Math::Vec3(light.direction.x, light.direction.y, light.direction.z), Math::Vec3(0.0f), Math::Vec3(0.0f, 1.0f, 0.0f));
+		shadowUniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(LIGHT_PROJECTION * light_view));
 	}
 
 	void Renderer::RenderPrimitive(const Component::DrawObject& primitive) const
@@ -407,13 +406,15 @@ namespace CGEngine
 
 	void Renderer::FirstPass() const
 	{
+		m_backend->ClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		m_backend->Clear(BufferMask::COLOR_DEPTH_BUFFER_BIT);
+
 		depthShader->Use();
 
 		m_backend->ResizeViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		depthFramebuffer->Bind();
 
-		constexpr float clearDepth = 1.0f;
-		depthFramebuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
+		m_backend->Clear(BufferMask::DEPTH_BUFFER_BIT);
 	}
 
 	void Renderer::SecondPass() const
@@ -425,40 +426,40 @@ namespace CGEngine
 		m_backend->ResizeViewport(0, 0, m_window.width, m_window.height);
 		m_backend->Clear(BufferMask::COLOR_DEPTH_BUFFER_BIT);
 
-		screenFramebuffer->Bind();
+		//screenFramebuffer->Bind();
 
-		constexpr float clearColor[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
-		constexpr float clearDepth = 1.0f;
+		//constexpr float clearColor[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
+		//constexpr float clearDepth = 1.0f;
 
-		screenFramebuffer->Clear(BufferType::COLOR, 0, clearColor);
-		screenFramebuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
+		//screenFramebuffer->Clear(BufferType::COLOR, 0, clearColor);
+		//screenFramebuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
 	}
 
 	void Renderer::ThirdPass() const
 	{
-		// Draw skybox after drawn objects
-		{
-			m_backend->SetDepthFunc(DepthFunc::LEQUAL);
-			skyboxShader->Use();
-			{
-				skyboxTexture->Bind(0);
-				m_backend->Draw(skyboxVertexArray.get());
-			}
-			m_backend->SetDepthFunc(DepthFunc::LESS);
-		}
+		//// Draw skybox after drawn objects
+		//{
+		//	m_backend->SetDepthFunc(DepthFunc::LEQUAL);
+		//	skyboxShader->Use();
+		//	{
+		//		skyboxTexture->Bind(0);
+		//		m_backend->Draw(skyboxVertexArray.get());
+		//	}
+		//	m_backend->SetDepthFunc(DepthFunc::LESS);
+		//}
 
 		//// Swap to default framebuffer
-		screenFramebuffer->Unbind();
-		m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
+		//screenFramebuffer->Unbind();
+		//m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
 
-		{
-			screenShader->Use();
-			{
-				screenTexture->Bind(0);
-				depthTexture->Bind(1);
-				m_backend->Draw(screenQuadVertexArray.get());
-			}
-		}
+		//{
+		//	screenShader->Use();
+		//	{
+		//		screenTexture->Bind(0);
+		//		depthTexture->Bind(1);
+		//		m_backend->Draw(screenQuadVertexArray.get());
+		//	}
+		//}
 	}
 
 	void Renderer::PostRender() const

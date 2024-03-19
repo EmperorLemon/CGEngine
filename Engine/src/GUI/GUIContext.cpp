@@ -31,6 +31,8 @@ namespace CGEngine
 	static bool viewportFocused = false;
 	static bool viewportHovered = false;
 
+	static bool useDockSpace = false;
+
 	void CreateGUIContext(const Window& window)
 	{
 		IMGUI_CHECKVERSION();
@@ -48,6 +50,8 @@ namespace CGEngine
 
 	static void CreateDockSpace()
 	{
+		useDockSpace = true;
+
 		static bool dockspaceOpen = true;
 		static bool fullscreen_cond = true;
 		const bool fullscreen = fullscreen_cond;
@@ -197,35 +201,35 @@ namespace CGEngine
 
 	void CreateViewport(const uint32_t colorID, const uint32_t depthID)
 	{
-		CreateDockSpace();
+		//CreateDockSpace();
+
+		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+		//ImGui::Begin("Viewport Color");
+
+		//const auto& viewportMinRegion = ImGui::GetWindowContentRegionMin();
+		//const auto& viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+		//const auto& viewportOffset = ImGui::GetWindowPos();
+
+		//viewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+		//viewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
+
+		//viewportFocused = ImGui::IsWindowFocused();
+		//viewportHovered = ImGui::IsWindowHovered();
+
+		//const auto& viewportSize = ImGui::GetContentRegionAvail();
+
+		//ImGui::Image(reinterpret_cast<ImTextureID>(colorID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+
+		//ImGuizmo::SetOrthographic(false);
+		//ImGuizmo::SetDrawlist();
+
+		//ImGuizmo::SetRect(viewportBounds[0].x, viewportBounds[0].y, viewportBounds[1].x - viewportBounds[0].x, viewportBounds[1].y - viewportBounds[0].y);
+
+		//ImGui::End();
+		//ImGui::PopStyleVar();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport Color");
-
-		const auto& viewportMinRegion = ImGui::GetWindowContentRegionMin();
-		const auto& viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-		const auto& viewportOffset = ImGui::GetWindowPos();
-
-		viewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-		viewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
-
-		viewportFocused = ImGui::IsWindowFocused();
-		viewportHovered = ImGui::IsWindowHovered();
-
-		const auto& viewportSize = ImGui::GetContentRegionAvail();
-
-		ImGui::Image(reinterpret_cast<ImTextureID>(colorID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
-
-		ImGuizmo::SetOrthographic(false);
-		ImGuizmo::SetDrawlist();
-
-		ImGuizmo::SetRect(viewportBounds[0].x, viewportBounds[0].y, viewportBounds[1].x - viewportBounds[0].x, viewportBounds[1].y - viewportBounds[0].y);
-
-		ImGui::End();
-		ImGui::PopStyleVar();
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport Depth");
+		ImGui::Begin("Depth");
 
 		ImGui::Image(reinterpret_cast<ImTextureID>(depthID), ImVec2(1024, 1024), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -300,7 +304,9 @@ namespace CGEngine
 		}
 
 		ImGui::End();
-		ImGui::End();
+
+		if (useDockSpace)
+			ImGui::End();
 	}
 
 	void EndGUIFrame()

@@ -21,7 +21,7 @@ namespace CGEngine
 
 		m_renderer = std::make_unique<Renderer>(Renderer({ GraphicsAPI::CG_OPENGL_API, m_window }));
 
-		//CreateGUIContext(m_window);
+		CreateGUIContext(m_window);
 	}
 
 	void Application::Run()
@@ -42,12 +42,12 @@ namespace CGEngine
 
 			m_time.Update();
 
-			//BeginGUIFrame();
+			BeginGUIFrame();
 
-			//CreateViewport(m_renderer->GetColorTextureID(), m_renderer->GetDepthTextureID());
-			//CreateEditorWindow(defaultScene);
+			CreateViewport(m_renderer->GetColorTextureID(), m_renderer->GetDepthTextureID());
+			CreateEditorWindow(defaultScene);
 
-			//EndGUIFrame();
+			EndGUIFrame();
 
 			{
 				int32_t offset = 0;
@@ -94,7 +94,7 @@ namespace CGEngine
 
 			m_renderer->ThirdPass();
 
-			//DrawGUI();
+			DrawGUI();
 
 			m_renderer->PostRender();
 		}
@@ -126,7 +126,7 @@ namespace CGEngine
 
 	void Application::Quit() const
 	{
-		//DestroyGUIContext();
+		DestroyGUIContext();
 		DestroyWindow(m_window);
 	}
 }

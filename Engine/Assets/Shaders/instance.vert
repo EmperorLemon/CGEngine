@@ -32,12 +32,11 @@ layout (std140, binding = 1) uniform Camera
     vec4 CAMERA_VIEW_POSITION;     // 16               128
 };
 
-//layout (std140, binding = 2) uniform Light
-//{
-//    mat4 LIGHT_TRANSFORM_MATRIX;
-//};
+layout (std140, binding = 2) uniform Shadow
+{
+	mat4 LIGHT_TRANSFORM_MATRIX;
+};
 
-uniform mat4 LIGHT_TRANSFORM_MATRIX;
 uniform mat3 NORMAL_MATRIX;
 
 void main()
