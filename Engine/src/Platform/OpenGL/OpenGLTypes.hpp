@@ -136,8 +136,9 @@ namespace CGEngine::OpenGL
 		case FramebufferTextureAttachmentFormat::NONE:				return 0;
 		case FramebufferTextureAttachmentFormat::DEPTH16:			return GL_DEPTH_COMPONENT16;
 		case FramebufferTextureAttachmentFormat::DEPTH24:			return GL_DEPTH_COMPONENT24;
+		case FramebufferTextureAttachmentFormat::DEPTH32:			return GL_DEPTH_COMPONENT32;
 		case FramebufferTextureAttachmentFormat::DEPTH32F:			return GL_DEPTH_COMPONENT32F;
-		case FramebufferTextureAttachmentFormat::STENCIL8:			return GL_STENCIL_INDEX8;
+		case FramebufferTextureAttachmentFormat::STENCIL_INDEX8:	return GL_STENCIL_INDEX8;
 		case FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8:	return GL_DEPTH24_STENCIL8;
 		case FramebufferTextureAttachmentFormat::DEPTH32F_STENCIL8: return GL_DEPTH32F_STENCIL8;
 		}

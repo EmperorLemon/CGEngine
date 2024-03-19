@@ -29,6 +29,10 @@ namespace CGEngine
 
 	std::shared_ptr<OpenGL::GLShader> shader = nullptr;
 
+	std::shared_ptr<OpenGL::GLShader>		shadowShader = nullptr;
+	std::shared_ptr<OpenGL::GLTexture>		depthTexture = nullptr;
+	std::shared_ptr<OpenGL::GLFramebuffer>  depthFramebuffer = nullptr;
+
 	std::shared_ptr<OpenGL::GLShader>	    screenShader		   = nullptr;
 	std::shared_ptr<OpenGL::GLTexture>	    screenTexture		   = nullptr;
 	std::shared_ptr<OpenGL::GLFramebuffer>  screenFramebuffer	   = nullptr;
@@ -36,10 +40,6 @@ namespace CGEngine
 
 	std::shared_ptr<OpenGL::GLBuffer>       screenQuadVertexBuffer = nullptr;
 	std::shared_ptr<OpenGL::GLVertexArray>  screenQuadVertexArray  = nullptr;
-
-	std::shared_ptr<OpenGL::GLShader>		depthShader = nullptr;
-	std::shared_ptr<OpenGL::GLTexture>		depthTexture = nullptr;
-	std::shared_ptr<OpenGL::GLFramebuffer>  depthFramebuffer = nullptr;
 
 	std::shared_ptr<OpenGL::GLShader>       skyboxShader       = nullptr;
 	std::shared_ptr<OpenGL::GLTexture>	    skyboxTexture	   = nullptr;
@@ -137,6 +137,23 @@ namespace CGEngine
 			shader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
 		}
 
+		// Shadow map setup
+		{
+			TextureLayout layout;
+
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::NEAREST);
+			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::NEAREST);
+			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::REPEAT);
+			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::REPEAT);
+
+			depthTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::DEPTH24, width, height, layout);
+
+			depthFramebuffer = std::make_shared<OpenGL::GLFramebuffer>(BufferTarget::FRAMEBUFFER);
+			depthFramebuffer->AttachTexture(FramebufferTextureAttachment::DEPTH_ATTACHMENT, depthTexture->GetID());
+
+			if (!depthFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
+		}
+
 		// Screen quad setup
 		{
 			std::string vert_src, frag_src;
@@ -167,18 +184,15 @@ namespace CGEngine
 			screenQuadVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
 			screenQuadVertexArray = std::make_shared<OpenGL::GLVertexArray>(screenQuadVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
 			screenQuadVertexArray->SetDrawType(DrawType::DRAW_ARRAYS);
-		}
 
-		// Depth buffer setup
-		{
-			TextureLayout layout;
+			screenFramebuffer = std::make_shared<OpenGL::GLFramebuffer>(BufferTarget::FRAMEBUFFER);
+			screenFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, screenTexture->GetID());
+			screenFramebuffer->AttachTexture(FramebufferTextureAttachment::DEPTH_ATTACHMENT, depthTexture->GetID());
 
-			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::NEAREST);
-			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::NEAREST);
-			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::REPEAT);
-			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::REPEAT);
+			screenRenderbuffer = std::make_shared<OpenGL::GLRenderbuffer>(BufferTarget::RENDERBUFFER, FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8, width, height);
+			screenFramebuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_STENCIL_ATTACHMENT, screenRenderbuffer->GetID());
 
-			depthTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::DEPTH24, SHADOW_WIDTH, SHADOW_HEIGHT, layout);
+			if (!screenFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
 		}
 
 		// Skybox setup
@@ -247,18 +261,6 @@ namespace CGEngine
 
 			lightUniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, light_buffer_size, nullptr);
 			lightUniformBuffer->BindBufferBase(3);
-		}
-
-		// Framebuffer setup
-		{
-			screenFramebuffer = std::make_shared<OpenGL::GLFramebuffer>(BufferTarget::FRAMEBUFFER);
-			screenFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, screenTexture->GetID());
-			screenFramebuffer->AttachTexture(FramebufferTextureAttachment::DEPTH_ATTACHMENT, depthTexture->GetID());
-
-			screenRenderbuffer = std::make_shared<OpenGL::GLRenderbuffer>(BufferTarget::RENDERBUFFER, FramebufferTextureAttachmentFormat::STENCIL8, width, height);
-			screenFramebuffer->AttachRenderbuffer(FramebufferTextureAttachment::STENCIL_ATTACHMENT, screenRenderbuffer->GetID());
-
-			if (!screenFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
 		}
 	}
 
@@ -335,14 +337,14 @@ namespace CGEngine
 
 	void Renderer::FirstPass() const
 	{
-		//screenFramebuffer->Bind();
+		screenFramebuffer->Bind();
 
-		//constexpr float clearColor[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
-		//constexpr float clearDepth = 1.0f;
-		//screenFramebuffer->Clear(BufferType::COLOR, 0, clearColor);
-		//screenFramebuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
+		constexpr float clearColor[4] = { 0.2f, 0.45f, 0.55f, 1.0f };
+		constexpr float clearDepth = 1.0f;
+		screenFramebuffer->Clear(BufferType::COLOR, 0, clearColor);
+		screenFramebuffer->Clear(BufferType::DEPTH, 0, &clearDepth);
 
-		//m_backend->Enable(APICapability::DEPTH_TEST);
+		m_backend->Enable(APICapability::DEPTH_TEST);
 	}
 
 	void Renderer::Update(const Camera& camera, const Time& time) const
@@ -393,19 +395,19 @@ namespace CGEngine
 			m_backend->SetDepthFunc(DepthFunc::LESS);
 		}
 
-		//// Second pass
-		//{
-		//	screenFramebuffer->Unbind();
+		// Second pass
+		{
+			screenFramebuffer->Unbind();
 
-		//	m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
-		//	m_backend->Disable(APICapability::DEPTH_TEST);
+			m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
+			m_backend->Disable(APICapability::DEPTH_TEST);
 
-		//	screenShader->Use();
-		//	{
-		//		screenTexture->Bind(0);
-		//		m_backend->Draw(screenQuadVertexArray.get());
-		//	}
-		//}
+			screenShader->Use();
+			{
+				screenTexture->Bind(0);
+				m_backend->Draw(screenQuadVertexArray.get());
+			}
+		}
 	}
 
 	void Renderer::PostRender() const
@@ -436,11 +438,11 @@ namespace CGEngine
 		TextureLayout layout;
 
 		const auto& resizedScreenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8, width, height, layout);
-		//screenRenderbuffer->ResizeBuffer(width, height);
+		screenRenderbuffer->ResizeBuffer(width, height);
 
 		screenFramebuffer->Bind();
 		screenFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, resizedScreenTexture->GetID());
-		//screenFramebuffer->AttachRenderbuffer(FramebufferTextureAttachment::STENCIL_ATTACHMENT, screenRenderbuffer->GetID());
+		screenFramebuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_STENCIL_ATTACHMENT, screenRenderbuffer->GetID());
 
 		if (!screenFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
 
