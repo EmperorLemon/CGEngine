@@ -9,7 +9,7 @@
 #include "ECS/Component/Light.h"
 #include "ECS/Component/Transform.h"
 
-#include "Platform/OpenGL/OpenGLBuffer.h"
+#include "Renderer/Buffer.h"
 
 #include "Renderer/Assets/Model.h"
 #include "IO/FileSystem.h"

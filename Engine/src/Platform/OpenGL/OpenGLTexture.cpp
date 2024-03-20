@@ -10,12 +10,19 @@ namespace CGEngine::OpenGL
 		switch (pixelFormat)
 		{
 		case PixelFormat::NONE:			return TextureFormat::NONE;
-		case PixelFormat::R8:			return TextureFormat::RED;
-		case PixelFormat::RG8:			return TextureFormat::RG;
-		case PixelFormat::RGB:
+		case PixelFormat::R8:			
+		case PixelFormat::R16F:			
+		case PixelFormat::R32F:			return TextureFormat::RED;
+		case PixelFormat::RG8:			
+		case PixelFormat::RG16F:		
+		case PixelFormat::RG32F:		return TextureFormat::RG;
 		case PixelFormat::RGB8:
+		case PixelFormat::RGB16F:
+		case PixelFormat::RGB32F:
 		case PixelFormat::SRGB8:		return TextureFormat::RGB;
 		case PixelFormat::RGBA8:
+		case PixelFormat::RGBA16F:
+		case PixelFormat::RGBA32F:
 		case PixelFormat::SRGB8_ALPHA8: return TextureFormat::RGBA;
 		case PixelFormat::DEPTH16:		
 		case PixelFormat::DEPTH24:		

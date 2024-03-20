@@ -13,6 +13,7 @@
 
 #include "ECS/Entity/Entity.hpp"
 
+#include "ECS/Component/DrawObject.h"
 #include "ECS/Component/Light.h"
 #include "ECS/Component/Tag.h"
 #include "ECS/Component/Transform.h"
@@ -153,6 +154,11 @@ namespace CGEngine
 		ImGui::Spacing();
 	}
 
+	static void EditDrawObject(Component::DrawObject& drawObject)
+	{
+		ImGui::SeparatorText("Draw Object");
+	}
+
 	static void EditLight(Component::Light& light)
 	{
 		ImGui::SeparatorText("Light");
@@ -286,6 +292,13 @@ namespace CGEngine
 							ImGui::PushID(tag.guid.str().c_str());
 
 							EditTransform(tag.type != Component::EntityType::LIGHT ? true : false, transform, camera);
+
+							//if (entity.HasComponent<Component::DrawObject>())
+							//{
+							//	auto& drawObject = entity.GetComponent<Component::DrawObject>();
+
+							//	EditDrawObject(drawObject);
+							//}
 
 							if (entity.HasComponent<Component::Light>())
 							{

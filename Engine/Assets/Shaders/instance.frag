@@ -20,13 +20,17 @@ in VS_OUT {
 
 struct Material
 {
-    vec4 albedo;
-    sampler2D baseAlbedoSampler;
-    sampler2D baseNormalSampler;
-    sampler2D baseOcclusionSampler;
+    vec4  albedo;
     float metallicFactor;
     float roughnessFactor;
+
+    vec2 uv_scale;
+    vec2 uv_offset;
 };
+
+uniform sampler2D baseAlbedoSampler;
+uniform sampler2D baseNormalSampler;
+uniform sampler2D baseOcclusionSampler;
 
 struct Light
 {
@@ -146,9 +150,9 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
 
 void main()
 {
-    vec4 baseColorTexture     = texture(material.baseAlbedoSampler, fs_in.TexCoords);
-    vec4 baseNormalTexture    = texture(material.baseNormalSampler, fs_in.TexCoords);
-    vec4 baseOcclusionTexture = texture(material.baseOcclusionSampler, fs_in.TexCoords);
+    vec4 baseColorTexture     = texture(baseAlbedoSampler, fs_in.TexCoords * material.uv_scale + material.uv_offset);
+    vec4 baseNormalTexture    = texture(baseNormalSampler, fs_in.TexCoords * material.uv_scale + material.uv_offset);
+    vec4 baseOcclusionTexture = texture(baseOcclusionSampler, fs_in.TexCoords * material.uv_scale + material.uv_offset);
 
     vec3 albedo = baseColorTexture.rgb;
     // Transform normal vector to range [-1, 1]

@@ -45,8 +45,7 @@ void main()
     vs_out.FragPos        = vec3(MODEL_MATRIX * vec4(aPos, 1.0));
     vs_out.FragLightPos   = LIGHT_TRANSFORM_MATRIX * vec4(vs_out.FragPos, 1.0);
     
-    //vs_out.Normal         = transpose(inverse(mat3(MODEL_MATRIX))) * aNormal;
-    vs_out.Normal         = aNormal;
+    vs_out.Normal         = transpose(inverse(mat3(MODEL_MATRIX))) * aNormal;
     vs_out.TexCoords      = aTexCoords;
 
     vec3 T = normalize(vec3(MODEL_MATRIX * vec4(aTangent, 0.0)));

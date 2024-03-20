@@ -180,10 +180,17 @@ namespace CGEngine::OpenGL
 		{
 		case PixelFormat::NONE:			return GL_NONE;
 		case PixelFormat::R8:			return GL_R8;
+		case PixelFormat::R16F:			return GL_R16F;
+		case PixelFormat::R32F:			return GL_R32F;
 		case PixelFormat::RG8:			return GL_RG8;
-		case PixelFormat::RGB:			return GL_RGB;
+		case PixelFormat::RG16F:		return GL_RG16F;
+		case PixelFormat::RG32F:		return GL_RG32F;
 		case PixelFormat::RGB8:			return GL_RGB8;
+		case PixelFormat::RGB16F:		return GL_RGB16F;
+		case PixelFormat::RGB32F:		return GL_RGB32F;
 		case PixelFormat::RGBA8:		return GL_RGBA8;
+		case PixelFormat::RGBA16F:		return GL_RGBA16F;
+		case PixelFormat::RGBA32F:		return GL_RGBA32F;
 		case PixelFormat::SRGB8:		return GL_SRGB8;
 		case PixelFormat::SRGB8_ALPHA8: return GL_SRGB8_ALPHA8;
 		case PixelFormat::DEPTH16:		return GL_DEPTH_COMPONENT16;

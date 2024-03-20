@@ -69,7 +69,7 @@ namespace CGEngine
 			{
 				int32_t offset = 0;
 
-				entities.Iterate<Component::Transform, Component::Instance>([&](const Component::Transform& transform, const Component::Instance& instance)
+				entities.Iterate<Component::Transform, Component::Instance>([&](const Component::Transform& transform, const Component::Instance& instance [[maybe_unused]] )
 				{
 					m_renderer->UpdateInstance(offset, transform);
 					offset++;

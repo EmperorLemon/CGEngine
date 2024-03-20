@@ -56,8 +56,8 @@ namespace CGEngine
 	constexpr uint32_t MAX_NUM_LIGHTS = 10;
 	constexpr uint32_t MAX_NUM_INSTANCES = 10;
 
-	constexpr uint32_t SHADOW_WIDTH  = 2048;
-	constexpr uint32_t SHADOW_HEIGHT = 2048;
+	constexpr uint32_t SHADOW_WIDTH  = 4096;
+	constexpr uint32_t SHADOW_HEIGHT = 4096;
 
 	const Math::Mat4 LIGHT_PROJECTION = Math::Orthographic(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 10.0f);
 
@@ -183,7 +183,7 @@ namespace CGEngine
 			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR_MIPMAP_LINEAR);
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
-			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, layout);
+			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
 
 			Assets::Mesh mesh;
 
@@ -331,10 +331,13 @@ namespace CGEngine
 			constexpr int normal_texture_sampler = 1;
 			constexpr int occlusion_texture_sampler = 2;
 			constexpr int shadow_map_sampler = 3;
-			defaultShader->BindUniform("material.baseAlbedoSampler", OpenGL::UniformType::INT, &albedo_texture_sampler);
-			defaultShader->BindUniform("material.baseNormalSampler", OpenGL::UniformType::INT, &normal_texture_sampler);
-			//shader->BindUniform("material.baseOcclusionSampler", OpenGL::UniformType::INT, &occlusion_texture_sampler);
+			defaultShader->BindUniform("baseAlbedoSampler", OpenGL::UniformType::INT, &albedo_texture_sampler);
+			defaultShader->BindUniform("baseNormalSampler", OpenGL::UniformType::INT, &normal_texture_sampler);
+			//defaultShader->BindUniform("baseOcclusionSampler", OpenGL::UniformType::INT, &occlusion_texture_sampler);
 			defaultShader->BindUniform("shadowMapSampler", OpenGL::UniformType::INT, &shadow_map_sampler);
+
+			defaultShader->BindUniform("material.uv_scale",  OpenGL::UniformType::VEC2, Math::ToArray(Math::Vec2(1.0f)));
+			defaultShader->BindUniform("material.uv_offset", OpenGL::UniformType::VEC2, Math::ToArray(Math::Vec2(0.0f)));
 
 			defaultShader->Disable();
 		}
@@ -350,8 +353,8 @@ namespace CGEngine
 		{
 			screenShader->Use();
 
-			constexpr int screen_color_texture_sampler = 0;
-			screenShader->BindUniform("screenColorSampler", OpenGL::UniformType::INT, &screen_color_texture_sampler);
+			constexpr int HDR_color_texture_sampler = 0;
+			screenShader->BindUniform("HDRColorSampler", OpenGL::UniformType::INT, &HDR_color_texture_sampler);
 
 			screenShader->Disable();
 		}
@@ -398,6 +401,12 @@ namespace CGEngine
 	void Renderer::RenderPrimitive(const Component::DrawObject& primitive) const
 	{
 		int32_t unit = 0;
+
+		for (const auto& material : primitive.materials)
+		{
+			defaultShader->BindUniform("material.uv_scale",  OpenGL::UniformType::VEC2, Math::ToArray(material.uv_scale));
+			defaultShader->BindUniform("material.uv_offset", OpenGL::UniformType::VEC2, Math::ToArray(material.uv_offset));
+		}
 
 		for (const auto& texture : primitive.textures)
 		{
@@ -495,7 +504,7 @@ namespace CGEngine
 	{
 		TextureLayout layout;
 
-		const auto& resizedScreenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, layout);
+		const auto& resizedScreenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
 		screenRenderbuffer->ResizeBuffer(width, height);
 
 		screenFramebuffer->Bind();
