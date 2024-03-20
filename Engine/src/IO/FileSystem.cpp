@@ -22,7 +22,9 @@ namespace CGEngine::IO
 
 		stbi_set_flip_vertically_on_load(flip);
 
-		const auto pixels = stbi_load(filepath.data(), &width, &height, &channels, 0);
+		const auto pixels = stbi_load(filepath.data(), &width, &height, &channels, 4);
+
+		channels = 4;
 
 		if (!pixels)
 		{

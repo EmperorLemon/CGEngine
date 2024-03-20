@@ -3,13 +3,14 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aTangent;
-layout (location = 4) in vec3 aBitangent;
 
 out VS_OUT 
 {
     vec3 FragPos;
+    vec4 FragLightPos;
+    vec3 Normal;
     vec2 TexCoords;
-    vec4 TangentLightPos;
+    mat3 TBN;
     vec3 TangentViewPos;
     vec3 TangentFragPos;
 } vs_out;
@@ -42,7 +43,10 @@ void main()
     mat4 MODEL_MATRIX = INSTANCE_TRANSFORMS[gl_InstanceID];
 
     vs_out.FragPos        = vec3(MODEL_MATRIX * vec4(aPos, 1.0));
-    //vs_out.Normal       = transpose(inverse(mat3(MODEL_MATRIX))) * aNormal;
+    vs_out.FragLightPos   = LIGHT_TRANSFORM_MATRIX * vec4(vs_out.FragPos, 1.0);
+    
+    //vs_out.Normal         = transpose(inverse(mat3(MODEL_MATRIX))) * aNormal;
+    vs_out.Normal         = aNormal;
     vs_out.TexCoords      = aTexCoords;
 
     vec3 T = normalize(vec3(MODEL_MATRIX * vec4(aTangent, 0.0)));
@@ -54,10 +58,10 @@ void main()
     // Retrieve perpendicular vector B with the cross product of T and N
     vec3 B = cross(N, T);
 
-    mat3 TBN = mat3(T, B, N);
-
-    vs_out.TangentLightPos = TBN * (LIGHT_TRANSFORM_MATRIX * vec4(vs_out.FragPos, 1.0);
-    vs_out.TangentViewPos  = TBN * CAMERA_VIEW_POSITION.xyz;
+    // Tangent-Bitangent-Normal matrix (world space to tangent space)
+    vs_out.TBN = mat3(T, B, N);
+    vs_out.TangentViewPos  = vs_out.TBN * CAMERA_VIEW_POSITION.xyz;
+    vs_out.TangentFragPos  = vs_out.TBN * vs_out.FragPos;
 
     gl_Position = CAMERA_PROJECTION_MATRIX * CAMERA_VIEW_MATRIX * MODEL_MATRIX * vec4(aPos, 1.0);
 }

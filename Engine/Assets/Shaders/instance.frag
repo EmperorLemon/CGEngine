@@ -10,8 +10,10 @@ const uint MAX_NUM_LIGHTS = 10;
 
 in VS_OUT {
     vec3 FragPos;
+    vec4 FragLightPos;
+    vec3 Normal;
     vec2 TexCoords;
-    vec4 TangentLightPos;
+    mat3 TBN;
     vec3 TangentViewPos;
     vec3 TangentFragPos;
 } fs_in;
@@ -55,7 +57,7 @@ uniform sampler2D shadowMapSampler;
 float CalculateShadow(in vec3 normal, in vec3 lightDir)
 {
     // Perspective divide
-    vec3 projCoords = fs_in.TangentLightPos.xyz / fs_in.TangentLightPos.w;
+    vec3 projCoords = fs_in.FragLightPos.xyz / fs_in.FragLightPos.w;
 
     // Normalize to [0, 1] range
     projCoords = projCoords * 0.5 + 0.5;
@@ -98,17 +100,17 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
     vec3 specular = vec3(0.0);
 
     vec3 lightDir = vec3(0.0);
+    vec3 lightPos = fs_in.TBN * light.direction.xyz;
 
     if (light.type == DIRECTIONAL_LIGHT)
-        lightDir          = normalize(-light.direction.xyz);
+        lightDir          = normalize(-lightPos);
     else
-        lightDir          = normalize(light.direction.xyz - fs_in.TangentFragPos);
+        lightDir          = normalize(lightPos - fs_in.TangentFragPos);
 
-    vec3  viewDir         = normalize(fs_in.TangentViewPos - fs_in.FragPos);
-    vec3  reflectDir      = reflect(-lightDir, normal);
+    vec3  viewDir         = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
     vec3  halfwayDir      = normalize(lightDir + viewDir);
 
-    float ambientFactor   = 0.15;
+    float ambientFactor   = 0.05;
     ambient               = ambientFactor * albedo;                   
 
     float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
@@ -119,7 +121,7 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
 
     if (light.type == POINT_LIGHT || light.type == SPOT_LIGHT)
     {
-        float distance        = length(light.direction.xyz - fs_in.FragPos);
+        float distance        = length(lightDir);
         float attenuation     = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance));// * distance));
 
         ambient  *= attenuation;
@@ -129,7 +131,7 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
 
     if (light.type == SPOT_LIGHT)
     {
-        float theta       = dot(lightDir, normalize(-light.direction.xyz));
+        float theta       = dot(lightDir, normalize(fs_in.TBN * -light.direction.xyz));
         float epsilon     = light.innerSpotAngle - light.outerSpotAngle;
         float intensity   = clamp((theta - light.outerSpotAngle) / epsilon, 0.0, 1.0);
 
@@ -148,16 +150,19 @@ void main()
     vec4 baseNormalTexture    = texture(material.baseNormalSampler, fs_in.TexCoords);
     vec4 baseOcclusionTexture = texture(material.baseOcclusionSampler, fs_in.TexCoords);
 
+    vec3 albedo = baseColorTexture.rgb;
     // Transform normal vector to range [-1, 1]
     vec3 normal = normalize(baseNormalTexture.rgb * 2.0 - 1.0);
+    
+    //vec3 normal   = normalize(fs_in.Normal);
 
     float metallic  = material.metallicFactor;
     float roughness = material.roughnessFactor;
 
-    vec3 result = Lighting(LIGHTS[0], normal, albedo.rgb);
+    vec3 result = Lighting(LIGHTS[0], normal, albedo);
 
-    for (int i = 1; i < NUM_LIGHTS; ++i)
-        result += Lighting(LIGHTS[i], normal, albedo.rgb);
+//    for (int i = 1; i < NUM_LIGHTS; ++i)
+//        result += Lighting(LIGHTS[i], normal, albedo);
 
     result = pow(result, vec3(1.0 / 2.2));
 

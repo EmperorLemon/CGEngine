@@ -13,11 +13,21 @@ namespace CGEngine
 		TParamValue value =  TParamValue::NONE;
 	};
 
+	enum class TextureType : uint8_t
+	{
+		NONE = 0,
+		DIFFUSE_TEXTURE,
+		NORMAL_TEXTURE,
+		SPECULAR_TEXTURE,
+		OCCLUSION_TEXTURE
+	};
+
 	struct Image
 	{
 		int32_t width = 0;
 		int32_t height = 0;
 		int32_t channels = 0;
+		TextureType type = TextureType::NONE;
 		std::vector<unsigned char> pixels;
 	};
 

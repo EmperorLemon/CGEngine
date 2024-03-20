@@ -183,7 +183,7 @@ namespace CGEngine
 			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR_MIPMAP_LINEAR);
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
-			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8, width, height, layout);
+			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, layout);
 
 			Assets::Mesh mesh;
 
@@ -239,7 +239,7 @@ namespace CGEngine
 			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
-			skyboxTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_CUBE_MAP, 1, PixelFormat::SRGB8, layout, std::move(bitmaps));
+			skyboxTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_CUBE_MAP, 1, PixelFormat::SRGB8_ALPHA8, layout, std::move(bitmaps));
 
 			Assets::Mesh mesh;
 
@@ -332,7 +332,7 @@ namespace CGEngine
 			constexpr int occlusion_texture_sampler = 2;
 			constexpr int shadow_map_sampler = 3;
 			defaultShader->BindUniform("material.baseAlbedoSampler", OpenGL::UniformType::INT, &albedo_texture_sampler);
-			//shader->BindUniform("material.baseNormalSampler",	  OpenGL::UniformType::INT, &normal_texture_sampler);
+			defaultShader->BindUniform("material.baseNormalSampler", OpenGL::UniformType::INT, &normal_texture_sampler);
 			//shader->BindUniform("material.baseOcclusionSampler", OpenGL::UniformType::INT, &occlusion_texture_sampler);
 			defaultShader->BindUniform("shadowMapSampler", OpenGL::UniformType::INT, &shadow_map_sampler);
 
@@ -495,7 +495,7 @@ namespace CGEngine
 	{
 		TextureLayout layout;
 
-		const auto& resizedScreenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8, width, height, layout);
+		const auto& resizedScreenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, layout);
 		screenRenderbuffer->ResizeBuffer(width, height);
 
 		screenFramebuffer->Bind();

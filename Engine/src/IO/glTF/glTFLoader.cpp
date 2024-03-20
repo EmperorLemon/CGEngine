@@ -193,7 +193,7 @@ namespace CGEngine::IO
 						const auto& texture = importModel.textures.at(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index);
 								auto& image = importModel.images.at(texture.source);
 
-						model.textures.emplace_back(image.width, image.height, 4, image.image);
+						model.textures.emplace_back(image.width, image.height, 4, TextureType::DIFFUSE_TEXTURE, image.image);
 					}
 
 					if (gltfMaterial.normalTexture.index >= 0)
@@ -201,7 +201,7 @@ namespace CGEngine::IO
 						const auto& texture = importModel.textures.at(gltfMaterial.normalTexture.index);
 								auto& image = importModel.images.at(texture.source);
 
-						model.textures.emplace_back(image.width, image.height, 4, image.image);
+						model.textures.emplace_back(image.width, image.height, 4, TextureType::NORMAL_TEXTURE, image.image);
 					}
 
 					if (gltfMaterial.occlusionTexture.index >= 0)
@@ -209,7 +209,7 @@ namespace CGEngine::IO
 						const auto& texture = importModel.textures.at(gltfMaterial.occlusionTexture.index);
 						auto& image = importModel.images.at(texture.source);
 
-						model.textures.emplace_back(image.width, image.height, 4, image.image);
+						model.textures.emplace_back(image.width, image.height, 3, TextureType::OCCLUSION_TEXTURE, image.image);
 					}
 
 					//if (gltfMaterial.emissiveTexture.index >= 0)
