@@ -54,7 +54,7 @@ namespace CGEngine
 	GraphicsAPI Renderer::m_API = GraphicsAPI::CG_NO_API;
 
 	constexpr uint32_t MAX_NUM_LIGHTS = 10;
-	constexpr uint32_t MAX_NUM_INSTANCES = 10;
+	constexpr uint32_t MAX_NUM_INSTANCES = 1000;
 
 	constexpr uint32_t SHADOW_WIDTH  = 4096;
 	constexpr uint32_t SHADOW_HEIGHT = 4096;
@@ -401,12 +401,6 @@ namespace CGEngine
 	void Renderer::RenderPrimitive(const Component::DrawObject& primitive) const
 	{
 		int32_t unit = 0;
-
-		for (const auto& material : primitive.materials)
-		{
-			defaultShader->BindUniform("material.uv_scale",  OpenGL::UniformType::VEC2, Math::ToArray(material.uv_scale));
-			defaultShader->BindUniform("material.uv_offset", OpenGL::UniformType::VEC2, Math::ToArray(material.uv_offset));
-		}
 
 		for (const auto& texture : primitive.textures)
 		{

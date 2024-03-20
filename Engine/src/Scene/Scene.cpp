@@ -14,7 +14,7 @@
 #include "Renderer/Assets/Model.h"
 #include "IO/FileSystem.h"
 
-constexpr int32_t INSTANCE_COUNT = 4;
+constexpr int32_t INSTANCE_COUNT = 15;
 constexpr int32_t    LIGHT_COUNT = 1;
 
 namespace CGEngine
@@ -39,7 +39,6 @@ namespace CGEngine
 			drawObject.vertexArrays.at(0)->SetInstanceCount(INSTANCE_COUNT);
 
 			entity.GetComponent<Component::Transform>().position = Math::Vec3(0.0f, 0.0f, 0.0f);
-			entity.GetComponent<Component::Transform>().scale = Math::Vec3(5.0f, 0.1f, 5.0f);
 		}
 
 		for (int32_t i = 0; i < INSTANCE_COUNT - 1; ++i)
@@ -47,29 +46,7 @@ namespace CGEngine
 			auto& entity = m_entityList->CreateEntity("Cube Instance " + std::to_string(i + 1), static_cast<uint8_t>(Component::EntityType::INSTANCE));
 			entity.AddComponent<Component::Instance>(i);
 
-			switch (i)
-			{
-			case 0:
-			{
-				entity.GetComponent<Component::Transform>().position = Math::Vec3(0.0f, 1.5f, 0.0f);
-				entity.GetComponent<Component::Transform>().scale = Math::Vec3(0.5f);
-				break;
-			}
-			case 1:
-			{
-				entity.GetComponent<Component::Transform>().position = Math::Vec3(2.0f, -5.0f, -5.0f);
-				entity.GetComponent<Component::Transform>().scale = Math::Vec3(0.5f);
-				break;
-			}
-			case 2:
-			{
-				entity.GetComponent<Component::Transform>().position = Math::Vec3(-1.0f, 0.5f, 2.0f);
-				entity.GetComponent<Component::Transform>().rotation = Math::Vec3(60.0f, 0.0f, 60.0f);
-				entity.GetComponent<Component::Transform>().scale = Math::Vec3(0.25f);
-				break;
-			}
-			default: break;
-			}
+			entity.GetComponent<Component::Transform>().position = Math::Vec3(0.0f, 2.10 * (i + 1), 0.0f);
 		}
 
 		for (int32_t i = 0; i < LIGHT_COUNT; ++i)
