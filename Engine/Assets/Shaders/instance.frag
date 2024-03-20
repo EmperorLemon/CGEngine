@@ -9,12 +9,11 @@ const uint SPOT_LIGHT        = 2;
 const uint MAX_NUM_LIGHTS = 10;
 
 in VS_OUT {
-    vec3 ViewPos;
     vec3 FragPos;
-    vec4 FragLightPos;
-    vec3 Normal;
     vec2 TexCoords;
-    vec3 Tangent;
+    vec4 TangentLightPos;
+    vec3 TangentViewPos;
+    vec3 TangentFragPos;
 } fs_in;
 
 struct Material
@@ -53,10 +52,10 @@ layout (std140, binding = 3) uniform Lights
 uniform Material material;
 uniform sampler2D shadowMapSampler;
 
-float CalculateShadow()
+float CalculateShadow(in vec3 normal, in vec3 lightDir)
 {
     // Perspective divide
-    vec3 projCoords = fs_in.FragLightPos.xyz / fs_in.FragLightPos.w;
+    vec3 projCoords = fs_in.TangentLightPos.xyz / fs_in.TangentLightPos.w;
 
     // Normalize to [0, 1] range
     projCoords = projCoords * 0.5 + 0.5;
@@ -67,8 +66,27 @@ float CalculateShadow()
     // Get the depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
 
-    // Check whether current frag pos is in shadow
-    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+    // Calculate the min and max shadow bias based on a surface's normal and light direction
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+
+    float shadow = 0.0;
+
+    vec2 texelSize = 1.0 / textureSize(shadowMapSampler, 0);
+
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(shadowMapSampler, projCoords.xy + vec2(x, y) * texelSize).r;
+            
+            // Check whether current frag pos is in shadow
+            shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
+        }
+    }
+
+    shadow /= 9.0;
+
+    if (projCoords.z > 1.0) shadow = 0.0;
 
     return shadow;
 }
@@ -84,10 +102,10 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
     if (light.type == DIRECTIONAL_LIGHT)
         lightDir          = normalize(-light.direction.xyz);
     else
-        lightDir          = normalize(light.direction.xyz  - fs_in.FragPos);
+        lightDir          = normalize(light.direction.xyz - fs_in.TangentFragPos);
 
-    vec3  viewDir         = normalize(fs_in.ViewPos - fs_in.FragPos);
-    vec3  reflectDir      =   reflect(-lightDir, normal);
+    vec3  viewDir         = normalize(fs_in.TangentViewPos - fs_in.FragPos);
+    vec3  reflectDir      = reflect(-lightDir, normal);
     vec3  halfwayDir      = normalize(lightDir + viewDir);
 
     float ambientFactor   = 0.15;
@@ -119,28 +137,26 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
         specular *= intensity;
     }
 
-    float shadow = CalculateShadow();
+    float shadow = CalculateShadow(normal, lightDir);
 
     return (ambient + (1.0 - shadow) * (diffuse + specular)) * albedo;
 }
 
 void main()
 {
-    vec3 normal = normalize(fs_in.Normal);
-    vec4 albedo = material.albedo;
-
     vec4 baseColorTexture     = texture(material.baseAlbedoSampler, fs_in.TexCoords);
     vec4 baseNormalTexture    = texture(material.baseNormalSampler, fs_in.TexCoords);
     vec4 baseOcclusionTexture = texture(material.baseOcclusionSampler, fs_in.TexCoords);
 
+    // Transform normal vector to range [-1, 1]
+    vec3 normal = normalize(baseNormalTexture.rgb * 2.0 - 1.0);
+
     float metallic  = material.metallicFactor;
     float roughness = material.roughnessFactor;
 
-    albedo = baseColorTexture;
+    vec3 result = Lighting(LIGHTS[0], normal, albedo.rgb);
 
-    vec3 result = vec3(0.0);
-    
-    for (int i = 0; i < NUM_LIGHTS; ++i)
+    for (int i = 1; i < NUM_LIGHTS; ++i)
         result += Lighting(LIGHTS[i], normal, albedo.rgb);
 
     result = pow(result, vec3(1.0 / 2.2));

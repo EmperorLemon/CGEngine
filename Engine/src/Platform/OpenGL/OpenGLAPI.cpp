@@ -75,6 +75,11 @@ namespace CGEngine::OpenGL
 		glClearColor(r, g, b, a);
 	}
 
+	void OpenGLAPI::CullFace(const CGEngine::CullFace face) const
+	{
+		glCullFace(Convert(face));
+	}
+
 	void OpenGLAPI::ResizeViewport(const int32_t x, const int32_t y, const int32_t width, const int32_t height)
 	{
 		glViewport(x, y, width, height);

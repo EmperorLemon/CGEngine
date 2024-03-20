@@ -32,6 +32,19 @@ namespace CGEngine::OpenGL
 		return GL_NONE;
 	}
 
+	constexpr GLenum Convert(const CullFace face)
+	{
+		switch (face)
+		{
+		case CullFace::NONE:			return GL_NONE;
+		case CullFace::FRONT:			return GL_FRONT;
+		case CullFace::BACK:			return GL_BACK;
+		case CullFace::FRONT_AND_BACK:  return GL_FRONT_AND_BACK;
+		}
+
+		return GL_NONE;
+	}
+
 	constexpr GLenum Convert(const APICapability capability)
 	{
 		switch (capability)
@@ -98,12 +111,13 @@ namespace CGEngine::OpenGL
 	{
 		switch (name)
 		{
-		case TParamName::NONE:				 return GL_NONE;
-		case TParamName::TEXTURE_WRAP_S:	 return GL_TEXTURE_WRAP_S;
-		case TParamName::TEXTURE_WRAP_T:	 return GL_TEXTURE_WRAP_T;
-		case TParamName::TEXTURE_WRAP_R:	 return GL_TEXTURE_WRAP_R;
-		case TParamName::TEXTURE_MIN_FILTER: return GL_TEXTURE_MIN_FILTER;
-		case TParamName::TEXTURE_MAG_FILTER: return GL_TEXTURE_MAG_FILTER;
+		case TParamName::NONE:				   return GL_NONE;
+		case TParamName::TEXTURE_WRAP_S:	   return GL_TEXTURE_WRAP_S;
+		case TParamName::TEXTURE_WRAP_T:	   return GL_TEXTURE_WRAP_T;
+		case TParamName::TEXTURE_WRAP_R:	   return GL_TEXTURE_WRAP_R;
+		case TParamName::TEXTURE_MIN_FILTER:   return GL_TEXTURE_MIN_FILTER;
+		case TParamName::TEXTURE_MAG_FILTER:   return GL_TEXTURE_MAG_FILTER;
+		case TParamName::TEXTURE_BORDER_COLOR: return GL_TEXTURE_BORDER_COLOR;
 		}
 
 		return GL_NONE;

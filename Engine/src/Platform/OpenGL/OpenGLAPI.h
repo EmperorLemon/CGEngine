@@ -21,6 +21,8 @@ namespace CGEngine::OpenGL
 		void ClearColor(const float* rgba) override;
 		void ClearColor(float r, float g, float b, float a) override;
 
+		void CullFace(CGEngine::CullFace face) const override;
+
 		void ResizeViewport(int32_t x, int32_t y, int32_t width, int32_t height) override;
 
 		void SetDepthFunc(DepthFunc func) const override;

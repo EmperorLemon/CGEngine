@@ -7,7 +7,7 @@ namespace CGEngine
 {
 	struct Camera
 	{
-		Math::Vec3  position = Math::Vec3(0.0f, 0.0f,  10.0f);
+		Math::Vec3  position = Math::Vec3(0.0f, 1.0f,  10.0f);
 		Math::Vec3 direction = Math::Vec3(0.0f, 0.0f,  -1.0f);
 		Math::Vec3		 up = Math::Vec3(0.0f, 1.0f,   0.0f);
 

@@ -34,6 +34,8 @@ namespace CGEngine
 		virtual void Enable(APICapability capability)  const = 0;
 		virtual void Disable(APICapability capability) const = 0;
 
+		virtual void CullFace(CullFace face) const = 0;
+
 		virtual void ResizeViewport(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
 
 		virtual void SetDepthFunc(DepthFunc func)  const = 0;

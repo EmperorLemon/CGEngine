@@ -49,6 +49,8 @@ namespace CGEngine
 
 			EndGUIFrame();
 
+			m_renderer->FirstPass();
+
 			{
 				int32_t offset = 0;
 
@@ -64,8 +66,6 @@ namespace CGEngine
 				});
 			}
 
-			m_renderer->Update(main_camera, m_time);
-
 			{
 				int32_t offset = 0;
 
@@ -76,8 +76,6 @@ namespace CGEngine
 				});
 			}
 
-			m_renderer->FirstPass();
-
 			entities.Iterate<Component::DrawObject>([&](const Component::DrawObject& drawObject)
 			{
 				m_renderer->RenderPrimitive(drawObject);
@@ -85,10 +83,9 @@ namespace CGEngine
 
 			m_renderer->SecondPass();
 
-			m_renderer->Update(main_camera, m_time);
-
 			entities.Iterate<Component::DrawObject>([&](const Component::DrawObject& drawObject)
 			{
+				m_renderer->Update(main_camera, m_time);
 				m_renderer->RenderPrimitive(drawObject);
 			});
 

@@ -55,8 +55,6 @@ namespace CGEngine
 
 		[[nodiscard]] virtual uint32_t GetID() const = 0;
 	protected:
-		uint32_t p_id = 0;
-
 		int32_t p_width  = 0;
 		int32_t p_height = 0;
 	};

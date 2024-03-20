@@ -201,32 +201,32 @@ namespace CGEngine
 
 	void CreateViewport(const uint32_t colorID, const uint32_t depthID)
 	{
-		//CreateDockSpace();
+		CreateDockSpace();
 
-		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		//ImGui::Begin("Viewport Color");
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+		ImGui::Begin("Viewport Color");
 
-		//const auto& viewportMinRegion = ImGui::GetWindowContentRegionMin();
-		//const auto& viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-		//const auto& viewportOffset = ImGui::GetWindowPos();
+		const auto& viewportMinRegion = ImGui::GetWindowContentRegionMin();
+		const auto& viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+		const auto& viewportOffset = ImGui::GetWindowPos();
 
-		//viewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-		//viewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
+		viewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+		viewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
 
-		//viewportFocused = ImGui::IsWindowFocused();
-		//viewportHovered = ImGui::IsWindowHovered();
+		viewportFocused = ImGui::IsWindowFocused();
+		viewportHovered = ImGui::IsWindowHovered();
 
-		//const auto& viewportSize = ImGui::GetContentRegionAvail();
+		const auto& viewportSize = ImGui::GetContentRegionAvail();
 
-		//ImGui::Image(reinterpret_cast<ImTextureID>(colorID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(reinterpret_cast<ImTextureID>(colorID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
 
-		//ImGuizmo::SetOrthographic(false);
-		//ImGuizmo::SetDrawlist();
+		ImGuizmo::SetOrthographic(false);
+		ImGuizmo::SetDrawlist();
 
-		//ImGuizmo::SetRect(viewportBounds[0].x, viewportBounds[0].y, viewportBounds[1].x - viewportBounds[0].x, viewportBounds[1].y - viewportBounds[0].y);
+		ImGuizmo::SetRect(viewportBounds[0].x, viewportBounds[0].y, viewportBounds[1].x - viewportBounds[0].x, viewportBounds[1].y - viewportBounds[0].y);
 
-		//ImGui::End();
-		//ImGui::PopStyleVar();
+		ImGui::End();
+		ImGui::PopStyleVar();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Depth");

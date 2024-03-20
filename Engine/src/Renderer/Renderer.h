@@ -42,7 +42,7 @@ namespace CGEngine
 		void RenderPrimitive(const Component::DrawObject& primitive) const;
 		void PostRender() const;
 
-		void Update(const Camera& camera, const Time& time) const;
+		void Update(Camera& camera, const Time& time) const;
 		void UpdateInstance(int32_t offset, const Component::Transform& transform) const;
 		void UpdateLight(int32_t offset, const Component::Light& light) const;
 

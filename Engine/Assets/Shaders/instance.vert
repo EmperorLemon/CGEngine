@@ -3,15 +3,15 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aTangent;
+layout (location = 4) in vec3 aBitangent;
 
 out VS_OUT 
 {
-    vec3 ViewPos;
     vec3 FragPos;
-    vec4 FragLightPos;
-    vec3 Normal;
     vec2 TexCoords;
-    vec3 Tangent;
+    vec4 TangentLightPos;
+    vec3 TangentViewPos;
+    vec3 TangentFragPos;
 } vs_out;
 
 layout (std430, binding = 0) buffer  Instance
@@ -37,19 +37,27 @@ layout (std140, binding = 2) uniform Shadow
 	mat4 LIGHT_TRANSFORM_MATRIX;
 };
 
-uniform mat3 NORMAL_MATRIX;
-
 void main()
 {
     mat4 MODEL_MATRIX = INSTANCE_TRANSFORMS[gl_InstanceID];
 
-    vs_out.ViewPos        = CAMERA_VIEW_POSITION.xyz;
     vs_out.FragPos        = vec3(MODEL_MATRIX * vec4(aPos, 1.0));
-    vs_out.FragLightPos   = LIGHT_TRANSFORM_MATRIX * vec4(vs_out.FragPos, 1.0);
-
-    vs_out.Normal         = NORMAL_MATRIX * aNormal;
-    vs_out.Tangent        = aTangent;
+    //vs_out.Normal       = transpose(inverse(mat3(MODEL_MATRIX))) * aNormal;
     vs_out.TexCoords      = aTexCoords;
+
+    vec3 T = normalize(vec3(MODEL_MATRIX * vec4(aTangent, 0.0)));
+    vec3 N = normalize(vec3(MODEL_MATRIX * vec4(aNormal,  0.0)));
+
+    // Re-Orthogonalize T with respect to N
+    T = normalize(T - dot(T, N) * N);
+
+    // Retrieve perpendicular vector B with the cross product of T and N
+    vec3 B = cross(N, T);
+
+    mat3 TBN = mat3(T, B, N);
+
+    vs_out.TangentLightPos = TBN * (LIGHT_TRANSFORM_MATRIX * vec4(vs_out.FragPos, 1.0);
+    vs_out.TangentViewPos  = TBN * CAMERA_VIEW_POSITION.xyz;
 
     gl_Position = CAMERA_PROJECTION_MATRIX * CAMERA_VIEW_MATRIX * MODEL_MATRIX * vec4(aPos, 1.0);
 }

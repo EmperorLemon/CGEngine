@@ -37,6 +37,14 @@ namespace CGEngine
 		MULTISAMPLING,
 	};
 
+	enum class CullFace : uint8_t
+	{
+		NONE = 0,
+		FRONT,
+		BACK,
+		FRONT_AND_BACK
+	};
+
 	enum class DataType : uint8_t
 	{
 		NONE = 0,
@@ -141,7 +149,8 @@ namespace CGEngine
 		TEXTURE_WRAP_T,
 		TEXTURE_WRAP_R,
 		TEXTURE_MIN_FILTER,
-		TEXTURE_MAG_FILTER
+		TEXTURE_MAG_FILTER,
+		TEXTURE_BORDER_COLOR
 	};
 
 	enum class TParamValue : uint8_t
