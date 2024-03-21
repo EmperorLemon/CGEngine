@@ -13,14 +13,17 @@ namespace CGEngine::OpenGL
 
 	GLFramebuffer::~GLFramebuffer()
 	{
-		//CG_TRACE("Deleted GLFramebuffer {0}", m_id);
+		CG_TRACE("Deleted GLFramebuffer {0}", m_id);
 
 		glDeleteFramebuffers(1, &m_id);
 	}
 
-	void GLFramebuffer::AttachTexture(const FramebufferTextureAttachment attachment, const uint32_t texture) const
+	void GLFramebuffer::AttachTexture(const FramebufferTextureAttachment attachment, const uint32_t texture, const int32_t index) const
 	{
-		glNamedFramebufferTexture(m_id, Convert(attachment), texture, 0);
+		if (attachment == FramebufferTextureAttachment::COLOR_ATTACHMENT)
+			glNamedFramebufferTexture(m_id, GL_COLOR_ATTACHMENT0 + index, texture, 0);
+		else
+			glNamedFramebufferTexture(m_id, Convert(attachment), texture, 0);
 	}
 
 	void GLFramebuffer::AttachRenderbuffer(const FramebufferTextureAttachment attachment, const uint32_t renderbuffer) const
@@ -61,6 +64,18 @@ namespace CGEngine::OpenGL
 	void GLFramebuffer::ReadBuffer() const
 	{
 		glNamedFramebufferReadBuffer(m_id, GL_NONE);
+	}
+
+	void GLFramebuffer::DrawBuffers(const int32_t count) const
+	{
+		std::vector<GLenum> attachments;
+
+		attachments.reserve(count);
+
+		for (int32_t i = 0; i < count; ++i)
+			attachments.emplace_back(GL_COLOR_ATTACHMENT0 + i);
+
+		glNamedFramebufferDrawBuffers(m_id, count, attachments.data());
 	}
 
 	GLRenderbuffer::GLRenderbuffer(const FramebufferTextureAttachmentFormat format, const int32_t width, const int32_t height) : Renderbuffer()

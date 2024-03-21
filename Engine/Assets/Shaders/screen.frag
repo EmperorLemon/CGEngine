@@ -10,10 +10,15 @@ in VS_OUT {
 } fs_in;
 
 uniform sampler2D HDRColorSampler;
+uniform sampler2D HDRBloomSampler;
 
 void main()
 {
     vec3 HDRColor = texture(HDRColorSampler, fs_in.TexCoords).rgb;
+    vec3 HDRBloomColor = texture(HDRBloomSampler, fs_in.TexCoords).rgb;
+
+    // additive blending
+    HDRColor += HDRBloomColor;
 
     // Reinhard tone mapping
     vec3 mapped = vec3(1.0) - exp(-HDRColor * EXPOSURE);

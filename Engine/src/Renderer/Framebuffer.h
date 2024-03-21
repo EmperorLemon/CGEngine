@@ -18,7 +18,7 @@ namespace CGEngine
 
 		virtual ~Framebuffer() = default;
 
-		virtual void AttachTexture(FramebufferTextureAttachment attachment, uint32_t texture) const = 0;
+		virtual void AttachTexture(FramebufferTextureAttachment attachment, uint32_t texture, int32_t index = 0) const = 0;
 		virtual void AttachRenderbuffer(FramebufferTextureAttachment attachment, uint32_t renderbuffer) const = 0;
 
 		virtual void Bind(FramebufferTarget target) const = 0;
@@ -26,6 +26,8 @@ namespace CGEngine
 
 		virtual void DrawBuffer() const = 0;
 		virtual void ReadBuffer() const = 0;
+
+		virtual void DrawBuffers(int32_t count = 2) const = 0;
 
 		virtual void Clear(BufferType type, int32_t index, const float* value) const = 0;
 

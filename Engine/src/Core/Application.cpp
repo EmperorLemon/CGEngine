@@ -44,7 +44,7 @@ namespace CGEngine
 
 			BeginGUIFrame();
 
-			CreateViewport(m_renderer->GetColorTextureID(), m_renderer->GetDepthTextureID());
+			CreateViewport(m_renderer->GetColorTextureID(), m_renderer->GetGlowTextureID(), m_renderer->GetDepthTextureID());
 			CreateEditorWindow(defaultScene);
 
 			EndGUIFrame();

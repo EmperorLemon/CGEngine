@@ -18,7 +18,7 @@ namespace CGEngine::OpenGL
 
 		~GLFramebuffer() override;
 
-		void AttachTexture(FramebufferTextureAttachment attachment, uint32_t texture) const override;
+		void AttachTexture(FramebufferTextureAttachment attachment, uint32_t texture, int32_t index = 0) const override;
 		void AttachRenderbuffer(FramebufferTextureAttachment attachment, uint32_t renderbuffer) const override;
 
 		void Bind(FramebufferTarget target = FramebufferTarget::FRAMEBUFFER) const override;
@@ -30,6 +30,8 @@ namespace CGEngine::OpenGL
 
 		void DrawBuffer() const override;
 		void ReadBuffer() const override;
+
+		void DrawBuffers(int32_t count = 2) const override;
 
 		[[nodiscard]] bool CheckStatus() const;
 

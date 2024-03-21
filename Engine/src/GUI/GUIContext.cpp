@@ -205,7 +205,7 @@ namespace CGEngine
 		}
 	}
 
-	void CreateViewport(const uint32_t colorID, const uint32_t depthID)
+	void CreateViewport(const uint32_t colorID, const uint32_t glowID, const uint32_t depthID)
 	{
 		CreateDockSpace();
 
@@ -235,9 +235,21 @@ namespace CGEngine
 		ImGui::PopStyleVar();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Depth");
+		ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(400, 400));
+		ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Glow", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 
-		ImGui::Image(reinterpret_cast<ImTextureID>(depthID), ImVec2(1024, 1024), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+		ImGui::Image(reinterpret_cast<ImTextureID>(glowID), ImVec2(400, 400), ImVec2(0, 1), ImVec2(1, 0));
+
+		ImGui::End();
+		ImGui::PopStyleVar();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+		ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(400, 400));
+		ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Depth", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
+
+		ImGui::Image(reinterpret_cast<ImTextureID>(depthID), ImVec2(400, 400), ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGui::End();
 		ImGui::PopStyleVar();

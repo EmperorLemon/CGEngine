@@ -55,6 +55,7 @@ namespace CGEngine
 		void ResizeFramebuffer(int32_t width, int32_t height) const;
 
 		[[nodiscard]] uint32_t GetColorTextureID() const;
+		[[nodiscard]] uint32_t  GetGlowTextureID() const;
 		[[nodiscard]] uint32_t GetDepthTextureID() const;
 
 		static GraphicsAPI GetAPI() { return m_API; }

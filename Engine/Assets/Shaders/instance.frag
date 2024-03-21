@@ -1,6 +1,7 @@
 #version 460
 
-out vec4 FragColor;
+layout (location = 0) out vec4 HDRFragColor;
+layout (location = 1) out vec4 HDRGlowColor;
 
 const uint DIRECTIONAL_LIGHT = 0;
 const uint POINT_LIGHT       = 1;
@@ -128,7 +129,6 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
         float distance        = length(lightDir);
         float attenuation     = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance));// * distance));
 
-        ambient  *= attenuation;
         diffuse  *= attenuation;
         specular *= attenuation;
     }
@@ -157,7 +157,6 @@ void main()
     vec3 albedo = baseColorTexture.rgb;
     // Transform normal vector to range [-1, 1]
     vec3 normal = normalize(baseNormalTexture.rgb * 2.0 - 1.0);
-    
     //vec3 normal   = normalize(fs_in.Normal);
 
     float metallic  = material.metallicFactor;
@@ -165,10 +164,21 @@ void main()
 
     vec3 result = Lighting(LIGHTS[0], normal, albedo);
 
-//    for (int i = 1; i < NUM_LIGHTS; ++i)
-//        result += Lighting(LIGHTS[i], normal, albedo);
+    for (int i = 1; i < NUM_LIGHTS; ++i)
+    {
+        if (LIGHTS[i].type == POINT_LIGHT || LIGHTS[i].type == SPOT_LIGHT)
+            result += Lighting(LIGHTS[i], normal, albedo);
+    }
 
     result = pow(result, vec3(1.0 / 2.2));
 
-	FragColor = vec4(result, 1.0);
+	HDRFragColor = vec4(result, 1.0);
+
+    // Check if fragment output is higher than threshold (sRGB)
+    float brightness = dot(HDRFragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+
+    if (brightness > 1.0)
+        HDRGlowColor = vec4(HDRFragColor.rgb, 1.0);
+    else
+        HDRGlowColor = vec4(0.0);
 }

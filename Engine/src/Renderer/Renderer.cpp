@@ -1,5 +1,7 @@
 #include "Renderer.h"
 
+#include <array>
+
 #include "Core/Logger.hpp"
 #include "Core/Time.h"
 
@@ -32,12 +34,15 @@ namespace CGEngine
 	std::shared_ptr<OpenGL::GLShader> screenShader  = nullptr;
 	std::shared_ptr<OpenGL::GLShader> skyboxShader  = nullptr;
 
-	std::shared_ptr<OpenGL::GLTexture> depthTexture  = nullptr;
-	std::shared_ptr<OpenGL::GLTexture> screenTexture = nullptr;
-	std::shared_ptr<OpenGL::GLTexture> skyboxTexture = nullptr;
+	std::shared_ptr<OpenGL::GLTexture> depthTexture    = nullptr;
+	std::shared_ptr<OpenGL::GLTexture> HDRTexture      = nullptr;
+	std::shared_ptr<OpenGL::GLTexture> HDRGlowTexture  = nullptr;
+	std::array<std::shared_ptr<OpenGL::GLTexture>, 2> blurTextures;
+	std::shared_ptr<OpenGL::GLTexture> skyboxTexture   = nullptr;
 
 	std::shared_ptr<OpenGL::GLFramebuffer>  depthFramebuffer   = nullptr;
 	std::shared_ptr<OpenGL::GLFramebuffer>  screenFramebuffer  = nullptr;
+	std::array<std::shared_ptr<OpenGL::GLFramebuffer>, 2> blurFramebuffers;
 	std::shared_ptr<OpenGL::GLRenderbuffer> screenRenderbuffer = nullptr;
 
 	std::shared_ptr<OpenGL::GLBuffer> screenQuadVertexBuffer = nullptr;
@@ -169,7 +174,7 @@ namespace CGEngine
 			if (!depthFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
 		}
 
-		// Screen quad setup
+		// Screen space shader setup
 		{
 			std::string vert_src, frag_src;
 			IO::ReadFile("Assets/Shaders/screen.vert", vert_src);
@@ -177,14 +182,10 @@ namespace CGEngine
 
 			ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
 			screenShader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
+		}
 
-			TextureLayout layout;
-
-			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR_MIPMAP_LINEAR);
-			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
-
-			screenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
-
+		// Screen quad setup
+		{
 			Assets::Mesh mesh;
 
 			mesh.vertices.swap(QUAD_VERTICES);
@@ -195,18 +196,54 @@ namespace CGEngine
 			mesh.layout.SetStride(4 * sizeof(float));
 
 			const BufferInfo vertexBuffer = { mesh.vertices.size() * sizeof(float), mesh.vertices.size(), 0 };
-
 			screenQuadVertexBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::VERTEX_BUFFER, vertexBuffer.size, mesh.vertices.data());
 			screenQuadVertexArray = std::make_shared<OpenGL::GLVertexArray>(screenQuadVertexBuffer->GetID(), vertexBuffer, nullptr, mesh.layout);
 			screenQuadVertexArray->SetDrawType(DrawType::DRAW_ARRAYS);
+		}
 
+		// HDR + Glow (Bloom) texture setup
+		{
+			TextureLayout layout;
+
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR_MIPMAP_LINEAR);
+			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
+			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
+
+			HDRTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
+			HDRGlowTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
+		}
+
+		// Screen framebuffer + renderbuffer setup
+		{
 			screenFramebuffer = std::make_shared<OpenGL::GLFramebuffer>();
-			screenFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, screenTexture->GetID());
+			screenFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, HDRTexture->GetID());
+			screenFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, HDRGlowTexture->GetID(), 1);
+			screenFramebuffer->DrawBuffers();
 
 			screenRenderbuffer = std::make_shared<OpenGL::GLRenderbuffer>(FramebufferTextureAttachmentFormat::DEPTH24_STENCIL8, width, height);
 			screenFramebuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_STENCIL_ATTACHMENT, screenRenderbuffer->GetID());
 
 			if (!screenFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
+		}
+
+		// Blur (for Bloom) framebuffers + textures setup 
+		{
+			TextureLayout layout;
+
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR_MIPMAP_LINEAR);
+			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
+			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
+
+			for (int i = 0; i < 2; ++i)
+			{
+				blurTextures.at(i) = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
+				blurFramebuffers.at(i) = std::make_shared<OpenGL::GLFramebuffer>();
+				blurFramebuffers.at(i)->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, blurTextures.at(i)->GetID(), i);
+
+				if (!blurFramebuffers.at(i)->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
+			}
 		}
 
 		// Skybox setup
@@ -465,7 +502,7 @@ namespace CGEngine
 		{
 			screenShader->Use();
 			{
-				screenTexture->Bind(0);
+				HDRTexture->Bind(0);
 				m_backend->Draw(screenQuadVertexArray.get());
 			}
 		}
@@ -498,23 +535,31 @@ namespace CGEngine
 	{
 		TextureLayout layout;
 
-		const auto& resizedScreenTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
+		const auto& resizedHDRTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
+		const auto& resizedHDRGlowTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
 		screenRenderbuffer->ResizeBuffer(width, height);
 
 		screenFramebuffer->Bind();
-		screenFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, resizedScreenTexture->GetID());
+		screenFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, resizedHDRTexture->GetID());
+		screenFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, resizedHDRGlowTexture->GetID(), 1);
 		screenFramebuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_STENCIL_ATTACHMENT, screenRenderbuffer->GetID());
 
 		if (!screenFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
 
-		screenTexture = resizedScreenTexture;
+		HDRTexture = resizedHDRTexture;
+		HDRGlowTexture = resizedHDRGlowTexture;
 
 		screenFramebuffer->Unbind();
 	}
 
 	uint32_t Renderer::GetColorTextureID () const
 	{
-		return screenTexture->GetID();
+		return HDRTexture->GetID();
+	}
+
+	uint32_t Renderer::GetGlowTextureID() const
+	{
+		return HDRGlowTexture->GetID();
 	}
 
 	uint32_t Renderer::GetDepthTextureID() const
