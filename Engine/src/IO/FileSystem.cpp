@@ -15,16 +15,17 @@
 
 namespace CGEngine::IO
 {
-	void LoadImageFile(const std::string_view filepath, int& width, int& height, int& channels, std::vector<unsigned char>& data, const bool flip)
+	void LoadImageFile(const std::string_view filepath, int& width, int& height, int& channels, std::vector<unsigned char>& data, const bool flip, const int reqChannels)
 	{
 		if (!FileExists(filepath))
 			CG_ERROR("File {0} does not exist!", filepath.data());
 
 		stbi_set_flip_vertically_on_load(flip);
 
-		const auto pixels = stbi_load(filepath.data(), &width, &height, &channels, 4);
+		const auto pixels = stbi_load(filepath.data(), &width, &height, &channels, reqChannels);
 
-		channels = 4;
+		if (reqChannels > 3)
+			channels = reqChannels;
 
 		if (!pixels)
 		{

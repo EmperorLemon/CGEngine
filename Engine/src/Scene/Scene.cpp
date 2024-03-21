@@ -39,6 +39,7 @@ namespace CGEngine
 			drawObject.vertexArrays.at(0)->SetInstanceCount(INSTANCE_COUNT);
 
 			entity.GetComponent<Component::Transform>().position = Math::Vec3(0.0f, 0.0f, 0.0f);
+			entity.GetComponent<Component::Transform>().scale = Math::Vec3(12.5f, 0.15f, 12.5f);
 		}
 
 		for (int32_t i = 0; i < INSTANCE_COUNT - 1; ++i)
@@ -46,7 +47,7 @@ namespace CGEngine
 			auto& entity = m_entityList->CreateEntity("Cube Instance " + std::to_string(i + 1), static_cast<uint8_t>(Component::EntityType::INSTANCE));
 			entity.AddComponent<Component::Instance>(i);
 
-			entity.GetComponent<Component::Transform>().position = Math::Vec3(0.0f, 2.10 * (i + 1), 0.0f);
+			entity.GetComponent<Component::Transform>().position = Math::Vec3(2.10f * (i + 1), 2.10f * (i + 1), 0.0f);
 		}
 
 		for (int32_t i = 0; i < LIGHT_COUNT; ++i)
@@ -54,7 +55,7 @@ namespace CGEngine
 			auto& entity = m_entityList->CreateEntity("Light " + std::to_string(i), static_cast<uint8_t>(Component::EntityType::LIGHT));
 			entity.AddComponent<Component::Light>();
 
-			entity.GetComponent<Component::Transform>().position = Math::Vec3(-2.0f, 4.0f, -1.0f);
+			entity.GetComponent<Component::Transform>().position = Math::Vec3(0.0f, 4.0f, -2.0f);
 		}
 	}
 

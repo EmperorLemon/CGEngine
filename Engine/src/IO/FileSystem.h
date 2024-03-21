@@ -10,7 +10,7 @@ namespace CGEngine::Assets
 
 namespace CGEngine::IO
 {
-	void LoadImageFile(std::string_view filepath, int& width, int& height, int& channels, std::vector<unsigned char>& data, bool flip = false);
+	void LoadImageFile(std::string_view filepath, int& width, int& height, int& channels, std::vector<unsigned char>& data, bool flip = false, int reqChannels = 3);
 	void LoadModelFile(std::string_view filepath, Assets::Model& model);
 
 	void ReadFile(std::string_view filepath, std::vector<unsigned char>& data);

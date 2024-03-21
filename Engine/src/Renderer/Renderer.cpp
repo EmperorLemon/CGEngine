@@ -32,6 +32,7 @@ namespace CGEngine
 	std::shared_ptr<OpenGL::GLShader> defaultShader	= nullptr;
 	std::shared_ptr<OpenGL::GLShader> depthShader   = nullptr;
 	std::shared_ptr<OpenGL::GLShader> screenShader  = nullptr;
+	std::shared_ptr<OpenGL::GLShader> blurShader    = nullptr;
 	std::shared_ptr<OpenGL::GLShader> skyboxShader  = nullptr;
 
 	std::shared_ptr<OpenGL::GLTexture> depthTexture    = nullptr;
@@ -64,7 +65,9 @@ namespace CGEngine
 	constexpr uint32_t SHADOW_WIDTH  = 4096;
 	constexpr uint32_t SHADOW_HEIGHT = 4096;
 
-	const Math::Mat4 LIGHT_PROJECTION = Math::Orthographic(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 10.0f);
+	constexpr uint32_t BLUR_PASSES = 10;
+
+	const Math::Mat4 LIGHT_PROJECTION = Math::Orthographic(-25.0f, 25.0f, -25.0f, 25.0f, 0.5f, 25.0f);
 
 	std::vector QUAD_VERTICES =
 	{
@@ -210,8 +213,8 @@ namespace CGEngine
 			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
 			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
 
-			HDRTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
-			HDRGlowTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
+			HDRTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, layout);
+			HDRGlowTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, layout);
 		}
 
 		// Screen framebuffer + renderbuffer setup
@@ -227,6 +230,16 @@ namespace CGEngine
 			if (!screenFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
 		}
 
+		// Blur (for Bloom) shader setup
+		{
+			std::string vert_src, frag_src;
+			IO::ReadFile("Assets/Shaders/blur.vert", vert_src);
+			IO::ReadFile("Assets/Shaders/blur.frag", frag_src);
+
+			ShaderModule modules[] = { {vert_src.data(), ShaderType::VERTEX} , {frag_src.data(), ShaderType::FRAGMENT} };
+			blurShader = std::make_shared<OpenGL::GLShader>(modules, std::size(modules));
+		}
+
 		// Blur (for Bloom) framebuffers + textures setup 
 		{
 			TextureLayout layout;
@@ -238,7 +251,7 @@ namespace CGEngine
 
 			for (int i = 0; i < 2; ++i)
 			{
-				blurTextures.at(i) = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
+				blurTextures.at(i) = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, layout);
 				blurFramebuffers.at(i) = std::make_shared<OpenGL::GLFramebuffer>();
 				blurFramebuffers.at(i)->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, blurTextures.at(i)->GetID(), i);
 
@@ -276,7 +289,7 @@ namespace CGEngine
 			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR);
 			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
 
-			skyboxTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_CUBE_MAP, 1, PixelFormat::SRGB8_ALPHA8, layout, std::move(bitmaps));
+			skyboxTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_CUBE_MAP, 1, PixelFormat::SRGB8, layout, std::move(bitmaps));
 
 			Assets::Mesh mesh;
 
@@ -354,7 +367,7 @@ namespace CGEngine
 			shadowUniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(LIGHT_PROJECTION * light_view));
 
 			constexpr uint32_t num_lights = 0;
-			const std::vector default_lights(MAX_NUM_LIGHTS, Component::Light(Math::Vec4(-2.0f, 4.0f, -1.0f, 0.0f)));
+			const std::vector default_lights(MAX_NUM_LIGHTS, Component::Light(Math::Vec4(0.0f, 4.0f, -2.0f, 0.0f)));
 
 			lightUniformBuffer->SetSubData(0, MAX_NUM_LIGHTS * sizeof(Component::Light), default_lights.data());
 			lightUniformBuffer->SetSubData(MAX_NUM_LIGHTS * sizeof(Component::Light), sizeof(uint32_t), &num_lights);
@@ -394,6 +407,16 @@ namespace CGEngine
 			screenShader->BindUniform("HDRColorSampler", OpenGL::UniformType::INT, &HDR_color_texture_sampler);
 
 			screenShader->Disable();
+		}
+
+		// Blur (for Bloom) shader setup
+		{
+			blurShader->Use();
+
+			constexpr int image_sampler = 0;
+			blurShader->BindUniform("imageSampler", OpenGL::UniformType::INT, &image_sampler);
+
+			blurShader->Disable();
 		}
 
 		// Skybox shader setup
@@ -466,8 +489,8 @@ namespace CGEngine
 	void Renderer::SecondPass() const
 	{
 		// Swap to default framebuffer
-		depthFramebuffer->Unbind();
 		m_backend->CullFace(CullFace::BACK);
+		depthFramebuffer->Unbind();
 
 		// Reset viewport
 		m_backend->ResizeViewport(0, 0, m_window.width, m_window.height);
@@ -484,6 +507,23 @@ namespace CGEngine
 
 	void Renderer::ThirdPass() const
 	{
+		bool horizontal = true, first_iteration = true;
+		blurShader->Use();
+		// Blur brightness fragments with two-pass Gaussian Blur
+		{
+			for (uint32_t i = 0; i < BLUR_PASSES; ++i)
+			{
+				blurFramebuffers.at(horizontal)->Bind();
+				blurShader->BindUniform("horizontal", OpenGL::UniformType::BOOL, &horizontal);
+				first_iteration ? HDRGlowTexture->Bind(0) : m_backend->BindTexture(blurFramebuffers.at(!horizontal)->GetID(), 0);
+				horizontal = !horizontal;
+				first_iteration = false;
+			}
+
+			blurFramebuffers.at(0)->Unbind();
+			blurFramebuffers.at(1)->Unbind();
+		}
+
 		// Draw skybox after drawn objects
 		{
 			m_backend->SetDepthFunc(DepthFunc::LEQUAL);
@@ -499,6 +539,7 @@ namespace CGEngine
 		screenFramebuffer->Unbind();
 		m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
 
+		// Render HDR color texture to screen quad
 		{
 			screenShader->Use();
 			{
@@ -535,8 +576,8 @@ namespace CGEngine
 	{
 		TextureLayout layout;
 
-		const auto& resizedHDRTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
-		const auto& resizedHDRGlowTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGBA16F, width, height, layout);
+		const auto& resizedHDRTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, layout);
+		const auto& resizedHDRGlowTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, layout);
 		screenRenderbuffer->ResizeBuffer(width, height);
 
 		screenFramebuffer->Bind();

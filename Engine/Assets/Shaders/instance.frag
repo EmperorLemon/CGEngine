@@ -79,19 +79,21 @@ float CalculateShadow(in vec3 normal, in vec3 lightDir)
     float shadow = 0.0;
 
     vec2 texelSize = 1.0 / textureSize(shadowMapSampler, 0);
+    const int halfKernelWidth = 3;
 
-    for (int x = -1; x <= 1; ++x)
+    // PCF: Percentage-Closer Filtering
+    for (int x = -halfKernelWidth; x <= halfKernelWidth; ++x)
     {
-        for (int y = -1; y <= 1; ++y)
+        for (int y = -halfKernelWidth; y <= halfKernelWidth; ++y)
         {
             float pcfDepth = texture(shadowMapSampler, projCoords.xy + vec2(x, y) * texelSize).r;
             
             // Check whether current frag pos is in shadow
-            shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
         }
     }
 
-    shadow /= 9.0;
+    shadow /= ((halfKernelWidth * 2 + 1) * (halfKernelWidth * 2 + 1));
 
     if (projCoords.z > 1.0) shadow = 0.0;
 

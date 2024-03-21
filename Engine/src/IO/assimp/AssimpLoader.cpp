@@ -187,7 +187,7 @@ namespace CGEngine::IO
 				default: break;
 				}
 
-				LoadImageFile(path.c_str(), image.width, image.height, image.channels, image.pixels, false);
+				LoadImageFile(path.c_str(), image.width, image.height, image.channels, image.pixels, false, type == aiTextureType_NORMALS ? 4 : 3);
 
 				model.textures.emplace_back(std::move(image));
 			}
