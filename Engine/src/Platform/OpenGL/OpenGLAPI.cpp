@@ -85,6 +85,11 @@ namespace CGEngine::OpenGL
 		glViewport(x, y, width, height);
 	}
 
+	void OpenGLAPI::ResetFramebuffer() const
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
 	void OpenGLAPI::SetDepthFunc(const DepthFunc func) const
 	{
 		glDepthFunc(Convert(func));

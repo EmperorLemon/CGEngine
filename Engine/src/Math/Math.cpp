@@ -48,12 +48,27 @@ namespace CGEngine::Math
 		return value_ptr(vector);
 	}
 
+	const int* ToArray(const IVec2& vector)
+	{
+		return value_ptr(vector);
+	}
+
 	const float* ToArray(const Vec3& vector)
 	{
 		return value_ptr(vector);
 	}
 
+	const int* ToArray(const IVec3& vector)
+	{
+		return value_ptr(vector);
+	}
+
 	const float* ToArray(const Vec4& vector)
+	{
+		return value_ptr(vector);
+	}
+
+	const int* ToArray(const IVec4& vector)
 	{
 		return value_ptr(vector);
 	}

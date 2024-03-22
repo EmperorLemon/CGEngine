@@ -7,7 +7,7 @@ uniform vec4 LIGHT_COLOR;
 
 void main()
 {
-    HDRFragColor = LIGHT_COLOR;
+    HDRFragColor = LIGHT_COLOR * 255.0;
 
     float brightness = dot(HDRFragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
     

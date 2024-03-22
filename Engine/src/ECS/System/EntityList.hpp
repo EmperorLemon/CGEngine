@@ -20,6 +20,9 @@ namespace CGEngine
 		template <typename Component, typename Func>
 		void Sort(Func&& func);
 
+		template <typename Component>
+		[[nodiscard]] size_t Count() const;
+
 		static std::vector<Entity>& GetEntities();
 	private:
 		entt::registry m_registry;
@@ -38,6 +41,12 @@ namespace CGEngine
 	void EntityList::Sort(Func&& func)
 	{
 		m_registry.sort<Component>(std::forward<Func>(func));
+	}
+
+	template <typename Component>
+	size_t EntityList::Count() const
+	{
+		return m_registry.view<Component>().size();
 	}
 
 }

@@ -5,5 +5,5 @@
 namespace CGEngine::Math
 {
 	using Vec4  = glm::vec4;
-	using IVector4 = glm::ivec4;
+	using IVec4 = glm::ivec4;
 }

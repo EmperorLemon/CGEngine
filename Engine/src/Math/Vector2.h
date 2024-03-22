@@ -4,5 +4,6 @@
 
 namespace CGEngine::Math
 {
-	using Vec2 = glm::vec2;
+	using Vec2  = glm::vec2;
+	using IVec2 = glm::ivec2;
 }

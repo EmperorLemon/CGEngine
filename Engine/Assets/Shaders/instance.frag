@@ -7,7 +7,8 @@ const uint DIRECTIONAL_LIGHT = 0;
 const uint POINT_LIGHT       = 1;
 const uint SPOT_LIGHT        = 2;
 
-const uint MAX_NUM_LIGHTS = 10;
+const uint  MAX_NUM_LIGHTS = 10;
+const float GAMMA = 2.2;
 
 in VS_OUT {
     vec3 FragPos;
@@ -54,8 +55,9 @@ struct Light
 layout (std140, binding = 3) uniform Lights
 {
     Light LIGHTS[MAX_NUM_LIGHTS];
-    uint NUM_LIGHTS;
 };
+
+uniform uint NUM_LIGHTS = 1;
 
 uniform Material material;
 uniform sampler2D shadowMapSampler;
@@ -118,11 +120,11 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
     vec3  viewDir         = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
     vec3  halfwayDir      = normalize(lightDir + viewDir);
 
-    float ambientFactor   = 0.05;
+    float ambientFactor   = 0.0;
     ambient               = ambientFactor * albedo;                   
 
     float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
-    diffuse               = light.diffuseColor.rgb * diffuseFactor * albedo;                  
+    diffuse               = light.diffuseColor.rgb * diffuseFactor;                  
 
     float specularFactor  = pow(max(dot(normal, halfwayDir), 0.0), 32);
     specular              = light.specularColor.rgb * specularFactor;
@@ -146,10 +148,9 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
         specular *= intensity;
     }
 
-    //float shadow = CalculateShadow(normal, lightDir);
+    float shadow = CalculateShadow(normal, lightDir);
 
-    //return (ambient + (1.0 - shadow) * (diffuse + specular)) * albedo;
-    return (ambient + diffuse + specular) * albedo;
+    return (ambient + (1.0 - shadow) * (diffuse + specular)) * albedo;
 }
 
 void main()
@@ -166,25 +167,14 @@ void main()
     float metallic  = material.metallicFactor;
     float roughness = material.roughnessFactor;
 
-    vec3 ambient = 0.0 * albedo;
     vec3 lighting = vec3(0.0);
-    vec3 viewDir = normalize(fs_in.ViewPos - fs_in.FragPos);
 
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < NUM_LIGHTS.x; ++i)
     {
-        // diffuse
-        vec3 lightDir = normalize(LIGHTS[i].direction.xyz - fs_in.FragPos);
-        float diff = max(dot(lightDir, normal), 0.0);
-        vec3 result = LIGHTS[i].diffuseColor.rgb * diff * albedo;      
-        
-        // attenuation (use quadratic as we have gamma correction)
-        float distance = length(fs_in.FragPos - LIGHTS[i].direction.xyz);
-        result *= 1.0 / (distance * distance);
-        lighting += result;
+        lighting += Lighting(LIGHTS[i], normal, albedo);
     }
 
-    vec3 result = ambient + lighting;
-    //result = pow(result, vec3(1.0 / 2.2));
+    vec3 result = lighting;
 
     // Check if fragment output is higher than threshold (sRGB)
     float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));

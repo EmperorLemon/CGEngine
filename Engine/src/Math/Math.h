@@ -32,8 +32,11 @@ namespace CGEngine::Math
 	Vec3 DegToRad(const Vec3& degrees);
 
 	const float* ToArray(const Vec2& vector);
+	const int* ToArray(const IVec2& vector);
 	const float* ToArray(const Vec3& vector);
+	const int* ToArray(const IVec3& vector);
 	const float* ToArray(const Vec4& vector);
+	const int* ToArray(const IVec4& vector);
 	const float* ToArray(const Mat3& matrix);
 	const float* ToArray(const Mat4& matrix);
 	float* ToPtr(Vec2& vector);

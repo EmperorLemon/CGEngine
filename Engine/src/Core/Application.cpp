@@ -49,46 +49,57 @@ namespace CGEngine
 
 			EndGUIFrame();
 
-			m_renderer->FirstPass();
-
 			{
 				int32_t offset = 0;
 
-				entities.Iterate<Component::Transform, Component::Instance>([&](const Component::Transform& transform, const Component::Instance& instance [[maybe_unused]] )
+				entities.Iterate<Component::Transform, Component::Instance>([&](const Component::Transform& transform, const Component::Instance& instance [[maybe_unused]])
 				{
 					m_renderer->UpdateInstance(offset, transform);
 					offset++;
 				});
 			}
 
-			m_renderer->Update(main_camera, m_time);
-			entities.Iterate<Component::DrawObject>([&](const Component::DrawObject& drawObject)
-			{
-				m_renderer->RenderPrimitive(drawObject);
-			});
-
 			{
 				int32_t offset = 0;
 
-				entities.Iterate<Component::Transform, Component::Light>([&](const Component::Transform& transform, Component::Light& light)
-					{
-						if (light.type == Component::LightType::DIRECTIONAL_LIGHT)
-							light.direction = Math::Vec4(Math::DegToRad(transform.rotation), 0.0f);
-						else
-							light.direction = Math::Vec4(transform.position, 0.0f);
+				const auto num_lights = static_cast<uint32_t>(entities.Count<Component::Light>());
 
-						m_renderer->UpdateLight(offset, light);
-						offset++;
-					});
+				entities.Iterate<Component::Transform, Component::Light>([&](const Component::Transform& transform, Component::Light& light)
+				{
+					if (light.type == Component::LightType::DIRECTIONAL_LIGHT)
+						light.direction = Math::Vec4(Math::DegToRad(transform.rotation), 0.0f);
+					else
+						light.direction = Math::Vec4(transform.position, 0.0f);
+
+					m_renderer->UpdateLight(offset, num_lights, light);
+					offset++;
+				});
 			}
+
+			m_renderer->EnableShader(ShaderEnable::DEPTH_SHADER);
+
+			m_renderer->FirstPass();
+
+			entities.Iterate<Component::DrawObject>([&](const Component::DrawObject& primitive)
+			{
+				m_renderer->RenderPrimitive(primitive);
+			});
 
 			m_renderer->SecondPass();
 
-			//entities.Iterate<Component::DrawObject>([&](const Component::DrawObject& drawObject)
-			//{
-			//	m_renderer->Update(main_camera, m_time);
-			//	m_renderer->RenderPrimitive(drawObject);
-			//});
+			m_renderer->EnableShader(ShaderEnable::DEFAULT_SHADER);
+
+			entities.Iterate<Component::DrawObject>([&](const Component::DrawObject& primitive)
+			{
+				m_renderer->RenderPrimitive(primitive);
+			});
+
+			m_renderer->EnableShader(ShaderEnable::LIGHT_SHADER);
+
+			entities.Iterate<Component::Transform, Component::Light>([&](const Component::Transform& transform, const Component::Light& light)
+			{
+				m_renderer->DrawLight(transform, light);
+			});
 
 			m_renderer->ThirdPass();
 

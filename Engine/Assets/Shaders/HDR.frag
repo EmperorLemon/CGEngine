@@ -21,10 +21,10 @@ void main()
     HDRColor += HDRBloomColor;
 
     // Reinhard tone mapping
-    vec3 mapped = vec3(1.0) - exp(-HDRColor * EXPOSURE);
+    vec3 result = vec3(1.0) - exp(-HDRColor * EXPOSURE);
 
     // Gamma correction
-    mapped = pow(mapped, vec3(1.0 / GAMMA));
+    result = pow(result, vec3(1.0 / GAMMA));
 
-    FragColor  = vec4(mapped, 1.0);
+    FragColor = vec4(result, 1.0);
 }
