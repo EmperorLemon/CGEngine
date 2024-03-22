@@ -363,7 +363,7 @@ namespace CGEngine
 			shadowUniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, shadow_buffer_size, nullptr);
 			shadowUniformBuffer->BindBufferBase(2);
 
-			constexpr size_t light_buffer_size = sizeof(uint32_t) + MAX_NUM_LIGHTS * sizeof(Component::Light);
+			constexpr size_t light_buffer_size = MAX_NUM_LIGHTS * sizeof(Component::Light);
 
 			lightUniformBuffer = std::make_shared<OpenGL::GLBuffer>(BufferTarget::UNIFORM_BUFFER, light_buffer_size, nullptr);
 			lightUniformBuffer->BindBufferBase(3);
@@ -400,11 +400,9 @@ namespace CGEngine
 			cameraUniformBuffer->SetSubData(2 * sizeof(Math::Mat4), sizeof(Math::Vec4), Math::ToArray(Math::Vec4(camera.position, 0.0)));
 
 			const auto& light_view = Math::View(Math::Vec3(0.0f), Math::Vec3(0.0f), Math::Vec3(0.0f, 1.0f, 0.0f));
-
 			shadowUniformBuffer->SetSubData(0, sizeof(Math::Mat4), Math::ToArray(LIGHT_PROJECTION * light_view));
 
 			const std::vector default_lights(MAX_NUM_LIGHTS, Component::Light(Math::Vec4(0.0f, 4.0f, -2.0f, 0.0f)));
-
 			lightUniformBuffer->SetSubData(0, MAX_NUM_LIGHTS * sizeof(Component::Light), default_lights.data());
 		}
 
