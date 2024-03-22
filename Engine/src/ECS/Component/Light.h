@@ -22,6 +22,9 @@ namespace CGEngine::Component
 		float constant = 1.0f;
 		float linear = 0.045f;
 		float quadratic = 0.0075f;
+		//float constant = 0.001f;
+		//float linear = 0.001f;
+		//float quadratic = 0.001f;
 
 		float innerSpotAngle = 0.0f;
 		float outerSpotAngle = 1.0f;

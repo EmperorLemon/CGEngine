@@ -155,7 +155,7 @@ namespace CGEngine::OpenGL
 
 		switch (type)
 		{
-		case UniformType::BOOL:
+		case UniformType::BOOL:			glProgramUniform1i(p_id, uniform.location, *static_cast<const GLboolean*>(value));							 break;
 		case UniformType::INT:		    glProgramUniform1i(p_id, uniform.location, *static_cast<const GLint*>(value));								 break;
 		case UniformType::UNSIGNED_INT: glProgramUniform1ui(p_id, uniform.location, *static_cast<const GLuint*>(value));						 break;
 		case UniformType::FLOAT:		glProgramUniform1f(p_id, uniform.location, *static_cast<const GLfloat*>(value));								 break;

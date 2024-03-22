@@ -21,16 +21,16 @@ void main()
     {
         for (int i = 1; i < 5; ++i)
         {
-            result += texture(imageSampler, fs_in.TexCoords + vec2(offset.x * i * SAMPLE_DISTANCE, 0.0)).rgb * WEIGHTS[i];
-            result += texture(imageSampler, fs_in.TexCoords - vec2(offset.x * i * SAMPLE_DISTANCE, 0.0)).rgb * WEIGHTS[i];
+            result += texture(imageSampler, fs_in.TexCoords + vec2(offset.x * i, 0.0)).rgb * WEIGHTS[i];
+            result += texture(imageSampler, fs_in.TexCoords - vec2(offset.x * i, 0.0)).rgb * WEIGHTS[i];
         }
     }
     else
     {
         for (int i = 1; i < 5; ++i)
         {
-            result += texture(imageSampler, fs_in.TexCoords + vec2(0.0, offset.y * i * SAMPLE_DISTANCE)).rgb * WEIGHTS[i];
-            result += texture(imageSampler, fs_in.TexCoords - vec2(0.0, offset.y * i * SAMPLE_DISTANCE)).rgb * WEIGHTS[i];
+            result += texture(imageSampler, fs_in.TexCoords + vec2(0.0, offset.y * i)).rgb * WEIGHTS[i];
+            result += texture(imageSampler, fs_in.TexCoords - vec2(0.0, offset.y * i)).rgb * WEIGHTS[i];
         }
     }
 

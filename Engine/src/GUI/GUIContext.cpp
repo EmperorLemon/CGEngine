@@ -186,9 +186,9 @@ namespace CGEngine
 
 		if (light.type == Component::LightType::POINT_LIGHT || light.type == Component::LightType::SPOT_LIGHT)
 		{
-			ImGui::DragFloat("Constant", &light.constant, 0.01f, 0.0f, 1.0f);
-			ImGui::DragFloat("Linear", &light.linear , 0.01f, 0.014f, 0.7f);
-			ImGui::DragFloat("Quadratic", &light.quadratic, 0.01f, 0.00007f, 1.8f);
+			ImGui::DragFloat("Constant", &light.constant, 0.01f, 0.0001f, 1.0f);
+			ImGui::DragFloat("Linear", &light.linear , 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Quadratic", &light.quadratic, 0.01f, 0.0f, 2.0f);
 
 			ImGui::Spacing();
 

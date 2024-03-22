@@ -12,6 +12,7 @@ const uint MAX_NUM_LIGHTS = 10;
 in VS_OUT {
     vec3 FragPos;
     vec4 FragLightPos;
+    vec3 ViewPos;
     vec3 Normal;
     vec2 TexCoords;
     mat3 TBN;
@@ -121,10 +122,10 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
     ambient               = ambientFactor * albedo;                   
 
     float diffuseFactor   = max(dot(normal, lightDir), 0.0); 
-    diffuse               = light.diffuseColor.xyz * diffuseFactor * albedo;                  
+    diffuse               = light.diffuseColor.rgb * diffuseFactor * albedo;                  
 
     float specularFactor  = pow(max(dot(normal, halfwayDir), 0.0), 32);
-    specular              = light.specularColor.xyz * specularFactor;
+    specular              = light.specularColor.rgb * specularFactor;
 
     if (light.type == POINT_LIGHT || light.type == SPOT_LIGHT)
     {
@@ -145,9 +146,10 @@ vec3 Lighting(in Light light, in vec3 normal, in vec3 albedo)
         specular *= intensity;
     }
 
-    float shadow = CalculateShadow(normal, lightDir);
+    //float shadow = CalculateShadow(normal, lightDir);
 
-    return (ambient + (1.0 - shadow) * (diffuse + specular)) * albedo;
+    //return (ambient + (1.0 - shadow) * (diffuse + specular)) * albedo;
+    return (ambient + diffuse + specular) * albedo;
 }
 
 void main()
@@ -158,29 +160,39 @@ void main()
 
     vec3 albedo = baseColorTexture.rgb;
     // Transform normal vector to range [-1, 1]
-    vec3 normal = normalize(baseNormalTexture.rgb * 2.0 - 1.0);
-    //vec3 normal   = normalize(fs_in.Normal);
+    //vec3 normal = normalize(baseNormalTexture.rgb * 2.0 - 1.0);
+    vec3 normal   = normalize(fs_in.Normal);
 
     float metallic  = material.metallicFactor;
     float roughness = material.roughnessFactor;
 
-    vec3 result = Lighting(LIGHTS[0], normal, albedo);
+    vec3 ambient = 0.0 * albedo;
+    vec3 lighting = vec3(0.0);
+    vec3 viewDir = normalize(fs_in.ViewPos - fs_in.FragPos);
 
-    for (int i = 1; i < NUM_LIGHTS; ++i)
+    for (int i = 0; i < 4; ++i)
     {
-        if (LIGHTS[i].type == POINT_LIGHT || LIGHTS[i].type == SPOT_LIGHT)
-            result += Lighting(LIGHTS[i], normal, albedo);
+        // diffuse
+        vec3 lightDir = normalize(LIGHTS[i].direction.xyz - fs_in.FragPos);
+        float diff = max(dot(lightDir, normal), 0.0);
+        vec3 result = LIGHTS[i].diffuseColor.rgb * diff * albedo;      
+        
+        // attenuation (use quadratic as we have gamma correction)
+        float distance = length(fs_in.FragPos - LIGHTS[i].direction.xyz);
+        result *= 1.0 / (distance * distance);
+        lighting += result;
     }
 
-    result = pow(result, vec3(1.0 / 2.2));
-
-	HDRFragColor = vec4(result, 1.0);
+    vec3 result = ambient + lighting;
+    //result = pow(result, vec3(1.0 / 2.2));
 
     // Check if fragment output is higher than threshold (sRGB)
-    float brightness = dot(HDRFragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
 
     if (brightness > 1.0)
-        HDRGlowColor = vec4(HDRFragColor.rgb, 1.0);
+        HDRGlowColor = vec4(result, 1.0);
     else
-        HDRGlowColor = vec4(0.0);
+        HDRGlowColor = vec4(vec3(0.0), 1.0);
+
+	HDRFragColor = vec4(result, 1.0);
 }

@@ -60,8 +60,8 @@ namespace CGEngine
 
 		virtual void SetSubImage(DataType type, const void* pixels) const = 0;
 
-		virtual void Bind(uint32_t unit)   const = 0;
-		virtual void Unbind(uint32_t unit) const = 0;
+		virtual void Bind(uint32_t unit = 0)   const = 0;
+		virtual void Unbind(uint32_t unit = 0) const = 0;
 
 		[[nodiscard]] virtual uint32_t GetID() const = 0;
 	protected:

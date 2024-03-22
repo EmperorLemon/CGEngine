@@ -12,8 +12,6 @@ namespace CGEngine::OpenGL
 	class OpenGLAPI final : public RenderAPI
 	{
 	public:
-		void BindTexture(uint32_t texture, int32_t unit) override;
-
 		void Clear(BufferMask mask) override;
 		void ClearColor(const float* rgba) override;
 		void ClearColor(float r, float g, float b, float a) override;

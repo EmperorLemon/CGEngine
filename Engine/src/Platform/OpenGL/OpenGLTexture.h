@@ -20,8 +20,8 @@ namespace CGEngine::OpenGL
 
 		void AddTextureParameter(TParamName name, const float* value) const;
 
-		void Bind(uint32_t unit) const override;
-		void Unbind(uint32_t unit) const override;
+		void Bind(uint32_t unit = 0) const override;
+		void Unbind(uint32_t unit = 0) const override;
 
 		void ResizeImage(int32_t width, int32_t height) const;
 		void SetSubImage(DataType type, const void* pixels) const override;

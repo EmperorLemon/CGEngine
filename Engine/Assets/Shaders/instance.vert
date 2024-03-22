@@ -8,6 +8,7 @@ out VS_OUT
 {
     vec3 FragPos;
     vec4 FragLightPos;
+    vec3 ViewPos;
     vec3 Normal;
     vec2 TexCoords;
     mat3 TBN;
@@ -44,6 +45,8 @@ void main()
 
     vs_out.FragPos        = vec3(MODEL_MATRIX * vec4(aPos, 1.0));
     vs_out.FragLightPos   = LIGHT_TRANSFORM_MATRIX * vec4(vs_out.FragPos, 1.0);
+
+    vs_out.ViewPos        = CAMERA_VIEW_POSITION.xyz;
     
     vs_out.Normal         = transpose(inverse(mat3(MODEL_MATRIX))) * aNormal;
     vs_out.TexCoords      = aTexCoords;
@@ -59,7 +62,7 @@ void main()
 
     // Tangent-Bitangent-Normal matrix (world space to tangent space)
     vs_out.TBN = mat3(T, B, N);
-    vs_out.TangentViewPos  = vs_out.TBN * CAMERA_VIEW_POSITION.xyz;
+    vs_out.TangentViewPos  = vs_out.TBN * vs_out.ViewPos;
     vs_out.TangentFragPos  = vs_out.TBN * vs_out.FragPos;
 
     gl_Position = CAMERA_PROJECTION_MATRIX * CAMERA_VIEW_MATRIX * MODEL_MATRIX * vec4(aPos, 1.0);

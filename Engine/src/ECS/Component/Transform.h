@@ -19,12 +19,12 @@ namespace CGEngine::Component
 
 namespace CGEngine
 {
-	inline Math::Mat4 GetModelMatrix(const Component::Transform& transform)
+	inline Math::Mat4 GetModelMatrix(const Math::Vec3& position, const Math::Vec3& rotation, const Math::Vec3& scale)
 	{
-		const Math::Mat4 rotation = Math::ToMat4(Math::Quat(Math::DegToRad(transform.rotation)));
+		const Math::Mat4 rotation_matrix = Math::ToMat4(Math::Quat(Math::DegToRad(rotation)));
 
-		return Math::Translate(Math::Mat4(1.0f), transform.position)
-			   * rotation
-			   * Math::Scale(Math::Mat4(1.0f), transform.scale);
+		return Math::Translate(Math::Mat4(1.0f), position)
+			   * rotation_matrix
+			   * Math::Scale(Math::Mat4(1.0f), scale);
 	}
 }

@@ -7,11 +7,6 @@
 
 namespace CGEngine::OpenGL
 {
-	void OpenGLAPI::BindTexture(const uint32_t texture, const int32_t unit)
-	{
-		glBindTextureUnit(unit, texture);
-	}
-
 	void OpenGLAPI::Clear(const BufferMask mask)
 	{
 		glClear(Convert(mask));

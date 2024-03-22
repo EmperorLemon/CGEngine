@@ -25,8 +25,6 @@ namespace CGEngine
 
 		virtual ~RenderAPI() = default;
 
-		virtual void BindTexture(uint32_t texture, int32_t unit) = 0;
-
 		virtual void Clear(BufferMask mask) = 0;
 		virtual void ClearColor(const float* rgba) = 0;
 		virtual void ClearColor(float r, float g, float b, float a) = 0;
