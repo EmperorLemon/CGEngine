@@ -44,10 +44,12 @@ namespace CGEngine
 
 			BeginGUIFrame();
 
-			CreateViewport(m_renderer->GetColorTextureID(), m_renderer->GetGlowTextureID(), m_renderer->GetDepthTextureID());
+			CreateViewport(m_renderer->GetHDRSceneTextureID(), m_renderer->GetGlowTextureID(), m_renderer->GetDepthTextureID());
 			CreateEditorWindow(defaultScene);
 
 			EndGUIFrame();
+
+			m_renderer->UpdateUniforms(main_camera, m_time);
 
 			{
 				int32_t offset = 0;

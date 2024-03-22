@@ -44,11 +44,9 @@ namespace CGEngine
 	std::shared_ptr<OpenGL::GLTexture> HDRSceneTexture   = nullptr;
 
 	std::shared_ptr<OpenGL::GLFramebuffer>  depthFramebuffer     = nullptr;
-	std::shared_ptr<OpenGL::GLFramebuffer>  HDRColorFramebuffer       = nullptr;
+	std::shared_ptr<OpenGL::GLFramebuffer>  HDRColorFramebuffer  = nullptr;
 	std::array<std::shared_ptr<OpenGL::GLFramebuffer>, 2> blurFramebuffers;
-	std::shared_ptr<OpenGL::GLFramebuffer>  HDRSceneFramebuffer  = nullptr;
 	std::shared_ptr<OpenGL::GLRenderbuffer> HDRColorRenderbuffer = nullptr;
-	std::shared_ptr<OpenGL::GLRenderbuffer> HDRSceneRenderbuffer = nullptr;
 
 	std::shared_ptr<OpenGL::GLBuffer> screenQuadVertexBuffer    = nullptr;
 	std::shared_ptr<OpenGL::GLBuffer> skyboxVertexBuffer        = nullptr;
@@ -77,6 +75,8 @@ namespace CGEngine
 	uint32_t NUM_LIGHTS = 1;
 
 	const Math::Mat4 LIGHT_PROJECTION = Math::Orthographic(-25.0f, 25.0f, -25.0f, 25.0f, 0.5f, 15.0f);
+
+	TextureLayout GLOBAL_TEXTURE_LAYOUT;
 
 	std::vector QUAD_VERTICES =
 	{
@@ -147,6 +147,11 @@ namespace CGEngine
 
 	void SetupRenderScene(const int32_t width, const int32_t height)
 	{
+		GLOBAL_TEXTURE_LAYOUT.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR_MIPMAP_LINEAR);
+		GLOBAL_TEXTURE_LAYOUT.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
+		GLOBAL_TEXTURE_LAYOUT.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
+		GLOBAL_TEXTURE_LAYOUT.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
+
 		// Default lit shader setup
 		{
 			std::string vert_src, frag_src;
@@ -186,7 +191,7 @@ namespace CGEngine
 			if (!depthFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
 		}
 
-		// Screen space shader setup
+		// HDR color shader setup
 		{
 			std::string vert_src, frag_src;
 			IO::ReadFile("Assets/Shaders/HDR.vert", vert_src);
@@ -325,6 +330,19 @@ namespace CGEngine
 			skyboxVertexArray->SetDrawType(DrawType::DRAW_ARRAYS);
 		}
 
+
+		// HDR Scene texture setup
+		{
+			TextureLayout layout;
+
+			layout.add(TParamName::TEXTURE_MIN_FILTER, TParamValue::LINEAR_MIPMAP_LINEAR);
+			layout.add(TParamName::TEXTURE_MAG_FILTER, TParamValue::LINEAR);
+			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
+			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
+
+			HDRSceneTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, layout);
+		}
+
 		// Shader storage buffers setup
 		{
 			constexpr size_t instance_buffer_size = MAX_NUM_INSTANCES * sizeof(Math::Mat4);
@@ -449,15 +467,6 @@ namespace CGEngine
 			skyboxShader->Disable();
 		}
 
-		// HDR Scene texture setup
-		{
-			
-		}
-
-		// HDR Scene framebuffer + renderbuffer setup
-		{
-			
-		}
 	}
 
 	void Renderer::EnableShader(const ShaderEnable enable) const
@@ -534,10 +543,12 @@ namespace CGEngine
 		// 1. Render depth of scene from light perspective to texture
 		depthFramebuffer->Bind();
 		depthFramebuffer->Clear(BufferType::DEPTH, 0, &CLEAR_DEPTH);
+		m_backend->CullFace(CullFace::FRONT);
 	}
 
 	void Renderer::SecondPass() const
 	{
+		m_backend->CullFace(CullFace::BACK);
 		// Unbind depth framebuffer back to default framebuffer
 		depthFramebuffer->Unbind();
 
@@ -589,15 +600,13 @@ namespace CGEngine
 		HDRColorFramebuffer->Unbind();
 
 		// 5. Render HDR floating point framebuffer to 2D quad
-		m_backend->Clear(BufferMask::COLOR_BUFFER_BIT);
-
+		m_backend->Clear(BufferMask::COLOR_DEPTH_BUFFER_BIT);
 		HDRShader->Use();
 		HDRColorTexture->Bind();
 		blurTextures.at(!horizontal)->Bind(1);
 		m_backend->Draw(quadVertexArray.get());
 
-		HDRSceneFramebuffer->Bind();
-		HDRSceneFramebuffer->Unbind();
+		HDRSceneTexture->CopySubImage(0, m_window.width, m_window.height);
 	}
 
 	void Renderer::PostRender() const
@@ -625,10 +634,10 @@ namespace CGEngine
 
 	void Renderer::ResizeFramebuffer(const int32_t width, const int32_t height) const
 	{
-		TextureLayout layout;
+		const auto& resizedHDRColorTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, GLOBAL_TEXTURE_LAYOUT);
+		const auto& resizedHDRBloomTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, GLOBAL_TEXTURE_LAYOUT);
+		const auto& resizedHDRSceneTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, GLOBAL_TEXTURE_LAYOUT);
 
-		const auto& resizedHDRColorTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, layout);
-		const auto& resizedHDRBloomTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, layout);
 		HDRColorRenderbuffer->ResizeBuffer(width, height);
 
 		HDRColorFramebuffer->Bind();
@@ -640,6 +649,7 @@ namespace CGEngine
 
 		HDRColorTexture = resizedHDRColorTexture;
 		HDRBloomTexture = resizedHDRBloomTexture;
+		HDRSceneTexture = resizedHDRSceneTexture;
 
 		HDRColorFramebuffer->Unbind();
 	}

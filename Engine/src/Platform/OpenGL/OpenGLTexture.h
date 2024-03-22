@@ -24,7 +24,9 @@ namespace CGEngine::OpenGL
 		void Unbind(uint32_t unit = 0) const override;
 
 		void ResizeImage(int32_t width, int32_t height) const;
-		void SetSubImage(DataType type, const void* pixels) const override;
+		void SetSubImage(DataType type, int32_t level, const void* pixels) const override;
+
+		void CopySubImage(int32_t level, int32_t width, int32_t height) const override;
 
 		[[nodiscard]] uint32_t GetID() const override { return m_id; }
 	private:

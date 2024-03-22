@@ -111,9 +111,15 @@ namespace CGEngine::OpenGL
 		glTextureStorage2D(m_id, m_levels, Convert(m_pixelFormat), width, height);
 	}
 
-	void GLTexture::SetSubImage(const DataType type, const void* pixels) const
+	void GLTexture::SetSubImage(const DataType type, const int32_t level, const void* pixels) const
 	{
-		glTextureSubImage2D(m_id, 0, 0, 0, p_width, p_height, Convert(m_textureFormat), Convert(type), pixels);
+		glTextureSubImage2D(m_id, level, 0, 0, p_width, p_height, Convert(m_textureFormat), Convert(type), pixels);
 		glGenerateTextureMipmap(m_id);
 	}
+
+	void GLTexture::CopySubImage(const int32_t level, const int32_t width, const int32_t height) const
+	{
+		glCopyTextureSubImage2D(m_id, level, 0, 0, 0, 0, width, height);
+	}
+
 }

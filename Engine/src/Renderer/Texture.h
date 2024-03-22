@@ -58,7 +58,8 @@ namespace CGEngine
 
 		virtual ~Texture() = default;
 
-		virtual void SetSubImage(DataType type, const void* pixels) const = 0;
+		virtual void SetSubImage(DataType type, int32_t level, const void* pixels) const = 0;
+		virtual void CopySubImage(int32_t level, int32_t width, int32_t height) const = 0;
 
 		virtual void Bind(uint32_t unit = 0)   const = 0;
 		virtual void Unbind(uint32_t unit = 0) const = 0;

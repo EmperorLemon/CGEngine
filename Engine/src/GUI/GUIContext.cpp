@@ -205,7 +205,7 @@ namespace CGEngine
 		}
 	}
 
-	void CreateViewport(const uint32_t viewportID, const uint32_t glowID, const uint32_t depthID)
+	void CreateViewport(const uint32_t colorID, const uint32_t glowID, const uint32_t depthID)
 	{
 		CreateDockSpace();
 
@@ -224,7 +224,7 @@ namespace CGEngine
 
 		const auto& viewportSize = ImGui::GetContentRegionAvail();
 
-		ImGui::Image(reinterpret_cast<ImTextureID>(viewportID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(reinterpret_cast<ImTextureID>(colorID), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();

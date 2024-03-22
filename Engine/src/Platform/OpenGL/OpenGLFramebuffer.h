@@ -24,7 +24,7 @@ namespace CGEngine::OpenGL
 		void Bind(FramebufferTarget target = FramebufferTarget::FRAMEBUFFER) const override;
 		void Unbind(FramebufferTarget target = FramebufferTarget::FRAMEBUFFER) const override;
 
-		void Blit(const Math::IVec4& src, const Math::IVec4& dst, BufferMask mask, TParamValue filter) const;
+		void Blit(uint32_t otherID, const Math::IVec4& src, const Math::IVec4& dst, BufferMask mask, TParamValue filter) const;
 
 		void Clear(BufferType type, int32_t index, const float* value) const override;
 

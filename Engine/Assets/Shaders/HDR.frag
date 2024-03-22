@@ -3,7 +3,7 @@
 out vec4 FragColor;
 
 const float GAMMA = 2.2;
-const float EXPOSURE = 1.0;
+const float EXPOSURE = 0.01;
 
 in VS_OUT {
     vec2 TexCoords;
