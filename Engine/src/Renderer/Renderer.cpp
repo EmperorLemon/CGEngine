@@ -41,7 +41,7 @@ namespace CGEngine
 	std::shared_ptr<OpenGL::GLTexture> HDRBloomTexture   = nullptr;
 	std::array<std::shared_ptr<OpenGL::GLTexture>, 2> blurTextures;
 	std::shared_ptr<OpenGL::GLTexture> skyboxTexture     = nullptr;
-	std::shared_ptr<OpenGL::GLTexture> HDRSceneTexture   = nullptr;
+	std::shared_ptr<OpenGL::GLTexture> sceneTexture   = nullptr;
 
 	std::shared_ptr<OpenGL::GLFramebuffer>  depthFramebuffer     = nullptr;
 	std::shared_ptr<OpenGL::GLFramebuffer>  HDRColorFramebuffer  = nullptr;
@@ -340,7 +340,7 @@ namespace CGEngine
 			layout.add(TParamName::TEXTURE_WRAP_S, TParamValue::CLAMP_TO_EDGE);
 			layout.add(TParamName::TEXTURE_WRAP_T, TParamValue::CLAMP_TO_EDGE);
 
-			HDRSceneTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, layout);
+			sceneTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, layout);
 		}
 
 		// Shader storage buffers setup
@@ -606,7 +606,7 @@ namespace CGEngine
 		blurTextures.at(!horizontal)->Bind(1);
 		m_backend->Draw(quadVertexArray.get());
 
-		HDRSceneTexture->CopySubImage(0, m_window.width, m_window.height);
+		sceneTexture->CopySubImage(0, m_window.width, m_window.height);
 	}
 
 	void Renderer::PostRender() const
@@ -634,29 +634,48 @@ namespace CGEngine
 
 	void Renderer::ResizeFramebuffer(const int32_t width, const int32_t height) const
 	{
-		const auto& resizedHDRColorTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, GLOBAL_TEXTURE_LAYOUT);
-		const auto& resizedHDRBloomTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, GLOBAL_TEXTURE_LAYOUT);
-		const auto& resizedHDRSceneTexture = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, GLOBAL_TEXTURE_LAYOUT);
+		const auto& resizedHDRColorTexture   = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, GLOBAL_TEXTURE_LAYOUT);
+		const auto& resizedHDRBloomTexture   = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, GLOBAL_TEXTURE_LAYOUT);
+		const std::array resizedBlurTextures = { std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, GLOBAL_TEXTURE_LAYOUT),
+			                                     std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::RGB16F, width, height, GLOBAL_TEXTURE_LAYOUT) };
+		const auto& resizedSceneTexture      = std::make_shared<OpenGL::GLTexture>(TextureTarget::TEXTURE_2D, 1, PixelFormat::SRGB8_ALPHA8, width, height, GLOBAL_TEXTURE_LAYOUT);
 
-		HDRColorRenderbuffer->ResizeBuffer(width, height);
+		{
+			HDRColorRenderbuffer->ResizeBuffer(width, height);
 
-		HDRColorFramebuffer->Bind();
-		HDRColorFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, resizedHDRColorTexture->GetID());
-		HDRColorFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, resizedHDRBloomTexture->GetID(), 1);
-		HDRColorFramebuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_ATTACHMENT, HDRColorRenderbuffer->GetID());
+			HDRColorFramebuffer->Bind();
+			HDRColorFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, resizedHDRColorTexture->GetID());
+			HDRColorFramebuffer->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, resizedHDRBloomTexture->GetID(), 1);
+			HDRColorFramebuffer->AttachRenderbuffer(FramebufferTextureAttachment::DEPTH_ATTACHMENT, HDRColorRenderbuffer->GetID());
 
-		if (!HDRColorFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
+			if (!HDRColorFramebuffer->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
 
-		HDRColorTexture = resizedHDRColorTexture;
-		HDRBloomTexture = resizedHDRBloomTexture;
-		HDRSceneTexture = resizedHDRSceneTexture;
+			HDRColorTexture = resizedHDRColorTexture;
+			HDRBloomTexture = resizedHDRBloomTexture;
 
-		HDRColorFramebuffer->Unbind();
+			HDRColorFramebuffer->Unbind();
+		}
+
+		{
+			for (int i = 0; i < 2; ++i)
+			{
+				blurFramebuffers.at(i)->Bind();
+				blurFramebuffers.at(i)->AttachTexture(FramebufferTextureAttachment::COLOR_ATTACHMENT, resizedBlurTextures.at(i)->GetID());
+
+				if (!blurFramebuffers.at(i)->CheckStatus()) CG_ERROR("Error: Framebuffer is incomplete!");
+
+				blurTextures.at(i) = resizedBlurTextures.at(i);
+			}
+
+			m_backend->ResetFramebuffer();
+		}
+
+		sceneTexture = resizedSceneTexture;
 	}
 
-	uint32_t Renderer::GetHDRSceneTextureID() const
+	uint32_t Renderer::GetSceneTextureID() const
 	{
-		return HDRSceneTexture->GetID();
+		return sceneTexture->GetID();
 	}
 
 	uint32_t Renderer::GetDepthTextureID() const

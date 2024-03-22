@@ -66,7 +66,7 @@ namespace CGEngine
 		void ResizeViewport(int32_t width, int32_t height) const;
 		void ResizeFramebuffer(int32_t width, int32_t height) const;
 
-		[[nodiscard]] uint32_t GetHDRSceneTextureID() const;
+		[[nodiscard]] uint32_t GetSceneTextureID() const;
 		[[nodiscard]] uint32_t GetDepthTextureID() const;
 		[[nodiscard]] uint32_t  GetGlowTextureID() const;
 
