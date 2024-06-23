@@ -15,7 +15,7 @@ namespace CGEngine
 	{
 		m_sceneManager.AddScene(Scene("Default Scene"));
 
-		CreateWindow({ 800, 800,"Default Window" }, m_window);
+		CreateWindow({ 1600, 800,"Default Window" }, m_window);
 
 		m_window.eventCallback = BIND_EVENT_FN(OnEvent);
 
