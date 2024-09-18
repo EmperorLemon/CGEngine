@@ -2,6 +2,7 @@
 
 #include "Renderer/Shader.h"
 
+#include <string>
 #include <unordered_map>
 #include <string_view>
 
@@ -43,7 +44,7 @@ namespace CGEngine::OpenGL
 
 		void BindUniform(std::string_view name, UniformType type, const void* value, bool transpose = false) const;
 	private:
-		[[nodiscar]] bool GetUniform(const std::string& name, GLUniform& uniform) const;
+		[[nodiscard]] bool GetUniform(const std::string& name, GLUniform& uniform) const;
 
 		std::unordered_map<std::string, GLUniform> m_uniforms;
 	};
