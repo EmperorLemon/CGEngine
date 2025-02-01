@@ -1,4 +1,4 @@
 # CGEngine
- Custom game engine from the ground up.
+ > A custom render engine from the ground up.
 
- Using OpenGL 4.6
+ *Using OpenGL 4.6 with Direct State Access.*
